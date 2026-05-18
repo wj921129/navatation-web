@@ -1,3 +1,6 @@
+# Compiled
+.idea/
+
 # Logs
 logs
 *.log
