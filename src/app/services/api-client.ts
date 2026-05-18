@@ -85,13 +85,29 @@ async function request<T = any>(
 
   // 401 自动刷新
   if (res.status === 401 && getRefreshToken()) {
+    // 如果在请求期间，token 已经被其他流程（如重新登录）修改
+    // 则不应该使用新的 refresh token 去刷新，也不应该用新 token 重试旧请求
+    if (token !== getAccessToken()) {
+      throw new Error('认证状态已变更，取消原请求');
+    }
+
+    // 登出请求不需要在 token 失效时尝试刷新，防止误用新 token
+    if (path === '/auth/logout') {
+      clearTokens();
+      throw new Error('认证已过期');
+    }
+
     const refreshed = await tryRefreshToken();
     if (refreshed) {
       headers['Authorization'] = `Bearer ${getAccessToken()}`;
       res = await fetch(url, { ...options, headers });
     } else {
-      clearTokens();
-      window.dispatchEvent(new CustomEvent('auth:logout'));
+      // 清除前检查 Token 是否已被其他流程（如登录）更新
+      // 避免竞态条件下误删新写入的 Token
+      if (getAccessToken() === token) {
+        clearTokens();
+        window.dispatchEvent(new CustomEvent('auth:logout'));
+      }
       throw new Error('认证已过期，请重新登录');
     }
   }

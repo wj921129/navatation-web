@@ -49,6 +49,9 @@ class AuthStore {
           isLoading: false,
           user: data.userInfo,
         });
+      } else {
+        this.setState({ isLoading: false });
+        throw new Error(res.message || '用户名或密码错误');
       }
     } catch (err) {
       this.setState({ isLoading: false });
@@ -68,6 +71,29 @@ class AuthStore {
         this.setState({ isLoading: false });
         // 注册成功后自动登录
         await this.login(username, password);
+      } else {
+        this.setState({ isLoading: false });
+        throw new Error(res.message || '注册失败');
+      }
+    } catch (err) {
+      this.setState({ isLoading: false });
+      throw err;
+    }
+  }
+
+  async changePassword(oldPassword: string, newPassword: string): Promise<void> {
+    this.setState({ isLoading: true });
+    try {
+      const res = await authService.changePassword({
+        oldPassword,
+        newPassword,
+        confirmPassword: newPassword,
+      });
+      if (res.code === 200) {
+        this.setState({ isLoading: false });
+      } else {
+        this.setState({ isLoading: false });
+        throw new Error(res.message || '修改密码失败');
       }
     } catch (err) {
       this.setState({ isLoading: false });
@@ -83,8 +109,8 @@ class AuthStore {
         this.setState({ user: res.data, isLoggedIn: true });
       }
     } catch {
-      // Token 无效，静默处理
-      this.setState({ isLoggedIn: false, user: null });
+      // 不清除登录状态，避免与登录流程产生竞态条件
+      // api-client 的 401 自动刷新机制会负责处理无效 Token 的清除
     }
   }
 

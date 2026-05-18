@@ -1,5 +1,7 @@
 import { X, Link, Upload, Video, Cpu, Code, ShoppingBag, Newspaper, Gamepad2, Music as MusicIcon, BookOpen, Camera, Briefcase, Heart, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import * as Icons from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { navService } from '../services/nav-service';
 import { LucideIcon } from 'lucide-react';
 
 interface AddShortcutDialogProps {
@@ -106,6 +108,10 @@ const recommendedCategories: CategoryGroup[] = [
   },
 ];
 
+/**
+ * 添加捷径对话框组件。
+ * 支持浏览并选择推荐网站，以及输入链接与图标来自定义创建捷径。
+ */
 export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius }: AddShortcutDialogProps) {
   const [activeTab, setActiveTab] = useState<'recommended' | 'custom'>('recommended');
   const [customName, setCustomName] = useState('');
@@ -113,15 +119,46 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
   const [customIconUrl, setCustomIconUrl] = useState('');
   const [customIconFile, setCustomIconFile] = useState<string | null>(null);
   const [pendingShortcuts, setPendingShortcuts] = useState<RecommendedSite[]>([]);
+  const [categories, setCategories] = useState<CategoryGroup[]>(recommendedCategories);
 
+  // 监听对话框打开状态，自动拉取后端推荐网站分类数据
+  useEffect(() => {
+    if (isOpen) {
+      navService.getRecommended().then(res => {
+        if (res.code === 200 && res.data && res.data.length > 0) {
+          // 格式化后端推荐数据为组件渲染结构
+          const mapped = res.data.map(cat => ({
+            category: cat.categoryName,
+            icon: (Icons as any)[cat.categoryIcon] || Icons.Folder,
+            sites: cat.sites.map(site => ({
+              name: site.name,
+              url: site.url,
+              color: site.iconColor || '#333',
+              icon: (Icons as any)[site.iconValue] || Icons.Link,
+              iconType: site.iconType,
+              iconValue: site.iconValue
+            }))
+          }));
+          setCategories(mapped);
+        }
+      }).catch(console.error);
+    }
+  }, [isOpen]);
+
+  // 若未开启则直接不渲染
   if (!isOpen) return null;
 
+  /**
+   * 处理自定义图标的文件上传。
+   * 读取图片文件并转换为 Base64 编码供预览与保存使用。
+   */
   const handleCustomIconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
+          // 更新 Base64 编码状态并清空链接输入
           setCustomIconFile(event.target.result as string);
           setCustomIconUrl('');
         }
@@ -130,6 +167,10 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
     }
   };
 
+  /**
+   * 将自定义捷径加入待添加队列。
+   * 校验输入合法性并补充链接协议前缀，随后清空输入框。
+   */
   const handleAddCustomToPending = () => {
     if (customName.trim() && customUrl.trim()) {
       const newShortcut = {
@@ -139,6 +180,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
         url: customUrl.startsWith('http') ? customUrl : `https://${customUrl}`,
       };
       setPendingShortcuts([...pendingShortcuts, newShortcut]);
+      // 重置所有输入框状态
       setCustomName('');
       setCustomUrl('');
       setCustomIconUrl('');
@@ -146,16 +188,27 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
     }
   };
 
+  /**
+   * 将推荐捷径加入待添加队列。
+   */
   const handleAddRecommendedToPending = (site: RecommendedSite) => {
     setPendingShortcuts([...pendingShortcuts, site]);
   };
 
+  /**
+   * 从待添加队列中移除指定捷径。
+   */
   const handleRemoveFromPending = (index: number) => {
     setPendingShortcuts(pendingShortcuts.filter((_, i) => i !== index));
   };
 
+  /**
+   * 确认保存所有已选的待添加捷径。
+   * 调用父组件回调后清空并关闭对话框。
+   */
   const handleSave = () => {
     if (pendingShortcuts.length > 0) {
+      // 提交到父组件进行持久化处理
       onAdd(pendingShortcuts);
       setPendingShortcuts([]);
       setCustomName('');
@@ -166,6 +219,10 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
     }
   };
 
+  /**
+   * 取消操作。
+   * 清空所有待添加记录与表单，随后关闭对话框。
+   */
   const handleCancel = () => {
     setPendingShortcuts([]);
     setCustomName('');
@@ -245,35 +302,42 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
               <div className="col-span-2 border-r border-gray-200 overflow-y-auto">
                 {activeTab === 'recommended' ? (
                   <div className="p-6 space-y-8">
-                    {recommendedCategories.map((category) => (
+                    {categories.map((category) => (
                       <div key={category.category}>
                         <div className="flex items-center gap-2 mb-4">
                           <category.icon className="w-5 h-5 text-gray-600" />
                           <h3 className="text-base text-gray-800">{category.category}</h3>
                         </div>
                         <div className="grid grid-cols-8 gap-6">
-                          {category.sites.map((site) => (
+                          {category.sites.map((site: any) => (
                             <button
                               key={site.name}
                               onClick={() => handleAddRecommendedToPending(site)}
                               className="flex flex-col items-center gap-2 group"
                             >
                               <div
-                                className="bg-white flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all duration-200 border border-gray-200"
+                                className="bg-white flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all duration-200 border border-gray-200 overflow-hidden"
                                 style={{
                                   width: `${iconSize}px`,
                                   height: `${iconSize}px`,
                                   borderRadius: borderRadius,
                                 }}
                               >
-                                <site.icon
-                                  style={{
-                                    color: site.color,
-                                    width: `${iconSize * 0.5}px`,
-                                    height: `${iconSize * 0.5}px`,
-                                  }}
-                                  strokeWidth={2}
-                                />
+                                {(() => {
+                                  if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
+                                    return <img src={site.iconValue} alt={site.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />;
+                                  }
+                                  return (
+                                    <site.icon
+                                      style={{
+                                        color: site.color,
+                                        width: `${iconSize * 0.5}px`,
+                                        height: `${iconSize * 0.5}px`,
+                                      }}
+                                      strokeWidth={2}
+                                    />
+                                  );
+                                })()}
                               </div>
                               <span className="text-xs text-gray-700 group-hover:text-gray-900">
                                 {site.name}

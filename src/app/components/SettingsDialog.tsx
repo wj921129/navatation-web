@@ -1,5 +1,6 @@
-import { X, Link, Upload, Shuffle } from 'lucide-react';
+import { X, Link, Upload, Shuffle, Sun, Moon, Monitor } from 'lucide-react';
 import { useState } from 'react';
+import { useTheme } from 'next-themes';
 
 interface SettingsDialogProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ interface SettingsDialogProps {
 
 export function SettingsDialog({ isOpen, onClose, settings, onSettingsChange, backgroundImage, onBackgroundChange }: SettingsDialogProps) {
   const [urlInput, setUrlInput] = useState('');
+  const { theme, setTheme } = useTheme();
 
   if (!isOpen) return null;
 
@@ -125,6 +127,46 @@ export function SettingsDialog({ isOpen, onClose, settings, onSettingsChange, ba
               <Shuffle className="w-3 h-3" />
               随机壁纸
             </button>
+          </div>
+
+          {/* 主题设置 */}
+          <div className="space-y-3">
+            <h3 className="text-sm text-gray-900">主题</h3>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setTheme('light')}
+                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border transition-all text-xs ${
+                  theme === 'light'
+                    ? 'bg-blue-50 border-blue-300 text-blue-700'
+                    : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <Sun className="w-4 h-4" />
+                浅色
+              </button>
+              <button
+                onClick={() => setTheme('dark')}
+                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border transition-all text-xs ${
+                  theme === 'dark'
+                    ? 'bg-blue-50 border-blue-300 text-blue-700'
+                    : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <Moon className="w-4 h-4" />
+                深色
+              </button>
+              <button
+                onClick={() => setTheme('system')}
+                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border transition-all text-xs ${
+                  theme === 'system'
+                    ? 'bg-blue-50 border-blue-300 text-blue-700'
+                    : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <Monitor className="w-4 h-4" />
+                系统
+              </button>
+            </div>
           </div>
 
           {/* Search Box Settings */}
