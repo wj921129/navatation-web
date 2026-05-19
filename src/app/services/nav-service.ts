@@ -114,6 +114,13 @@ export const navService = {
     return api.post('/nav/favicon', { url });
   },
 
+  // 图标上传
+  uploadIcon(file: File): Promise<ApiResponse<{ iconUrl: string }>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.upload('/nav/icon/upload', formData);
+  },
+
   // 推荐
   getRecommended(): Promise<ApiResponse<RecommendCategory[]>> {
     return api.get('/nav/recommended');

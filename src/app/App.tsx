@@ -409,6 +409,16 @@ export default function App() {
           
           // 将前端传入的数据格式化为后端保存接口所需格式
           const payload = newShortcuts.map(s => {
+            // 优先使用透传的 iconType/iconValue（如自动检测的 FAVICON）
+            if (s.iconType && s.iconType !== 'BUILTIN') {
+              return {
+                name: s.name,
+                url: s.url,
+                iconType: s.iconType,
+                iconValue: s.iconValue,
+                iconColor: s.color,
+              };
+            }
             let iconName = 'Link';
             if (s.icon && s.icon.displayName) {
               iconName = s.icon.displayName;
@@ -417,7 +427,7 @@ export default function App() {
             } else if (typeof s.iconValue === 'string') {
               iconName = s.iconValue;
             }
-            
+
             return {
               name: s.name,
               url: s.url,
@@ -438,8 +448,8 @@ export default function App() {
       // 本地非登录态直接追加到 shortcuts 状态中
       const formatted = newShortcuts.map(s => ({
         ...s,
-        iconType: 'BUILTIN',
-        iconValue: s.icon?.displayName || s.icon?.name || 'Link'
+        iconType: s.iconType || 'BUILTIN',
+        iconValue: s.iconValue || s.icon?.displayName || s.icon?.name || 'Link'
       }));
       setShortcuts([...shortcuts, ...formatted]);
       setTempShortcuts([...shortcuts, ...formatted]);

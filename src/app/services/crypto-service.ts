@@ -28,10 +28,18 @@ async function getNonceAndPublicKey(): Promise<NonceResult> {
  * 将 PEM 格式的公钥导入为 CryptoKey
  */
 async function importPublicKey(pem: string): Promise<CryptoKey> {
-  // 去除 PEM 头尾标记和换行符
-  const pemHeader = '-----BEGIN PUBLIC KEY-----';
-  const pemFooter = '-----END PUBLIC KEY-----';
-  const pemContents = pem.substring(pemHeader.length, pem.length - pemFooter.length).replace(/\n/g, '').replace(/\r/g, '');
+  // 使用正则提取 Base64 内容，兼容不同的换行格式和额外空白
+  const base64Match = pem.match(/-----BEGIN PUBLIC KEY-----[\s\S]*?-----END PUBLIC KEY-----/);
+  if (!base64Match) {
+    throw new Error('无法解析公钥 PEM 格式');
+  }
+  const pemContents = base64Match[0]
+    .replace(/-----BEGIN PUBLIC KEY-----|-----END PUBLIC KEY-----/g, '')
+    .replace(/\s/g, '');
+
+  if (!pemContents) {
+    throw new Error('公钥内容为空');
+  }
 
   // Base64 解码
   const binaryDer = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));

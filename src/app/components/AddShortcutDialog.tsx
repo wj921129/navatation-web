@@ -1,6 +1,6 @@
-import { X, Link, Upload, Video, Cpu, Code, ShoppingBag, Newspaper, Gamepad2, Music as MusicIcon, BookOpen, Camera, Briefcase, Heart, Trash2 } from 'lucide-react';
+import { X, Link, Upload, Video, Cpu, Code, ShoppingBag, Newspaper, Gamepad2, Music as MusicIcon, BookOpen, Camera, Briefcase, Heart, Trash2, Loader2, Check } from 'lucide-react';
 import * as Icons from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { navService } from '../services/nav-service';
 import { LucideIcon } from 'lucide-react';
 
@@ -120,6 +120,44 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
   const [customIconFile, setCustomIconFile] = useState<string | null>(null);
   const [pendingShortcuts, setPendingShortcuts] = useState<RecommendedSite[]>([]);
   const [categories, setCategories] = useState<CategoryGroup[]>(recommendedCategories);
+  const [faviconStatus, setFaviconStatus] = useState<'idle' | 'loading' | 'detected' | 'error' | 'uploading'>('idle');
+  const [iconFromUpload, setIconFromUpload] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  // 当用户输入网址时，防抖自动检测网站图标
+  useEffect(() => {
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+    const url = customUrl.trim();
+    if (!url) {
+      setFaviconStatus('idle');
+      setUploadError(null);
+      return;
+    }
+    const fullUrl = url.startsWith('http') ? url : `https://${url}`;
+    try { new URL(fullUrl); } catch { setFaviconStatus('idle'); setUploadError(null); return; }
+
+    setFaviconStatus('loading');
+    debounceTimer.current = setTimeout(() => {
+      navService.fetchFavicon(fullUrl).then(res => {
+        if (res.code === 200 && res.data?.faviconUrl) {
+          setCustomIconUrl(res.data.faviconUrl);
+          setCustomIconFile(null);
+          setFaviconStatus('detected');
+        } else {
+          setFaviconStatus('error');
+        }
+      }).catch(() => {
+        setFaviconStatus('error');
+      });
+    }, 600);
+
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, [customUrl]);
 
   // 监听对话框打开状态，自动拉取后端推荐网站分类数据
   useEffect(() => {
@@ -150,20 +188,28 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
 
   /**
    * 处理自定义图标的文件上传。
-   * 读取图片文件并转换为 Base64 编码供预览与保存使用。
+   * 将文件上传至后端服务器，获取可访问的 URL 后自动填充图标链接输入框。
    */
-  const handleCustomIconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCustomIconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          // 更新 Base64 编码状态并清空链接输入
-          setCustomIconFile(event.target.result as string);
-          setCustomIconUrl('');
-        }
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+    setFaviconStatus('uploading');
+    setUploadError(null);
+    try {
+      const res = await navService.uploadIcon(file);
+      if (res.code === 200 && res.data?.iconUrl) {
+        setCustomIconUrl(res.data.iconUrl);
+        setIconFromUpload(true);
+        setFaviconStatus('detected');
+      } else {
+        console.error('上传失败:', res);
+        setUploadError(res.message || '上传失败');
+        setFaviconStatus('error');
+      }
+    } catch (e) {
+      console.error('上传异常:', e);
+      setUploadError(String(e));
+      setFaviconStatus('error');
     }
   };
 
@@ -173,11 +219,26 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
    */
   const handleAddCustomToPending = () => {
     if (customName.trim() && customUrl.trim()) {
+      const url = customUrl.startsWith('http') ? customUrl : `https://${customUrl}`;
+      let iconType: string;
+      let iconValue: string | undefined;
+      if (iconFromUpload && customIconUrl) {
+        iconType = 'CUSTOM_UPLOAD';
+        iconValue = customIconUrl;
+      } else if (customIconUrl) {
+        iconType = 'FAVICON';
+        iconValue = customIconUrl;
+      } else {
+        iconType = 'BUILTIN';
+        iconValue = 'Link';
+      }
       const newShortcut = {
         name: customName,
         icon: Link,
         color: '#4285F4',
-        url: customUrl.startsWith('http') ? customUrl : `https://${customUrl}`,
+        url,
+        iconType,
+        iconValue,
       };
       setPendingShortcuts([...pendingShortcuts, newShortcut]);
       // 重置所有输入框状态
@@ -185,6 +246,9 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
       setCustomUrl('');
       setCustomIconUrl('');
       setCustomIconFile(null);
+      setFaviconStatus('idle');
+      setIconFromUpload(false);
+      setUploadError(null);
     }
   };
 
@@ -215,6 +279,9 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
       setCustomUrl('');
       setCustomIconUrl('');
       setCustomIconFile(null);
+      setFaviconStatus('idle');
+      setIconFromUpload(false);
+      setUploadError(null);
       onClose();
     }
   };
@@ -229,6 +296,9 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
     setCustomUrl('');
     setCustomIconUrl('');
     setCustomIconFile(null);
+    setFaviconStatus('idle');
+    setIconFromUpload(false);
+    setUploadError(null);
     onClose();
   };
 
@@ -378,42 +448,71 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                           网址图标链接
                         </label>
                         <div className="flex gap-2">
-                          <input
-                            type="text"
-                            value={customIconUrl}
-                            onChange={(e) => {
-                              setCustomIconUrl(e.target.value);
-                              setCustomIconFile(null);
-                            }}
-                            placeholder="https://example.com/icon.png"
-                            className="flex-1 px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-800 outline-none focus:border-blue-500 focus:bg-white transition-all"
-                            disabled={!!customIconFile}
-                          />
-                          <label className="px-4 py-3 bg-gray-200 hover:bg-gray-300 rounded-xl cursor-pointer flex items-center gap-2 transition-colors">
-                            <Upload className="w-4 h-4 text-gray-700" />
-                            <span className="text-sm text-gray-700">上传</span>
+                          <div className="flex-1 relative">
+                            <input
+                              type="text"
+                              value={customIconUrl}
+                              onChange={(e) => {
+                                setCustomIconUrl(e.target.value);
+                                if (e.target.value) {
+                                  setFaviconStatus('idle');
+                                  setIconFromUpload(false);
+                                }
+                              }}
+                              placeholder="https://example.com/icon.png"
+                              className="w-full px-4 py-3 pr-10 bg-gray-100 border border-gray-200 rounded-xl text-gray-800 outline-none focus:border-blue-500 focus:bg-white transition-all"
+                              disabled={!!customIconFile}
+                            />
+                            {(faviconStatus === 'loading' || faviconStatus === 'uploading') && (
+                              <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-500 animate-spin" />
+                            )}
+                            {faviconStatus === 'detected' && (
+                              <Check className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
+                            )}
+                            {faviconStatus === 'error' && (
+                              <Link className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            )}
+                          </div>
+                          <label className={`px-4 py-3 rounded-xl cursor-pointer flex items-center gap-2 transition-colors ${
+                              faviconStatus === 'uploading'
+                                ? 'bg-blue-100 text-blue-400 cursor-not-allowed'
+                                : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                            }`}>
+                            {faviconStatus === 'uploading' ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Upload className="w-4 h-4" />
+                            )}
+                            <span className="text-sm">{faviconStatus === 'uploading' ? '上传中...' : '上传'}</span>
                             <input
                               type="file"
                               accept="image/*"
                               onChange={handleCustomIconUpload}
                               className="hidden"
+                              disabled={faviconStatus === 'uploading'}
                             />
                           </label>
                         </div>
-                        {customIconFile && (
+                        {iconFromUpload && customIconUrl && (
                           <div className="mt-3 flex items-center gap-3">
                             <img
-                              src={customIconFile}
+                              src={customIconUrl}
                               alt="Preview"
                               className="w-12 h-12 object-cover rounded-lg border border-gray-200"
                             />
                             <button
-                              onClick={() => setCustomIconFile(null)}
+                              onClick={() => {
+                                setCustomIconUrl('');
+                                setIconFromUpload(false);
+                              }}
                               className="text-sm text-red-600 hover:text-red-700"
                             >
                               移除
                             </button>
                           </div>
+                        )}
+                        {uploadError && (
+                          <p className="mt-2 text-xs text-red-500">{uploadError}</p>
                         )}
                       </div>
 
@@ -450,14 +549,22 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                               borderRadius: `${iconRadius}%`,
                             }}
                           >
-                            <shortcut.icon
-                              style={{
-                                color: shortcut.color,
-                                width: '20px',
-                                height: '20px',
-                              }}
-                              strokeWidth={2}
-                            />
+                            {(shortcut as any).iconType === 'FAVICON' || (shortcut as any).iconType === 'CUSTOM_URL' || (shortcut as any).iconType === 'CUSTOM_UPLOAD' ? (
+                              <img
+                                src={(shortcut as any).iconValue}
+                                alt={shortcut.name}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              />
+                            ) : (
+                              <shortcut.icon
+                                style={{
+                                  color: shortcut.color,
+                                  width: '20px',
+                                  height: '20px',
+                                }}
+                                strokeWidth={2}
+                              />
+                            )}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm text-gray-800 truncate">{shortcut.name}</p>

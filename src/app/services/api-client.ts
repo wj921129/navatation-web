@@ -72,13 +72,18 @@ async function request<T = any>(
   const url = `${API_BASE}${path}`;
 
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
     ...((options.headers as Record<string, string>) || {}),
   };
 
   const token = getAccessToken();
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  // 仅在非 FormData 请求时设置默认 JSON Content-Type
+  // FormData 需由浏览器自动设置 multipart/form-data; boundary=...
+  if (!(options.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
   }
 
   let res = await fetch(url, { ...options, headers });
