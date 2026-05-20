@@ -1,5 +1,6 @@
 # Compiled
 .idea/
+.npm-cache/
 
 # Logs
 logs

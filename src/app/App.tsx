@@ -127,7 +127,7 @@ function DraggableShortcut({
                 <img
                   src={shortcut.iconValue}
                   alt={shortcut.name}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  style={{ width: '60%', height: '60%', objectFit: 'contain' }}
                 />
               );
             }
@@ -681,7 +681,7 @@ export default function App() {
                                 <img
                                   src={shortcut.iconValue}
                                   alt={shortcut.name}
-                                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                  style={{ width: '60%', height: '60%', objectFit: 'contain' }}
                                 />
                               );
                             } else {

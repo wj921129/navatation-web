@@ -395,7 +395,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                               >
                                 {(() => {
                                   if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
-                                    return <img src={site.iconValue} alt={site.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />;
+                                    return <img src={site.iconValue} alt={site.name} style={{ width: '60%', height: '60%', objectFit: 'contain' }} />;
                                   }
                                   return (
                                     <site.icon
@@ -447,7 +447,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                         <label className="block text-sm text-gray-700 mb-2">
                           网址图标链接
                         </label>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 items-center">
                           <div className="flex-1 relative">
                             <input
                               type="text"
@@ -492,25 +492,26 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                               disabled={faviconStatus === 'uploading'}
                             />
                           </label>
+                          {customIconUrl && (
+                            <div className="w-12 h-12 flex-shrink-0 bg-white shadow-sm border border-gray-200 rounded-full flex items-center justify-center overflow-hidden relative group">
+                              <img
+                                src={customIconUrl}
+                                alt="Preview"
+                                style={{ width: '60%', height: '60%', objectFit: 'contain' }}
+                              />
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setCustomIconUrl('');
+                                  setIconFromUpload(false);
+                                }}
+                                className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                              >
+                                <X className="w-4 h-4 text-white" />
+                              </button>
+                            </div>
+                          )}
                         </div>
-                        {iconFromUpload && customIconUrl && (
-                          <div className="mt-3 flex items-center gap-3">
-                            <img
-                              src={customIconUrl}
-                              alt="Preview"
-                              className="w-12 h-12 object-cover rounded-lg border border-gray-200"
-                            />
-                            <button
-                              onClick={() => {
-                                setCustomIconUrl('');
-                                setIconFromUpload(false);
-                              }}
-                              className="text-sm text-red-600 hover:text-red-700"
-                            >
-                              移除
-                            </button>
-                          </div>
-                        )}
                         {uploadError && (
                           <p className="mt-2 text-xs text-red-500">{uploadError}</p>
                         )}
@@ -553,7 +554,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                               <img
                                 src={(shortcut as any).iconValue}
                                 alt={shortcut.name}
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                style={{ width: '60%', height: '60%', objectFit: 'contain' }}
                               />
                             ) : (
                               <shortcut.icon
