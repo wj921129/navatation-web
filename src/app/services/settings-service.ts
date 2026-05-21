@@ -39,4 +39,8 @@ export const settingsService = {
     formData.append('file', file);
     return api.upload('/settings/wallpaper/upload', formData);
   },
+
+  getRandomWallpaper(): Promise<ApiResponse<WallpaperUploadResult>> {
+    return api.get('/settings/wallpaper/random');
+  },
 };

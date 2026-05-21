@@ -1,10 +1,12 @@
 import { X, Link, Upload, Shuffle, Sun, Moon, Monitor } from 'lucide-react';
-import { useState } from 'react';
-import { useTheme } from 'next-themes';
+import { useState, useEffect } from 'react';
+import { settingsService } from '../services/settings-service';
 
 interface SettingsDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  onSave: (settings: any, backgroundImage: string, theme: string) => void;
+  onPreview?: (settings: any, backgroundImage: string, theme: string) => void;
   settings: {
     searchBoxWidth: number;
     searchBoxHeight: number;
@@ -17,47 +19,76 @@ interface SettingsDialogProps {
     textSize: number;
     iconsMarginTop: number;
   };
-  onSettingsChange: (settings: any) => void;
   backgroundImage: string;
-  onBackgroundChange: (url: string) => void;
+  currentTheme: string;
 }
 
-export function SettingsDialog({ isOpen, onClose, settings, onSettingsChange, backgroundImage, onBackgroundChange }: SettingsDialogProps) {
+export function SettingsDialog({ isOpen, onClose, onSave, onPreview, settings, backgroundImage, currentTheme }: SettingsDialogProps) {
+  const [draftSettings, setDraftSettings] = useState(settings);
+  const [draftBackgroundImage, setDraftBackgroundImage] = useState(backgroundImage);
+  const [draftTheme, setDraftTheme] = useState(currentTheme);
   const [urlInput, setUrlInput] = useState('');
-  const { theme, setTheme } = useTheme();
+
+  // 每次打开弹窗时，利用最新的全局生效状态重置本地草稿
+  useEffect(() => {
+    if (isOpen) {
+      setDraftSettings(settings);
+      setDraftBackgroundImage(backgroundImage);
+      setDraftTheme(currentTheme);
+      setUrlInput('');
+    }
+  }, [isOpen, settings, backgroundImage, currentTheme]);
 
   if (!isOpen) return null;
 
   const handleChange = (key: string, value: number) => {
-    onSettingsChange({ ...settings, [key]: value });
+    const updated = { ...draftSettings, [key]: value };
+    setDraftSettings(updated);
+    onPreview?.(updated, draftBackgroundImage, draftTheme);
   };
 
   const handleUrlSubmit = () => {
     if (urlInput.trim()) {
-      onBackgroundChange(urlInput.trim());
+      const newBg = urlInput.trim();
+      setDraftBackgroundImage(newBg);
+      onPreview?.(draftSettings, newBg, draftTheme);
       setUrlInput('');
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          onBackgroundChange(event.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    try {
+      const res = await settingsService.uploadWallpaper(file);
+      if (res && res.code === 200 && res.data) {
+        const newBg = res.data.wallpaperUrl;
+        setDraftBackgroundImage(newBg);
+        onPreview?.(draftSettings, newBg, draftTheme);
+      } else {
+        alert(res.message || '上传壁纸失败');
+      }
+    } catch (err: any) {
+      console.error('上传壁纸出错:', err);
+      alert(err.message || '上传壁纸出错，请稍后重试');
     }
   };
 
   const handleRandomWallpaper = async () => {
-    const randomQuery = ['nature', 'landscape', 'mountains', 'ocean', 'forest', 'sunset'][Math.floor(Math.random() * 6)];
-    const randomUrl = `https://images.unsplash.com/photo-${Date.now() % 1000000000000}?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=2400&auto=format&fit=crop&random=${Math.random()}`;
-    // Use Unsplash random API
-    const unsplashUrl = `https://images.unsplash.com/photo-1598439473183-42c9301db5dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=2400&sig=${Math.random()}`;
-    onBackgroundChange(unsplashUrl);
+    try {
+      const res = await settingsService.getRandomWallpaper();
+      if (res && res.code === 200 && res.data) {
+        const newBg = res.data.wallpaperUrl;
+        setDraftBackgroundImage(newBg);
+        onPreview?.(draftSettings, newBg, draftTheme);
+      } else {
+        alert(res.message || '获取随机壁纸失败');
+      }
+    } catch (err: any) {
+      console.error('获取随机壁纸出错:', err);
+      alert(err.message || '获取随机壁纸出错，请稍后重试');
+    }
   };
 
   return (
@@ -134,9 +165,12 @@ export function SettingsDialog({ isOpen, onClose, settings, onSettingsChange, ba
             <h3 className="text-sm text-gray-900">主题</h3>
             <div className="flex gap-2">
               <button
-                onClick={() => setTheme('light')}
+                onClick={() => {
+                  setDraftTheme('light');
+                  onPreview?.(draftSettings, draftBackgroundImage, 'light');
+                }}
                 className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border transition-all text-xs ${
-                  theme === 'light'
+                  draftTheme === 'light'
                     ? 'bg-blue-50 border-blue-300 text-blue-700'
                     : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
                 }`}
@@ -145,9 +179,12 @@ export function SettingsDialog({ isOpen, onClose, settings, onSettingsChange, ba
                 浅色
               </button>
               <button
-                onClick={() => setTheme('dark')}
+                onClick={() => {
+                  setDraftTheme('dark');
+                  onPreview?.(draftSettings, draftBackgroundImage, 'dark');
+                }}
                 className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border transition-all text-xs ${
-                  theme === 'dark'
+                  draftTheme === 'dark'
                     ? 'bg-blue-50 border-blue-300 text-blue-700'
                     : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
                 }`}
@@ -156,9 +193,12 @@ export function SettingsDialog({ isOpen, onClose, settings, onSettingsChange, ba
                 深色
               </button>
               <button
-                onClick={() => setTheme('system')}
+                onClick={() => {
+                  setDraftTheme('system');
+                  onPreview?.(draftSettings, draftBackgroundImage, 'system');
+                }}
                 className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border transition-all text-xs ${
-                  theme === 'system'
+                  draftTheme === 'system'
                     ? 'bg-blue-50 border-blue-300 text-blue-700'
                     : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
                 }`}
@@ -175,13 +215,13 @@ export function SettingsDialog({ isOpen, onClose, settings, onSettingsChange, ba
 
             <div>
               <label className="block text-xs text-gray-600 mb-1">
-                长度: {settings.searchBoxWidth}%
+                长度: {draftSettings.searchBoxWidth}%
               </label>
               <input
                 type="range"
                 min="60"
                 max="100"
-                value={settings.searchBoxWidth}
+                value={draftSettings.searchBoxWidth}
                 onChange={(e) => handleChange('searchBoxWidth', Number(e.target.value))}
                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
               />
@@ -189,13 +229,13 @@ export function SettingsDialog({ isOpen, onClose, settings, onSettingsChange, ba
 
             <div>
               <label className="block text-xs text-gray-600 mb-1">
-                高度: {settings.searchBoxHeight}px
+                高度: {draftSettings.searchBoxHeight}px
               </label>
               <input
                 type="range"
                 min="48"
                 max="80"
-                value={settings.searchBoxHeight}
+                value={draftSettings.searchBoxHeight}
                 onChange={(e) => handleChange('searchBoxHeight', Number(e.target.value))}
                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
               />
@@ -203,13 +243,13 @@ export function SettingsDialog({ isOpen, onClose, settings, onSettingsChange, ba
 
             <div>
               <label className="block text-xs text-gray-600 mb-1">
-                上间距: {settings.searchBoxMarginTop}px
+                上间距: {draftSettings.searchBoxMarginTop}px
               </label>
               <input
                 type="range"
                 min="100"
                 max="300"
-                value={settings.searchBoxMarginTop}
+                value={draftSettings.searchBoxMarginTop}
                 onChange={(e) => handleChange('searchBoxMarginTop', Number(e.target.value))}
                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
               />
@@ -222,13 +262,13 @@ export function SettingsDialog({ isOpen, onClose, settings, onSettingsChange, ba
 
             <div>
               <label className="block text-xs text-gray-600 mb-1">
-                大小: {settings.iconSize}px
+                大小: {draftSettings.iconSize}px
               </label>
               <input
                 type="range"
                 min="48"
                 max="96"
-                value={settings.iconSize}
+                value={draftSettings.iconSize}
                 onChange={(e) => handleChange('iconSize', Number(e.target.value))}
                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
               />
@@ -236,13 +276,13 @@ export function SettingsDialog({ isOpen, onClose, settings, onSettingsChange, ba
 
             <div>
               <label className="block text-xs text-gray-600 mb-1">
-                弧度: {settings.iconRadius}%
+                弧度: {draftSettings.iconRadius}%
               </label>
               <input
                 type="range"
                 min="0"
                 max="50"
-                value={settings.iconRadius}
+                value={draftSettings.iconRadius}
                 onChange={(e) => handleChange('iconRadius', Number(e.target.value))}
                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
               />
@@ -250,13 +290,13 @@ export function SettingsDialog({ isOpen, onClose, settings, onSettingsChange, ba
 
             <div>
               <label className="block text-xs text-gray-600 mb-1">
-                左右间距: {settings.iconSpacingX}px
+                左右间距: {draftSettings.iconSpacingX}px
               </label>
               <input
                 type="range"
                 min="16"
                 max="64"
-                value={settings.iconSpacingX}
+                value={draftSettings.iconSpacingX}
                 onChange={(e) => handleChange('iconSpacingX', Number(e.target.value))}
                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
               />
@@ -264,13 +304,13 @@ export function SettingsDialog({ isOpen, onClose, settings, onSettingsChange, ba
 
             <div>
               <label className="block text-xs text-gray-600 mb-1">
-                上下间距: {settings.iconSpacingY}px
+                上下间距: {draftSettings.iconSpacingY}px
               </label>
               <input
                 type="range"
                 min="24"
                 max="72"
-                value={settings.iconSpacingY}
+                value={draftSettings.iconSpacingY}
                 onChange={(e) => handleChange('iconSpacingY', Number(e.target.value))}
                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
               />
@@ -278,13 +318,13 @@ export function SettingsDialog({ isOpen, onClose, settings, onSettingsChange, ba
 
             <div>
               <label className="block text-xs text-gray-600 mb-1">
-                与文字间距: {settings.iconTextGap}px
+                与文字间距: {draftSettings.iconTextGap}px
               </label>
               <input
                 type="range"
                 min="4"
                 max="20"
-                value={settings.iconTextGap}
+                value={draftSettings.iconTextGap}
                 onChange={(e) => handleChange('iconTextGap', Number(e.target.value))}
                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
               />
@@ -292,13 +332,13 @@ export function SettingsDialog({ isOpen, onClose, settings, onSettingsChange, ba
 
             <div>
               <label className="block text-xs text-gray-600 mb-1">
-                整体上间距: {settings.iconsMarginTop}px
+                整体上间距: {draftSettings.iconsMarginTop}px
               </label>
               <input
                 type="range"
                 min="24"
                 max="96"
-                value={settings.iconsMarginTop}
+                value={draftSettings.iconsMarginTop}
                 onChange={(e) => handleChange('iconsMarginTop', Number(e.target.value))}
                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
               />
@@ -311,13 +351,13 @@ export function SettingsDialog({ isOpen, onClose, settings, onSettingsChange, ba
 
             <div>
               <label className="block text-xs text-gray-600 mb-1">
-                大小: {settings.textSize}px
+                大小: {draftSettings.textSize}px
               </label>
               <input
                 type="range"
                 min="10"
                 max="18"
-                value={settings.textSize}
+                value={draftSettings.textSize}
                 onChange={(e) => handleChange('textSize', Number(e.target.value))}
                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
               />
@@ -327,10 +367,10 @@ export function SettingsDialog({ isOpen, onClose, settings, onSettingsChange, ba
 
         <div className="sticky bottom-0 bg-white/95 backdrop-blur-xl border-t border-gray-200 p-4">
           <button
-            onClick={onClose}
+            onClick={() => onSave(draftSettings, draftBackgroundImage, draftTheme)}
             className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors text-sm"
           >
-            完成
+            保存
           </button>
         </div>
       </div>

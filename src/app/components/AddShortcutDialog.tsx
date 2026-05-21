@@ -1,4 +1,4 @@
-import { X, Link, Upload, Video, Cpu, Code, ShoppingBag, Newspaper, Gamepad2, Music as MusicIcon, BookOpen, Camera, Briefcase, Heart, Trash2, Loader2, Check } from 'lucide-react';
+import { X, Link, Upload, Video, Cpu, Code, ShoppingBag, Newspaper, Gamepad2, Music as MusicIcon, BookOpen, Camera, Briefcase, Trash2, Loader2, Check } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { navService } from '../services/nav-service';

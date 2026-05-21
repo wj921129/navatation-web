@@ -1,40 +1,94 @@
-import { X, Upload } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { X, Upload, Loader2, Check, Link } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { navService } from '../services/nav-service';
 
 interface EditShortcutDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (shortcut: { name: string; url: string; iconUrl?: string }) => void;
+  onSave: (shortcut: { name: string; url: string; iconType: string; iconValue: string }) => void;
   shortcut: {
+    id?: number;
     name: string;
     url: string;
+    iconType?: string;
+    iconValue?: string;
   };
 }
 
 export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditShortcutDialogProps) {
   const [name, setName] = useState(shortcut.name);
   const [url, setUrl] = useState(shortcut.url);
-  const [iconUrl, setIconUrl] = useState('');
-  const [iconFile, setIconFile] = useState<string | null>(null);
+  const [iconType, setIconType] = useState(shortcut.iconType || 'BUILTIN');
+  const [iconValue, setIconValue] = useState(shortcut.iconValue || 'Link');
+  
+  const [faviconStatus, setFaviconStatus] = useState<'idle' | 'loading' | 'detected' | 'error' | 'uploading'>('idle');
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     setName(shortcut.name);
     setUrl(shortcut.url);
+    setIconType(shortcut.iconType || 'BUILTIN');
+    setIconValue(shortcut.iconValue || 'Link');
+    setFaviconStatus('idle');
+    setUploadError(null);
   }, [shortcut]);
+
+  // 当网址链接改变且不等于原网址时，自动拉取 Favicon 图标进行检测
+  useEffect(() => {
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+    const currentUrl = url.trim();
+    if (!currentUrl || currentUrl === shortcut.url) {
+      setFaviconStatus('idle');
+      return;
+    }
+    
+    const fullUrl = currentUrl.startsWith('http') ? currentUrl : `https://${currentUrl}`;
+    try { new URL(fullUrl); } catch { setFaviconStatus('idle'); return; }
+
+    setFaviconStatus('loading');
+    debounceTimer.current = setTimeout(() => {
+      navService.fetchFavicon(fullUrl).then(res => {
+        if (res.code === 200 && res.data?.faviconUrl) {
+          setIconValue(res.data.faviconUrl);
+          setIconType('FAVICON');
+          setFaviconStatus('detected');
+        } else {
+          setFaviconStatus('error');
+        }
+      }).catch(() => {
+        setFaviconStatus('error');
+      });
+    }, 600);
+
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, [url, shortcut.url]);
 
   if (!isOpen) return null;
 
-  const handleIconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // 上传自定义图标并更新图标的值与类型
+  const handleIconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setIconFile(event.target.result as string);
-          setIconUrl('');
-        }
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+    setFaviconStatus('uploading');
+    setUploadError(null);
+    try {
+      const res = await navService.uploadIcon(file);
+      if (res.code === 200 && res.data?.iconUrl) {
+        setIconValue(res.data.iconUrl);
+        setIconType('CUSTOM_UPLOAD');
+        setFaviconStatus('detected');
+      } else {
+        setUploadError(res.message || '上传失败');
+        setFaviconStatus('error');
+      }
+    } catch (e) {
+      setUploadError(String(e));
+      setFaviconStatus('error');
     }
   };
 
@@ -43,11 +97,14 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
       onSave({
         name,
         url: url.startsWith('http') ? url : `https://${url}`,
-        iconUrl: iconFile || iconUrl || undefined,
+        iconType,
+        iconValue,
       });
       onClose();
     }
   };
+
+  const showImagePreview = iconType === 'CUSTOM_URL' || iconType === 'FAVICON' || iconType === 'CUSTOM_UPLOAD';
 
   return (
     <>
@@ -94,43 +151,83 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
 
             <div>
               <label className="block text-sm text-gray-700 mb-2">网址图标链接</label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={iconUrl}
-                  onChange={(e) => {
-                    setIconUrl(e.target.value);
-                    setIconFile(null);
-                  }}
-                  placeholder="https://example.com/icon.png"
-                  className="flex-1 px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-800 outline-none focus:border-blue-500 focus:bg-white transition-all"
-                  disabled={!!iconFile}
-                />
-                <label className="px-4 py-3 bg-gray-200 hover:bg-gray-300 rounded-xl cursor-pointer flex items-center gap-2 transition-colors">
-                  <Upload className="w-4 h-4 text-gray-700" />
-                  <span className="text-sm text-gray-700">上传</span>
+              <div className="flex gap-2 items-center">
+                <div className="flex-1 relative">
+                  <input
+                    type="text"
+                    value={showImagePreview ? iconValue : ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setIconValue(val);
+                      if (val) {
+                        setIconType('CUSTOM_URL');
+                        setFaviconStatus('idle');
+                      } else {
+                        setIconType('BUILTIN');
+                        setIconValue('Link');
+                      }
+                    }}
+                    placeholder="https://example.com/icon.png"
+                    className="w-full px-4 py-3 pr-10 bg-gray-100 border border-gray-200 rounded-xl text-gray-800 outline-none focus:border-blue-500 focus:bg-white transition-all"
+                  />
+                  {(faviconStatus === 'loading' || faviconStatus === 'uploading') && (
+                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-500 animate-spin" />
+                  )}
+                  {faviconStatus === 'detected' && (
+                    <Check className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
+                  )}
+                  {faviconStatus === 'error' && (
+                    <Link className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  )}
+                </div>
+                <label className={`px-4 py-3 rounded-xl cursor-pointer flex items-center gap-2 transition-colors ${
+                  faviconStatus === 'uploading'
+                    ? 'bg-blue-100 text-blue-400 cursor-not-allowed'
+                    : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                }`}>
+                  {faviconStatus === 'uploading' ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Upload className="w-4 h-4" />
+                  )}
+                  <span className="text-sm">{faviconStatus === 'uploading' ? '上传中...' : '上传'}</span>
                   <input
                     type="file"
                     accept="image/*"
                     onChange={handleIconUpload}
                     className="hidden"
+                    disabled={faviconStatus === 'uploading'}
                   />
                 </label>
               </div>
-              {iconFile && (
+              
+              {/* 实时图标预览 */}
+              {showImagePreview && iconValue && (
                 <div className="mt-3 flex items-center gap-3">
-                  <img
-                    src={iconFile}
-                    alt="Preview"
-                    className="w-12 h-12 object-cover rounded-lg border border-gray-200"
-                  />
-                  <button
-                    onClick={() => setIconFile(null)}
-                    className="text-sm text-red-600 hover:text-red-700"
-                  >
-                    移除
-                  </button>
+                  <div className="w-12 h-12 flex-shrink-0 bg-white border border-gray-200 rounded-xl flex items-center justify-center overflow-hidden">
+                    <img
+                      src={iconValue}
+                      alt="Preview"
+                      style={{ width: '60%', height: '60%', objectFit: 'contain' }}
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-gray-500 truncate">{iconValue}</p>
+                    <button
+                      onClick={() => {
+                        setIconType('BUILTIN');
+                        setIconValue('Link');
+                        setFaviconStatus('idle');
+                      }}
+                      className="text-xs text-red-500 hover:text-red-600 mt-1 block font-medium"
+                    >
+                      移除自定义图标
+                    </button>
+                  </div>
                 </div>
+              )}
+              {uploadError && (
+                <p className="mt-2 text-xs text-red-500">{uploadError}</p>
               )}
             </div>
           </div>

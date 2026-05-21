@@ -1,4 +1,4 @@
-import { Search, Mail, Youtube, Twitter, Github, Linkedin, Instagram, Facebook, ShoppingCart, Film, Music, MessageCircle, Video, MessageSquare, Slack, Dribbble, Settings, User, Plus, Edit3, X as XIcon, Save, XCircle, CheckSquare } from 'lucide-react';
+import { Search, Settings, User, Plus, Edit3, X as XIcon, Save, XCircle, CheckSquare } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { SearchEngineSelect, searchEngines } from './components/SearchEngineSelect';
@@ -181,9 +181,22 @@ export default function App() {
     return unsubscribe;
   }, []);
 
+  // 当用户登出（未登录）时，强制退出编辑模式，清空临时状态与壁纸缓存，回归游客初始数据
+  useEffect(() => {
+    if (!authState.isLoggedIn) {
+      setIsEditMode(false);
+      localStorage.removeItem('navatation_wallpaper');
+      setBackgroundImage('https://images.unsplash.com/photo-1598439473183-42c9301db5dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=2400');
+      setShortcuts(defaultShortcuts);
+      setTempShortcuts(defaultShortcuts);
+    }
+  }, [authState.isLoggedIn]);
+
   const [shortcuts, setShortcuts] = useState<any[]>(defaultShortcuts);
   const [tempShortcuts, setTempShortcuts] = useState<any[]>(defaultShortcuts);
-  const [backgroundImage, setBackgroundImage] = useState('https://images.unsplash.com/photo-1598439473183-42c9301db5dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=2400');
+  const [backgroundImage, setBackgroundImage] = useState(() => {
+    return localStorage.getItem('navatation_wallpaper') || 'https://images.unsplash.com/photo-1598439473183-42c9301db5dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=2400';
+  });
   const [settings, setSettings] = useState({
     searchBoxWidth: 100,
     searchBoxHeight: 64,
@@ -196,6 +209,9 @@ export default function App() {
     textSize: 14,
     iconsMarginTop: 64,
   });
+  const [backupSettings, setBackupSettings] = useState<any>(null);
+  const [backupBackgroundImage, setBackupBackgroundImage] = useState<string>('');
+  const [backupTheme, setBackupTheme] = useState<string>('');
 
   // 缓存最新的快捷方式列表，避免 fetchShortcuts 闭包捕获旧状态
   const shortcutsRef = useRef(shortcuts);
@@ -327,6 +343,7 @@ export default function App() {
           // 单独更新背景图和默认搜索引擎
           if (data.backgroundImage) {
             setBackgroundImage(data.backgroundImage);
+            localStorage.setItem('navatation_wallpaper', data.backgroundImage);
           }
           if (data.searchEngine) {
             setSearchEngine(data.searchEngine);
@@ -360,19 +377,69 @@ export default function App() {
   };
 
   /**
-   * 登录成功回调。
-   * 关闭登录对话框。
-   */
-  const handleLogin = async (username: string) => {
-    setIsLoginOpen(false);
-  };
-
-  /**
    * 执行退出登录。
    * 调用全局认证存储的登出方法，清除令牌及用户信息。
    */
   const handleLogout = () => {
     authStore.logout();
+  };
+
+  /**
+   * 打开设置面板，备份当前生效状态以供取消时回滚。
+   */
+  const handleOpenSettings = () => {
+    setBackupSettings(settings);
+    setBackupBackgroundImage(backgroundImage);
+    setBackupTheme(theme || 'light');
+    setIsSettingsOpen(true);
+  };
+
+  /**
+   * 关闭设置面板（不保存），回滚所有预览配置。
+   */
+  const handleCloseSettings = () => {
+    if (backupSettings !== null) setSettings(backupSettings);
+    if (backupBackgroundImage) setBackgroundImage(backupBackgroundImage);
+    if (backupTheme) setTheme(backupTheme);
+    setIsSettingsOpen(false);
+  };
+
+  /**
+   * 实时预览设置（不落盘、不保存到数据库）。
+   */
+  const handlePreviewSettings = (previewSettings: any, previewBg: string, previewTheme: string) => {
+    setSettings(previewSettings);
+    setBackgroundImage(previewBg);
+    setTheme(previewTheme);
+  };
+
+  /**
+   * 保存个性化设置。
+   * 支持本地草稿批量保存及后端持久化。
+   */
+  const handleSaveSettings = (draftSettings: any, draftBackgroundImage: string, draftTheme: string) => {
+    // 1. 同步更新前端生效状态
+    setSettings(draftSettings);
+    setBackgroundImage(draftBackgroundImage);
+    localStorage.setItem('navatation_wallpaper', draftBackgroundImage);
+    setTheme(draftTheme);
+
+    // 2. 异步保存至后端数据库 (若登录)
+    if (authState.isLoggedIn) {
+      settingsService.saveSettings({
+        ...draftSettings,
+        backgroundImage: draftBackgroundImage,
+        backgroundType: 'URL',
+        searchEngine: searchEngine,
+        theme: draftTheme
+      }).catch(console.error);
+    }
+
+    // 3. 清除备份数据并关闭对话框
+    setBackupSettings(null);
+    setBackupBackgroundImage('');
+    setBackupTheme('');
+    setIsSettingsOpen(false);
   };
 
   // 初始化挂载：如果本地存在 Token，则尝试获取用户信息
@@ -399,61 +466,32 @@ export default function App() {
    * 批量添加捷径。
    * 登录状态下同步提交给后端，未登录状态下仅在本地内存中更新。
    */
-  const handleAddShortcuts = async (newShortcuts: any[]) => {
-    if (authState.isLoggedIn) {
-      try {
-        // 先获取用户分类，将捷径保存至第一个分类中
-        const catRes = await navService.getCategories();
-        if (catRes.code === 200 && catRes.data.length > 0) {
-          const categoryId = catRes.data[0].categoryId;
-          
-          // 将前端传入的数据格式化为后端保存接口所需格式
-          const payload = newShortcuts.map(s => {
-            // 优先使用透传的 iconType/iconValue（如自动检测的 FAVICON）
-            if (s.iconType && s.iconType !== 'BUILTIN') {
-              return {
-                name: s.name,
-                url: s.url,
-                iconType: s.iconType,
-                iconValue: s.iconValue,
-                iconColor: s.color,
-              };
-            }
-            let iconName = 'Link';
-            if (s.icon && s.icon.displayName) {
-              iconName = s.icon.displayName;
-            } else if (s.icon && s.icon.name) {
-              iconName = s.icon.name;
-            } else if (typeof s.iconValue === 'string') {
-              iconName = s.iconValue;
-            }
-
-            return {
-              name: s.name,
-              url: s.url,
-              iconType: 'BUILTIN' as any,
-              iconValue: iconName,
-              iconColor: s.color,
-            };
-          });
-          
-          // 调用后端批量创建接口并重新获取最新列表
-          await navService.batchCreateShortcuts({ categoryId, shortcuts: payload });
-          fetchShortcuts();
-        }
-      } catch (err) {
-        console.error('Failed to save shortcuts', err);
+  /**
+   * 批量添加捷径。
+   * 仅在临时编辑列表 tempShortcuts 中追加，等最终保存时统一持久化。
+   */
+  const handleAddShortcuts = (newShortcuts: any[]) => {
+    const formatted = newShortcuts.map(s => {
+      let iconName = 'Link';
+      if (s.iconType && s.iconType !== 'BUILTIN') {
+        iconName = s.iconValue;
+      } else if (s.icon && s.icon.displayName) {
+        iconName = s.icon.displayName;
+      } else if (s.icon && s.icon.name) {
+        iconName = s.icon.name;
+      } else if (typeof s.iconValue === 'string') {
+        iconName = s.iconValue;
       }
-    } else {
-      // 本地非登录态直接追加到 shortcuts 状态中
-      const formatted = newShortcuts.map(s => ({
-        ...s,
+
+      return {
+        name: s.name,
+        url: s.url,
+        color: s.color || '#fff',
         iconType: s.iconType || 'BUILTIN',
-        iconValue: s.iconValue || s.icon?.displayName || s.icon?.name || 'Link'
-      }));
-      setShortcuts([...shortcuts, ...formatted]);
-      setTempShortcuts([...shortcuts, ...formatted]);
-    }
+        iconValue: iconName,
+      };
+    });
+    setTempShortcuts([...tempShortcuts, ...formatted]);
   };
 
   /**
@@ -482,21 +520,24 @@ export default function App() {
       // 1. 找出所有在编辑模式下被删除的快捷网址
       const deleted = shortcuts.filter(s => s.id && !tempShortcuts.some(t => t.id === s.id));
 
-      // 2. 找出所有在编辑模式下被修改了名称或 URL 的快捷网址
+      // 2. 找出所有在编辑模式下被修改了的快捷网址（对比名称、URL、图标类型、图标值及颜色）
       const updated = tempShortcuts.filter(t => {
         if (!t.id) return false;
         const original = shortcuts.find(s => s.id === t.id);
-        return original && (original.name !== t.name || original.url !== t.url);
+        return original && (
+          original.name !== t.name ||
+          original.url !== t.url ||
+          original.iconType !== t.iconType ||
+          original.iconValue !== t.iconValue ||
+          original.color !== t.color
+        );
       });
 
-      // 3. 检查顺序是否有变化
-      const orderChanged = tempShortcuts.some((t, i) => {
-        const orig = shortcuts[i];
-        return t.id && orig?.id && t.id !== orig.id;
-      });
+      // 3. 找出所有在编辑模式下新增的快捷网址（无 id 的项）
+      const added = tempShortcuts.filter(t => !t.id);
 
       // 4. 并发执行删除与更新 API 请求
-      const promises: Promise<any>[] = [
+      const writePromises: Promise<any>[] = [
         ...deleted.map(s => navService.deleteShortcut(s.id)),
         ...updated.map(t => navService.updateShortcut(t.id, {
           name: t.name,
@@ -506,19 +547,68 @@ export default function App() {
           iconColor: t.color
         })),
       ];
+      await Promise.all(writePromises);
 
-      // 5. 如果顺序有变化，同步排序到后端
-      if (orderChanged) {
-        const sortItems = tempShortcuts
-          .filter(t => t.id)
-          .map((t, idx) => ({ shortcutId: t.id, sortOrder: idx }));
-        promises.push(navService.sortShortcuts(sortItems));
+      // 5. 如果有新增项，批量同步到云端
+      if (added.length > 0) {
+        const catRes = await navService.getCategories();
+        const categoryId = catRes.code === 200 && catRes.data.length > 0 ? catRes.data[0].categoryId : undefined;
+        if (categoryId) {
+          const addedPayload = added.map(s => ({
+            name: s.name,
+            url: s.url,
+            iconType: s.iconType,
+            iconValue: s.iconValue,
+            iconColor: s.color
+          }));
+          await navService.batchCreateShortcuts({ categoryId, shortcuts: addedPayload });
+        }
       }
 
-      await Promise.all(promises);
+      // 6. 重新拉取最新的云端捷径数据（获取带有真实数据库 id 的全量数据）
+      const res = await navService.getShortcuts();
+      if (res.code === 200 && res.data) {
+        const loaded = res.data.map(item => ({
+          id: item.shortcutId,
+          categoryId: item.categoryId,
+          name: item.name,
+          url: item.url,
+          color: item.iconColor || '#fff',
+          iconType: item.iconType,
+          iconValue: item.iconValue || 'Link'
+        }));
 
-      // 6. 重新拉取最新的云端捷径数据
-      await fetchShortcuts();
+        // 7. 按 tempShortcuts 中设定的最终相对顺序将带有 ID 的项目重排组装起来
+        const orderedShortcuts: any[] = [];
+        tempShortcuts.forEach((temp) => {
+          let matched: any = null;
+          if (temp.id) {
+            matched = loaded.find(l => l.id === temp.id);
+          } else {
+            // 用 name & url 匹配新创建项
+            matched = loaded.find(l => l.name === temp.name && l.url === temp.url && !orderedShortcuts.some(o => o.id === l.id));
+          }
+          if (matched) {
+            orderedShortcuts.push(matched);
+          }
+        });
+
+        // 兜底补齐：防止有遗漏未匹配项
+        loaded.forEach(l => {
+          if (!orderedShortcuts.some(o => o.id === l.id)) {
+            orderedShortcuts.push(l);
+          }
+        });
+
+        // 8. 统一对最终排好序的列表在后端执行排序接口持久化
+        const sortItems = orderedShortcuts.map((item, idx) => ({
+          shortcutId: item.id,
+          sortOrder: idx
+        }));
+        await navService.sortShortcuts(sortItems);
+      }
+
+      // 9. 全局重新加载以同步 React 界面状态
       await fetchShortcuts();
     } catch (err) {
       console.error('Failed to save shortcut edits to backend', err);
@@ -558,13 +648,15 @@ export default function App() {
    * 保存单个捷径的编辑修改。
    * 更新临时列表中的指定项信息。
    */
-  const handleSaveEdit = (updatedShortcut: { name: string; url: string; iconUrl?: string }) => {
+  const handleSaveEdit = (updatedShortcut: { name: string; url: string; iconType: string; iconValue: string }) => {
     if (editingShortcut) {
       const newShortcuts = [...tempShortcuts];
       newShortcuts[editingShortcut.index] = {
         ...newShortcuts[editingShortcut.index],
         name: updatedShortcut.name,
         url: updatedShortcut.url,
+        iconType: updatedShortcut.iconType,
+        iconValue: updatedShortcut.iconValue,
       };
       setTempShortcuts(newShortcuts);
       setEditingShortcut(null);
@@ -628,8 +720,8 @@ export default function App() {
             const endIdx = Math.min(startIdx + 9, displayShortcuts.length);
             const rowShortcuts = displayShortcuts.slice(startIdx, endIdx);
 
-            // Show add button on the row after all shortcuts (but not in edit mode)
-            const showAddButton = !isEditMode && (startIdx === displayShortcuts.length || (rowShortcuts.length > 0 && rowShortcuts.length < 9));
+            // 仅在编辑模式下，如果在捷径之后的行有多余空间，则显示添加按钮
+            const showAddButton = isEditMode && (startIdx === displayShortcuts.length || (rowShortcuts.length > 0 && rowShortcuts.length < 9));
 
             if (rowShortcuts.length === 0 && !showAddButton) return null;
 
@@ -769,16 +861,18 @@ export default function App() {
         ) : (
           <>
             {/* Edit Button */}
-            <button
-              onClick={handleStartEdit}
-              className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all duration-200 shadow-lg"
-            >
-              <Edit3 className="w-5 h-5 text-white" />
-            </button>
+            {authState.isLoggedIn && (
+              <button
+                onClick={handleStartEdit}
+                className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all duration-200 shadow-lg"
+              >
+                <Edit3 className="w-5 h-5 text-white" />
+              </button>
+            )}
 
             {/* Settings Button */}
             <button
-              onClick={() => setIsSettingsOpen(true)}
+              onClick={handleOpenSettings}
               className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all duration-200 shadow-lg"
             >
               <Settings className="w-5 h-5 text-white" />
@@ -813,23 +907,12 @@ export default function App() {
       {/* Dialogs */}
       <SettingsDialog
         isOpen={isSettingsOpen}
-        onClose={() => {
-          setIsSettingsOpen(false);
-          // 如果已登录，在关闭设置对话框时，自动向后端保存最新配置
-          if (authState.isLoggedIn) {
-            settingsService.saveSettings({
-              ...settings,
-              backgroundImage: backgroundImage,
-              backgroundType: 'URL',
-              searchEngine: searchEngine,
-              theme: theme || 'light'
-            }).catch(console.error);
-          }
-        }}
+        onClose={handleCloseSettings}
+        onSave={handleSaveSettings}
+        onPreview={handlePreviewSettings}
         settings={settings}
-        onSettingsChange={setSettings}
         backgroundImage={backgroundImage}
-        onBackgroundChange={setBackgroundImage}
+        currentTheme={theme || 'light'}
       />
       <LoginDialog
         isOpen={isLoginOpen}
