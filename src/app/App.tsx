@@ -1,5 +1,5 @@
 import { Search, Settings, User, Plus, Edit3, X as XIcon, Save, XCircle, CheckSquare } from 'lucide-react';
-import * as Icons from 'lucide-react';
+import { IconMap } from './components/ui/IconMap';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { SearchEngineSelect, searchEngines } from './components/SearchEngineSelect';
 import { SettingsDialog } from './components/SettingsDialog';
@@ -8,6 +8,8 @@ import { AddShortcutDialog } from './components/AddShortcutDialog';
 import { EditShortcutDialog } from './components/EditShortcutDialog';
 import { LogoutConfirmDialog } from './components/LogoutConfirmDialog';
 import { TodoPanel } from './components/TodoPanel';
+import { TopDock } from './components/TopDock';
+import { TodoListWidget } from './components/TodoListWidget';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useTheme } from 'next-themes';
@@ -15,26 +17,8 @@ import { authStore } from './stores/auth-store';
 import { navService } from './services/nav-service';
 import { settingsService } from './services/settings-service';
 
-const defaultShortcuts = [
-  // First row - 9 icons
-  { name: 'Google', iconValue: 'Search', iconType: 'BUILTIN', color: '#4285F4', url: 'https://google.com' },
-  { name: 'YouTube', iconValue: 'Youtube', iconType: 'BUILTIN', color: '#FF0000', url: 'https://youtube.com' },
-  { name: 'Facebook', iconValue: 'Facebook', iconType: 'BUILTIN', color: '#1877F2', url: 'https://facebook.com' },
-  { name: 'Twitter', iconValue: 'Twitter', iconType: 'BUILTIN', color: '#1DA1F2', url: 'https://twitter.com' },
-  { name: 'Instagram', iconValue: 'Instagram', iconType: 'BUILTIN', color: '#E4405F', url: 'https://instagram.com' },
-  { name: 'LinkedIn', iconValue: 'Linkedin', iconType: 'BUILTIN', color: '#0A66C2', url: 'https://linkedin.com' },
-  { name: 'GitHub', iconValue: 'Github', iconType: 'BUILTIN', color: '#181717', url: 'https://github.com' },
-  { name: 'Amazon', iconValue: 'ShoppingCart', iconType: 'BUILTIN', color: '#FF9900', url: 'https://amazon.com' },
-  { name: 'Netflix', iconValue: 'Film', iconType: 'BUILTIN', color: '#E50914', url: 'https://netflix.com' },
-  // Second row - 7 icons
-  { name: 'Spotify', iconValue: 'Music', iconType: 'BUILTIN', color: '#1DB954', url: 'https://spotify.com' },
-  { name: 'Reddit', iconValue: 'MessageCircle', iconType: 'BUILTIN', color: '#FF4500', url: 'https://reddit.com' },
-  { name: 'Gmail', iconValue: 'Mail', iconType: 'BUILTIN', color: '#EA4335', url: 'https://gmail.com' },
-  { name: 'Twitch', iconValue: 'Video', iconType: 'BUILTIN', color: '#9146FF', url: 'https://twitch.tv' },
-  { name: 'Discord', iconValue: 'MessageSquare', iconType: 'BUILTIN', color: '#5865F2', url: 'https://discord.com' },
-  { name: 'Slack', iconValue: 'Slack', iconType: 'BUILTIN', color: '#4A154B', url: 'https://slack.com' },
-  { name: 'Dribbble', iconValue: 'Dribbble', iconType: 'BUILTIN', color: '#EA4C89', url: 'https://dribbble.com' },
-];
+import { DEFAULT_SETTINGS, DEFAULT_SHORTCUTS, DEFAULT_WALLPAPER } from '../config/app.config';
+
 
 const SHORTCUT_DRAG_TYPE = 'SHORTCUT';
 
@@ -114,7 +98,7 @@ function DraggableShortcut({
         style={{ gap: `${iconTextGap}px` }}
       >
         <div
-          className="bg-white flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden"
+          className="bg-white dark:bg-neutral-700 flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden"
           style={{
             width: `${iconSize}px`,
             height: `${iconSize}px`,
@@ -127,14 +111,14 @@ function DraggableShortcut({
                 <img
                   src={shortcut.iconValue}
                   alt={shortcut.name}
-                  style={{ width: '60%', height: '60%', objectFit: 'contain' }}
+                  style={{ width: '50%', height: '50%', objectFit: 'contain' }}
                 />
               );
             }
-            let IconComp = Icons.Link;
+            let IconComp = IconMap.Link;
             const iconName = shortcut.iconValue;
-            if (iconName && (Icons as any)[iconName]) {
-              IconComp = (Icons as any)[iconName];
+            if (iconName && IconMap[iconName]) {
+              IconComp = IconMap[iconName];
             }
             return (
               <IconComp
@@ -155,12 +139,66 @@ function DraggableShortcut({
   );
 }
 
+interface SearchBoxProps {
+  searchEngine: string;
+  onSearchEngineChange: (engine: string) => void;
+  settings: {
+    searchBoxWidth: number;
+    searchBoxHeight: number;
+    iconsMarginTop: number;
+  };
+}
+
+/**
+ * 隔离搜索输入框状态的局部组件，防止打字输入时导致整个 App 巨型组件频繁重渲染。
+ */
+function SearchBox({ searchEngine, onSearchEngineChange, settings }: SearchBoxProps) {
+  const [query, setQuery] = useState('');
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (query.trim()) {
+      const engine = searchEngines.find(ev => ev.value === searchEngine);
+      if (engine) {
+        window.open(`${engine.url}${encodeURIComponent(query)}`, '_blank');
+      }
+    }
+  };
+
+  return (
+    <form onSubmit={handleSearch} style={{ marginBottom: `${settings.iconsMarginTop}px` }}>
+      <div className="relative mx-auto flex items-center" style={{ width: `${settings.searchBoxWidth}%` }}>
+        <div className="relative w-full">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10">
+            <SearchEngineSelect value={searchEngine} onChange={onSearchEngineChange} />
+          </div>
+
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="搜索或输入网址..."
+            className="w-full px-16 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 text-white placeholder-white/70 text-lg outline-none focus:bg-white/25 focus:border-white/40 transition-all"
+            style={{ height: `${settings.searchBoxHeight}px` }}
+          />
+
+          <button
+            type="submit"
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+          >
+            <Search className="w-5 h-5 text-white" />
+          </button>
+        </div>
+      </div>
+    </form>
+  );
+}
+
 /**
  * 应用主组件，负责布局、搜索、捷径卡片展示与编辑、系统设置等核心功能。
  */
 export default function App() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchEngine, setSearchEngine] = useState('google');
+  const [searchEngine, setSearchEngine] = useState(() => localStorage.getItem('navatation_search_engine') || 'google');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
@@ -186,29 +224,18 @@ export default function App() {
     if (!authState.isLoggedIn) {
       setIsEditMode(false);
       localStorage.removeItem('navatation_wallpaper');
-      setBackgroundImage('https://images.unsplash.com/photo-1598439473183-42c9301db5dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=2400');
-      setShortcuts(defaultShortcuts);
-      setTempShortcuts(defaultShortcuts);
+      setBackgroundImage(DEFAULT_WALLPAPER);
+      setShortcuts(DEFAULT_SHORTCUTS);
+      setTempShortcuts(DEFAULT_SHORTCUTS);
     }
   }, [authState.isLoggedIn]);
 
-  const [shortcuts, setShortcuts] = useState<any[]>(defaultShortcuts);
-  const [tempShortcuts, setTempShortcuts] = useState<any[]>(defaultShortcuts);
+  const [shortcuts, setShortcuts] = useState<any[]>(() => authStore.getState().isLoggedIn ? [] : DEFAULT_SHORTCUTS);
+  const [tempShortcuts, setTempShortcuts] = useState<any[]>(() => authStore.getState().isLoggedIn ? [] : DEFAULT_SHORTCUTS);
   const [backgroundImage, setBackgroundImage] = useState(() => {
-    return localStorage.getItem('navatation_wallpaper') || 'https://images.unsplash.com/photo-1598439473183-42c9301db5dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=2400';
+    return localStorage.getItem('navatation_wallpaper') || DEFAULT_WALLPAPER;
   });
-  const [settings, setSettings] = useState({
-    searchBoxWidth: 100,
-    searchBoxHeight: 64,
-    searchBoxMarginTop: 192,
-    iconSize: 64,
-    iconRadius: 50,
-    iconSpacingX: 32,
-    iconSpacingY: 48,
-    iconTextGap: 12,
-    textSize: 14,
-    iconsMarginTop: 64,
-  });
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [backupSettings, setBackupSettings] = useState<any>(null);
   const [backupBackgroundImage, setBackupBackgroundImage] = useState<string>('');
   const [backupTheme, setBackupTheme] = useState<string>('');
@@ -235,8 +262,8 @@ export default function App() {
       // 未登录状态下重置登录切换追踪标识以备下次切换
       prevIsLoggedInRef.current = false;
       // 使用默认快捷方式
-      setShortcuts(defaultShortcuts);
-      setTempShortcuts(defaultShortcuts);
+      setShortcuts(DEFAULT_SHORTCUTS);
+      setTempShortcuts(DEFAULT_SHORTCUTS);
       return;
     }
 
@@ -347,6 +374,7 @@ export default function App() {
           }
           if (data.searchEngine) {
             setSearchEngine(data.searchEngine);
+            localStorage.setItem('navatation_search_engine', data.searchEngine);
           }
         }
       } catch (err) {
@@ -360,21 +388,39 @@ export default function App() {
     fetchSettings();
   }, [fetchShortcuts, fetchSettings]);
 
-  /**
-   * 执行搜索。
-   * 根据当前选中的搜索引擎跳转至对应搜索结果页。
-   */
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      // 查找当前所选搜索引擎的配置
-      const engine = searchEngines.find(e => e.value === searchEngine);
-      if (engine) {
-        // 拼接查询参数并进行页面跳转
-        window.location.href = `${engine.url}${encodeURIComponent(searchQuery)}`;
-      }
+  const handleSearchEngineChange = (engine: string) => {
+    setSearchEngine(engine);
+    localStorage.setItem('navatation_search_engine', engine);
+    if (authState.isLoggedIn) {
+      settingsService.patchSettings({ searchEngine: engine }).catch(console.error);
     }
   };
+
+  const handleRandomWallpaper = async () => {
+    try {
+      const res = await settingsService.getRandomWallpaper();
+      if (res && res.code === 200 && res.data) {
+        const newBg = res.data.wallpaperUrl;
+        setBackgroundImage(newBg);
+        localStorage.setItem('navatation_wallpaper', newBg);
+        if (authState.isLoggedIn) {
+          await settingsService.patchSettings({ backgroundImage: newBg });
+        }
+      }
+    } catch (err) {
+      console.error('Failed to trigger random wallpaper', err);
+    }
+  };
+
+  const handleToggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    if (authState.isLoggedIn) {
+      settingsService.patchSettings({ theme: nextTheme }).catch(console.error);
+    }
+  };
+
+
 
   /**
    * 执行退出登录。
@@ -680,56 +726,42 @@ export default function App() {
         }}
       />
 
+      {/* Top Left Todo Widget */}
+      <div className="absolute top-0 left-6 z-30">
+        <TodoListWidget onOpenTodoPanel={() => setIsTodoOpen(true)} />
+      </div>
+
+      {/* Top Widgets Bar */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 z-30">
+        <TopDock
+          theme={theme || 'light'}
+          onToggleTodo={() => setIsTodoOpen((prev) => !prev)}
+          onRandomWallpaper={handleRandomWallpaper}
+          onToggleTheme={handleToggleTheme}
+        />
+      </div>
       {/* Content Container */}
       <div className="relative z-10 w-full px-8" style={{ paddingTop: `${settings.searchBoxMarginTop}px` }}>
-        {/* Search Box */}
-        <form onSubmit={handleSearch} style={{ marginBottom: `${settings.iconsMarginTop}px` }}>
-          <div className="relative mx-auto flex items-center" style={{ maxWidth: `${(settings.searchBoxWidth / 100) * 768}px` }}>
-            {/* Search Input with embedded icons */}
-            <div className="relative w-full">
-              {/* Left: Search Engine Select */}
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10">
-                <SearchEngineSelect value={searchEngine} onChange={setSearchEngine} />
-              </div>
-
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="搜索或输入网址..."
-                className="w-full px-16 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 text-white placeholder-white/70 text-lg outline-none focus:bg-white/25 focus:border-white/40 transition-all"
-                style={{ height: `${settings.searchBoxHeight}px` }}
-              />
-
-              {/* Right: Search Button */}
-              <button
-                type="submit"
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
-              >
-                <Search className="w-5 h-5 text-white" />
-              </button>
-            </div>
-          </div>
-        </form>
+        {/* Search Box (Isolated State for Performance) */}
+        <SearchBox
+          searchEngine={searchEngine}
+          onSearchEngineChange={handleSearchEngineChange}
+          settings={settings}
+        />
 
         {/* Shortcuts Grid */}
-        <div className="flex flex-col items-center" style={{ gap: `${settings.iconSpacingY}px` }}>
+        <div 
+          className="flex flex-wrap justify-center w-full mx-auto" 
+          style={{ 
+            gap: `${settings.iconSpacingY}px ${settings.iconSpacingX}px`,
+            maxWidth: '1200px',
+            paddingLeft: `${settings.iconsMarginX}%`,
+            paddingRight: `${settings.iconsMarginX}%`
+          }}
+        >
           {/* Render all shortcuts dynamically */}
-          {Array.from({ length: Math.ceil(displayShortcuts.length / 9) + 1 }, (_, rowIndex) => {
-            const startIdx = rowIndex * 9;
-            const endIdx = Math.min(startIdx + 9, displayShortcuts.length);
-            const rowShortcuts = displayShortcuts.slice(startIdx, endIdx);
-
-            // 仅在编辑模式下，如果在捷径之后的行有多余空间，则显示添加按钮
-            const showAddButton = isEditMode && (startIdx === displayShortcuts.length || (rowShortcuts.length > 0 && rowShortcuts.length < 9));
-
-            if (rowShortcuts.length === 0 && !showAddButton) return null;
-
-            return (
-              <div key={rowIndex} className="flex items-center" style={{ gap: `${settings.iconSpacingX}px` }}>
-                {rowShortcuts.map((shortcut, idx) => {
-                  const globalIndex = startIdx + idx;
-                  if (isEditMode) {
+          {displayShortcuts.map((shortcut, globalIndex) => {
+            if (isEditMode) {
                     return (
                       <DraggableShortcut
                         key={`${shortcut.name}-${globalIndex}`}
@@ -760,7 +792,7 @@ export default function App() {
                         style={{ gap: `${settings.iconTextGap}px` }}
                       >
                         <div
-                          className="bg-white flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 overflow-hidden"
+                          className="bg-white dark:bg-neutral-700 flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 overflow-hidden"
                           style={{
                             width: `${settings.iconSize}px`,
                             height: `${settings.iconSize}px`,
@@ -773,14 +805,14 @@ export default function App() {
                                 <img
                                   src={shortcut.iconValue}
                                   alt={shortcut.name}
-                                  style={{ width: '60%', height: '60%', objectFit: 'contain' }}
+                                  style={{ width: '50%', height: '50%', objectFit: 'contain' }}
                                 />
                               );
                             } else {
-                              let IconComp = Icons.Link;
+                              let IconComp = IconMap.Link;
                               const iconName = shortcut.iconValue;
-                              if (iconName && (Icons as any)[iconName]) {
-                                IconComp = (Icons as any)[iconName];
+                              if (iconName && IconMap[iconName]) {
+                                IconComp = IconMap[iconName];
                               }
                               return (
                                 <IconComp
@@ -800,40 +832,37 @@ export default function App() {
                       </a>
                     </div>
                   );
-                })}
-
-                {/* Add Shortcut Button */}
-                {showAddButton && (
-                  <button
-                    onClick={() => setIsAddShortcutOpen(true)}
-                    className="flex flex-col items-center group"
-                    style={{ gap: `${settings.iconTextGap}px` }}
-                  >
-                    <div
-                      className="bg-white/80 flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 cursor-pointer hover:bg-white"
-                      style={{
-                        width: `${settings.iconSize}px`,
-                        height: `${settings.iconSize}px`,
-                        borderRadius: borderRadius
-                      }}
-                    >
-                      <Plus
-                        className="text-gray-400 group-hover:text-gray-600 transition-colors"
-                        style={{ width: `${iconInnerSize}px`, height: `${iconInnerSize}px` }}
-                        strokeWidth={2}
-                      />
-                    </div>
-                    <span
-                      className="text-white font-light tracking-wide drop-shadow-lg opacity-0"
-                      style={{ fontSize: `${settings.textSize}px` }}
-                    >
-                      添加
-                    </span>
-                  </button>
-                )}
-              </div>
-            );
           })}
+
+          {/* Add Shortcut Button */}
+          {isEditMode ? (
+            <button
+              onClick={() => setIsAddShortcutOpen(true)}
+              className="flex flex-col items-center group"
+              style={{ gap: `${settings.iconTextGap}px` }}
+            >
+              <div
+                className="bg-white/80 dark:bg-neutral-700/80 flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 cursor-pointer hover:bg-white dark:hover:bg-neutral-600"
+                style={{
+                  width: `${settings.iconSize}px`,
+                  height: `${settings.iconSize}px`,
+                  borderRadius: borderRadius
+                }}
+              >
+                <Plus
+                  className="text-gray-400 group-hover:text-gray-600 transition-colors"
+                  style={{ width: `${iconInnerSize}px`, height: `${iconInnerSize}px` }}
+                  strokeWidth={2}
+                />
+              </div>
+              <span
+                className="text-white font-light tracking-wide drop-shadow-lg opacity-0"
+                style={{ fontSize: `${settings.textSize}px` }}
+              >
+                添加
+              </span>
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -860,15 +889,15 @@ export default function App() {
           </>
         ) : (
           <>
-            {/* Edit Button */}
-            {authState.isLoggedIn && (
-              <button
-                onClick={handleStartEdit}
-                className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all duration-200 shadow-lg"
-              >
-                <Edit3 className="w-5 h-5 text-white" />
-              </button>
-            )}
+             {/* Edit Button */}
+             {authState.isLoggedIn ? (
+               <button
+                 onClick={handleStartEdit}
+                 className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all duration-200 shadow-lg"
+               >
+                 <Edit3 className="w-5 h-5 text-white" />
+               </button>
+             ) : null}
 
             {/* Settings Button */}
             <button
@@ -878,13 +907,6 @@ export default function App() {
               <Settings className="w-5 h-5 text-white" />
             </button>
 
-            {/* Todo Button */}
-            <button
-              onClick={() => setIsTodoOpen(true)}
-              className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center hover:bg-white/30 hover:scale-110 transition-all duration-200 shadow-lg"
-            >
-              <CheckSquare className="w-5 h-5 text-white" />
-            </button>
 
             {/* Account Button */}
             <button
@@ -896,9 +918,9 @@ export default function App() {
               ) : (
                 <User className="w-5 h-5 text-white" />
               )}
-              {authState.isLoggedIn && (
+              {authState.isLoggedIn ? (
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
-              )}
+              ) : null}
             </button>
           </>
         )}
@@ -935,14 +957,14 @@ export default function App() {
         iconSize={settings.iconSize}
         iconRadius={settings.iconRadius}
       />
-      {editingShortcut && (
+      {editingShortcut ? (
         <EditShortcutDialog
           isOpen={!!editingShortcut}
           onClose={() => setEditingShortcut(null)}
           onSave={handleSaveEdit}
           shortcut={editingShortcut.shortcut}
         />
-      )}
+      ) : null}
     </div>
     </DndProvider>
   );

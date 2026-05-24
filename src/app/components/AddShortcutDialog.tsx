@@ -1,5 +1,5 @@
 import { X, Link, Upload, Video, Cpu, Code, ShoppingBag, Newspaper, Gamepad2, Music as MusicIcon, BookOpen, Camera, Briefcase, Trash2, Loader2, Check } from 'lucide-react';
-import * as Icons from 'lucide-react';
+import { IconMap } from './ui/IconMap';
 import { useState, useEffect, useRef } from 'react';
 import { navService } from '../services/nav-service';
 import { LucideIcon } from 'lucide-react';
@@ -167,12 +167,12 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
           // 格式化后端推荐数据为组件渲染结构
           const mapped = res.data.map(cat => ({
             category: cat.categoryName,
-            icon: (Icons as any)[cat.categoryIcon] || Icons.Folder,
+            icon: IconMap[cat.categoryIcon] || IconMap.Folder,
             sites: cat.sites.map(site => ({
               name: site.name,
               url: site.url,
               color: site.iconColor || '#333',
-              icon: (Icons as any)[site.iconValue] || Icons.Link,
+              icon: IconMap[site.iconValue] || IconMap.Link,
               iconType: site.iconType,
               iconValue: site.iconValue
             }))
@@ -311,54 +311,54 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
         onClick={onClose}
       >
         <div
-          className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+          className="bg-card/95 border border-border backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden flex flex-col text-foreground transition-all duration-300"
           style={{ width: '85%', height: '90%', maxWidth: '1400px' }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="bg-white/95 border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-            <h2 className="text-xl text-gray-800">添加网址</h2>
+          <div className="bg-card/95 border-b border-border px-6 py-4 flex items-center justify-between transition-colors duration-300">
+            <h2 className="text-xl font-medium">添加网址</h2>
             <div className="flex items-center gap-3">
               <button
                 onClick={handleCancel}
-                className="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-full transition-colors text-sm"
+                className="px-5 py-2 bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-800 dark:text-gray-200 rounded-full transition-colors text-sm cursor-pointer"
               >
                 取消
               </button>
               <button
                 onClick={handleSave}
                 disabled={pendingShortcuts.length === 0}
-                className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors text-sm disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors text-sm disabled:bg-gray-200 dark:disabled:bg-neutral-800 disabled:text-gray-400 dark:disabled:text-neutral-600 disabled:cursor-not-allowed cursor-pointer"
               >
                 保存 {pendingShortcuts.length > 0 && `(${pendingShortcuts.length})`}
               </button>
               <button
                 onClick={onClose}
-                className="p-2 rounded-full hover:bg-black/5 transition-colors"
+                className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
               >
-                <X className="w-5 h-5 text-gray-600" />
+                <X className="w-5 h-5 text-gray-600 dark:text-gray-400" />
               </button>
             </div>
           </div>
 
           {/* Tabs */}
-          <div className="flex border-b border-gray-200 bg-white/90">
+          <div className="flex border-b border-border bg-card/90 transition-colors duration-300">
             <button
               onClick={() => setActiveTab('recommended')}
-              className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${
+              className={`flex-1 px-6 py-4 text-sm font-medium transition-colors cursor-pointer ${
                 activeTab === 'recommended'
                   ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-800'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
               }`}
             >
               推荐
             </button>
             <button
               onClick={() => setActiveTab('custom')}
-              className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${
+              className={`flex-1 px-6 py-4 text-sm font-medium transition-colors cursor-pointer ${
                 activeTab === 'custom'
                   ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-800'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
               }`}
             >
               自定义
@@ -369,24 +369,24 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
           <div className="flex-1 overflow-y-auto">
             <div className="grid grid-cols-3 h-full">
               {/* Left: Tabs Content */}
-              <div className="col-span-2 border-r border-gray-200 overflow-y-auto">
+              <div className="col-span-2 border-r border-border overflow-y-auto">
                 {activeTab === 'recommended' ? (
                   <div className="p-6 space-y-8">
                     {categories.map((category) => (
                       <div key={category.category}>
                         <div className="flex items-center gap-2 mb-4">
-                          <category.icon className="w-5 h-5 text-gray-600" />
-                          <h3 className="text-base text-gray-800">{category.category}</h3>
+                          <category.icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                          <h3 className="text-base font-medium">{category.category}</h3>
                         </div>
                         <div className="grid grid-cols-8 gap-6">
                           {category.sites.map((site: any) => (
                             <button
                               key={site.name}
                               onClick={() => handleAddRecommendedToPending(site)}
-                              className="flex flex-col items-center gap-2 group"
+                              className="flex flex-col items-center gap-2 group cursor-pointer"
                             >
                               <div
-                                className="bg-white flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all duration-200 border border-gray-200 overflow-hidden"
+                                className="bg-card flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all duration-200 border border-border overflow-hidden"
                                 style={{
                                   width: `${iconSize}px`,
                                   height: `${iconSize}px`,
@@ -395,7 +395,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                               >
                                 {(() => {
                                   if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
-                                    return <img src={site.iconValue} alt={site.name} style={{ width: '60%', height: '60%', objectFit: 'contain' }} />;
+                                    return <img src={site.iconValue} alt={site.name} style={{ width: '50%', height: '50%', objectFit: 'contain' }} />;
                                   }
                                   return (
                                     <site.icon
@@ -409,7 +409,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                   );
                                 })()}
                               </div>
-                              <span className="text-xs text-gray-700 group-hover:text-gray-900">
+                              <span className="text-xs text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors">
                                 {site.name}
                               </span>
                             </button>
@@ -422,29 +422,29 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                   <div className="p-8">
                     <div className="max-w-xl mx-auto space-y-6">
                       <div>
-                        <label className="block text-sm text-gray-700 mb-2">网址链接 *</label>
+                        <label className="block text-sm text-gray-600 dark:text-gray-400 mb-2">网址链接 *</label>
                         <input
                           type="text"
                           value={customUrl}
                           onChange={(e) => setCustomUrl(e.target.value)}
                           placeholder="https://example.com"
-                          className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-800 outline-none focus:border-blue-500 focus:bg-white transition-all"
+                          className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground outline-none focus:border-blue-500 focus:bg-card transition-all placeholder-gray-400 dark:placeholder-gray-500"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm text-gray-700 mb-2">网址名称 *</label>
+                        <label className="block text-sm text-gray-600 dark:text-gray-400 mb-2">网址名称 *</label>
                         <input
                           type="text"
                           value={customName}
                           onChange={(e) => setCustomName(e.target.value)}
                           placeholder="网站名称"
-                          className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-800 outline-none focus:border-blue-500 focus:bg-white transition-all"
+                          className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground outline-none focus:border-blue-500 focus:bg-card transition-all placeholder-gray-400 dark:placeholder-gray-500"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm text-gray-700 mb-2">
+                        <label className="block text-sm text-gray-600 dark:text-gray-400 mb-2">
                           网址图标链接
                         </label>
                         <div className="flex gap-2 items-center">
@@ -460,7 +460,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                 }
                               }}
                               placeholder="https://example.com/icon.png"
-                              className="w-full px-4 py-3 pr-10 bg-gray-100 border border-gray-200 rounded-xl text-gray-800 outline-none focus:border-blue-500 focus:bg-white transition-all"
+                              className="w-full px-4 py-3 pr-10 bg-background border border-border rounded-xl text-foreground outline-none focus:border-blue-500 focus:bg-card transition-all placeholder-gray-400 dark:placeholder-gray-500"
                               disabled={!!customIconFile}
                             />
                             {(faviconStatus === 'loading' || faviconStatus === 'uploading') && (
@@ -475,8 +475,8 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                           </div>
                           <label className={`px-4 py-3 rounded-xl cursor-pointer flex items-center gap-2 transition-colors ${
                               faviconStatus === 'uploading'
-                                ? 'bg-blue-100 text-blue-400 cursor-not-allowed'
-                                : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-500 dark:text-blue-400 cursor-not-allowed'
+                                : 'bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-700 dark:text-gray-300'
                             }`}>
                             {faviconStatus === 'uploading' ? (
                               <Loader2 className="w-4 h-4 animate-spin" />
@@ -493,11 +493,11 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                             />
                           </label>
                           {customIconUrl && (
-                            <div className="w-12 h-12 flex-shrink-0 bg-white shadow-sm border border-gray-200 rounded-full flex items-center justify-center overflow-hidden relative group">
+                            <div className="w-12 h-12 flex-shrink-0 bg-card shadow-sm border border-border rounded-full flex items-center justify-center overflow-hidden relative group">
                               <img
                                 src={customIconUrl}
                                 alt="Preview"
-                                style={{ width: '60%', height: '60%', objectFit: 'contain' }}
+                                style={{ width: '50%', height: '50%', objectFit: 'contain' }}
                               />
                               <button
                                 onClick={(e) => {
@@ -520,7 +520,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                       <button
                         onClick={handleAddCustomToPending}
                         disabled={!customName.trim() || !customUrl.trim()}
-                        className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                        className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors disabled:bg-gray-200 dark:disabled:bg-neutral-800 disabled:text-gray-400 dark:disabled:text-neutral-600 disabled:cursor-not-allowed cursor-pointer"
                       >
                         添加到本次
                       </button>
@@ -530,20 +530,20 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
               </div>
 
               {/* Right: Pending Shortcuts */}
-              <div className="col-span-1 bg-gray-50 overflow-y-auto">
+              <div className="col-span-1 bg-background border-l border-border overflow-y-auto transition-colors duration-300">
                 <div className="p-4">
-                  <h3 className="text-sm text-gray-900 mb-4">本次添加 ({pendingShortcuts.length})</h3>
+                  <h3 className="text-sm font-medium mb-4">本次添加 ({pendingShortcuts.length})</h3>
                   {pendingShortcuts.length === 0 ? (
-                    <p className="text-xs text-gray-500 text-center py-8">暂无选择</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-8">暂无选择</p>
                   ) : (
                     <div className="space-y-3">
                       {pendingShortcuts.map((shortcut, index) => (
                         <div
                           key={index}
-                          className="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200 group"
+                          className="flex items-center gap-3 bg-card p-3 rounded-lg border border-border group transition-all duration-200"
                         >
                           <div
-                            className="flex-shrink-0 bg-white flex items-center justify-center shadow-sm border border-gray-200"
+                            className="flex-shrink-0 bg-background flex items-center justify-center shadow-sm border border-border"
                             style={{
                               width: '40px',
                               height: '40px',
@@ -554,7 +554,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                               <img
                                 src={(shortcut as any).iconValue}
                                 alt={shortcut.name}
-                                style={{ width: '60%', height: '60%', objectFit: 'contain' }}
+                                style={{ width: '50%', height: '50%', objectFit: 'contain' }}
                               />
                             ) : (
                               <shortcut.icon
@@ -568,12 +568,12 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm text-gray-800 truncate">{shortcut.name}</p>
-                            <p className="text-xs text-gray-500 truncate">{shortcut.url}</p>
+                            <p className="text-sm text-gray-700 dark:text-gray-300 truncate">{shortcut.name}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{shortcut.url}</p>
                           </div>
                           <button
                             onClick={() => handleRemoveFromPending(index)}
-                            className="flex-shrink-0 p-1 rounded-full hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                            className="flex-shrink-0 p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-950/30 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>

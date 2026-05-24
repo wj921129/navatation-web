@@ -113,44 +113,44 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
         onClick={onClose}
       >
         <div
-          className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl w-full max-w-md p-8"
+          className="bg-card/95 border border-border backdrop-blur-xl rounded-3xl shadow-2xl w-full max-w-md p-8 text-foreground transition-all duration-300"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl text-gray-800">编辑网址</h2>
+            <h2 className="text-xl font-medium">编辑网址</h2>
             <button
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-black/5 transition-colors"
+              className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
             >
-              <X className="w-5 h-5 text-gray-600" />
+              <X className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             </button>
           </div>
 
           <div className="space-y-5">
             <div>
-              <label className="block text-sm text-gray-700 mb-2">网址链接 *</label>
+              <label className="block text-sm text-gray-600 dark:text-gray-400 mb-2">网址链接 *</label>
               <input
                 type="text"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="https://example.com"
-                className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-800 outline-none focus:border-blue-500 focus:bg-white transition-all"
+                className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground outline-none focus:border-blue-500 focus:bg-card transition-all placeholder-gray-400 dark:placeholder-gray-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-gray-700 mb-2">网址名称 *</label>
+              <label className="block text-sm text-gray-600 dark:text-gray-400 mb-2">网址名称 *</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="网站名称"
-                className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-800 outline-none focus:border-blue-500 focus:bg-white transition-all"
+                className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground outline-none focus:border-blue-500 focus:bg-card transition-all placeholder-gray-400 dark:placeholder-gray-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-gray-700 mb-2">网址图标链接</label>
+              <label className="block text-sm text-gray-600 dark:text-gray-400 mb-2">网址图标链接</label>
               <div className="flex gap-2 items-center">
                 <div className="flex-1 relative">
                   <input
@@ -168,7 +168,7 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
                       }
                     }}
                     placeholder="https://example.com/icon.png"
-                    className="w-full px-4 py-3 pr-10 bg-gray-100 border border-gray-200 rounded-xl text-gray-800 outline-none focus:border-blue-500 focus:bg-white transition-all"
+                    className="w-full px-4 py-3 pr-10 bg-background border border-border rounded-xl text-foreground outline-none focus:border-blue-500 focus:bg-card transition-all placeholder-gray-400 dark:placeholder-gray-500"
                   />
                   {(faviconStatus === 'loading' || faviconStatus === 'uploading') && (
                     <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-500 animate-spin" />
@@ -182,8 +182,8 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
                 </div>
                 <label className={`px-4 py-3 rounded-xl cursor-pointer flex items-center gap-2 transition-colors ${
                   faviconStatus === 'uploading'
-                    ? 'bg-blue-100 text-blue-400 cursor-not-allowed'
-                    : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-500 dark:text-blue-400 cursor-not-allowed'
+                    : 'bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-700 dark:text-gray-300'
                 }`}>
                   {faviconStatus === 'uploading' ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -204,15 +204,15 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
               {/* 实时图标预览 */}
               {showImagePreview && iconValue && (
                 <div className="mt-3 flex items-center gap-3">
-                  <div className="w-12 h-12 flex-shrink-0 bg-white border border-gray-200 rounded-xl flex items-center justify-center overflow-hidden">
+                  <div className="w-12 h-12 flex-shrink-0 bg-card border border-border rounded-xl flex items-center justify-center overflow-hidden">
                     <img
                       src={iconValue}
                       alt="Preview"
-                      style={{ width: '60%', height: '60%', objectFit: 'contain' }}
+                      style={{ width: '50%', height: '50%', objectFit: 'contain' }}
                     />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-gray-500 truncate">{iconValue}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{iconValue}</p>
                     <button
                       onClick={() => {
                         setIconType('BUILTIN');
@@ -235,14 +235,14 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
           <div className="flex gap-3 mt-8">
             <button
               onClick={onClose}
-              className="flex-1 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-full transition-colors"
+              className="flex-1 py-3 bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-800 dark:text-gray-200 rounded-full transition-colors cursor-pointer"
             >
               取消
             </button>
             <button
               onClick={handleSave}
               disabled={!name.trim() || !url.trim()}
-              className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+              className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors disabled:bg-gray-200 dark:disabled:bg-neutral-800 disabled:text-gray-400 dark:disabled:text-neutral-600 disabled:cursor-not-allowed cursor-pointer"
             >
               保存
             </button>
