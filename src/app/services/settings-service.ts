@@ -22,24 +22,29 @@ export interface WallpaperUploadResult {
 }
 
 export const settingsService = {
+  /** 获取当前用户的全量个性化设置（搜索框/图标/主题/壁纸等） */
   getSettings(): Promise<ApiResponse<UserSettings>> {
     return api.get('/settings');
   },
 
+  /** 全量保存用户个性化设置，覆盖服务端现有配置 */
   saveSettings(settings: UserSettings): Promise<ApiResponse<null>> {
     return api.put('/settings', settings);
   },
 
+  /** 局部更新用户设置，仅修改传入的字段，其余保持不变 */
   patchSettings(partial: Partial<UserSettings>): Promise<ApiResponse<null>> {
     return api.patch('/settings', partial);
   },
 
+  /** 上传本地壁纸图片到服务器，返回可公开访问的壁纸 URL */
   uploadWallpaper(file: File): Promise<ApiResponse<WallpaperUploadResult>> {
     const formData = new FormData();
     formData.append('file', file);
     return api.upload('/settings/wallpaper/upload', formData);
   },
 
+  /** 从 Unsplash 随机获取一张高清壁纸 URL */
   getRandomWallpaper(): Promise<ApiResponse<WallpaperUploadResult>> {
     return api.get('/settings/wallpaper/random');
   },

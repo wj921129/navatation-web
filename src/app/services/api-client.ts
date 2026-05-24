@@ -1,3 +1,4 @@
+/** 后端 API 根路径，优先读取环境变量，回退到本地开发地址 */
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8080/api/v1';
 
 interface ApiResponse<T = any> {
@@ -8,28 +9,39 @@ interface ApiResponse<T = any> {
 }
 
 // Token 管理
+
+/** 从 localStorage 读取当前 Access Token */
 function getAccessToken(): string | null {
   return localStorage.getItem('access_token');
 }
 
+/** 从 localStorage 读取当前 Refresh Token */
 function getRefreshToken(): string | null {
   return localStorage.getItem('refresh_token');
 }
 
+/** 将 Access Token 与 Refresh Token 写入 localStorage */
 function setTokens(accessToken: string, refreshToken: string): void {
   localStorage.setItem('access_token', accessToken);
   localStorage.setItem('refresh_token', refreshToken);
 }
 
+/** 清除 localStorage 中的所有 Token（登出/过期时调用） */
 function clearTokens(): void {
   localStorage.removeItem('access_token');
   localStorage.removeItem('refresh_token');
 }
 
-// 刷新 Token
+// 刷新 Token 防并发标志：保证同一时刻只有一次 refresh 请求在途
+/** 是否正在执行 Token 刷新，防止并发重复刷新 */
 let isRefreshing = false;
+/** 当前进行中的刷新 Promise，供并发请求复用结果 */
 let refreshPromise: Promise<boolean> | null = null;
 
+/**
+ * 尝试使用 Refresh Token 刷新 Access Token。
+ * 并发调用时共享同一 Promise，避免重复请求。
+ */
 async function tryRefreshToken(): Promise<boolean> {
   if (isRefreshing && refreshPromise) return refreshPromise;
 
@@ -64,7 +76,10 @@ async function tryRefreshToken(): Promise<boolean> {
   return refreshPromise;
 }
 
-// 核心请求函数
+/**
+ * 核心 HTTP 请求函数，自动注入 Bearer Token，
+ * 并在收到 401 时尝试刷新 Token 后重试一次。
+ */
 async function request<T = any>(
   path: string,
   options: RequestInit = {}
@@ -125,23 +140,29 @@ async function request<T = any>(
   return res.json();
 }
 
-// 便捷方法
+/** 便捷 HTTP 方法封装，统一调用核心 request 函数 */
 export const api = {
+  /** 发起 GET 请求 */
   get<T = any>(path: string) {
     return request<T>(path, { method: 'GET' });
   },
+  /** 发起 POST 请求，自动序列化 body 为 JSON */
   post<T = any>(path: string, body?: any) {
     return request<T>(path, { method: 'POST', body: JSON.stringify(body) });
   },
+  /** 发起 PUT 请求，自动序列化 body 为 JSON */
   put<T = any>(path: string, body?: any) {
     return request<T>(path, { method: 'PUT', body: JSON.stringify(body) });
   },
+  /** 发起 PATCH 请求，自动序列化 body 为 JSON */
   patch<T = any>(path: string, body?: any) {
     return request<T>(path, { method: 'PATCH', body: JSON.stringify(body) });
   },
+  /** 发起 DELETE 请求 */
   delete<T = any>(path: string) {
     return request<T>(path, { method: 'DELETE' });
   },
+  /** 发起文件上传请求（multipart/form-data），由浏览器自动设置 boundary */
   upload<T = any>(path: string, formData: FormData) {
     const token = getAccessToken();
     return request<T>(path, {
