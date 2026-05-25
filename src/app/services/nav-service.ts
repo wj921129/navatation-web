@@ -2,7 +2,7 @@ import { api, ApiResponse } from './api-client';
 
 // ---- 分类 ----
 export interface NavCategory {
-  categoryId: number;
+  categoryId: string;
   name: string;
   sortOrder: number;
   shortcutCount: number;
@@ -17,8 +17,8 @@ export interface CreateCategoryRequest {
 export type IconType = 'BUILTIN' | 'FAVICON' | 'CUSTOM_URL' | 'CUSTOM_UPLOAD';
 
 export interface NavShortcut {
-  shortcutId: number;
-  categoryId: number;
+  shortcutId: string;
+  categoryId: string;
   name: string;
   url: string;
   iconType: IconType;
@@ -37,7 +37,7 @@ export interface CreateShortcutItem {
 }
 
 export interface BatchCreateRequest {
-  categoryId: number;
+  categoryId: string;
   shortcuts: CreateShortcutItem[];
 }
 
@@ -50,7 +50,7 @@ export interface UpdateShortcutRequest {
 }
 
 export interface SortItem {
-  shortcutId: number;
+  shortcutId: string;
   sortOrder: number;
 }
 
@@ -64,7 +64,7 @@ export interface RecommendSite {
 }
 
 export interface RecommendCategory {
-  categoryId: number;
+  categoryId: string;
   categoryName: string;
   categoryIcon: string;
   sites: RecommendSite[];
@@ -87,30 +87,30 @@ export const navService = {
     return api.post('/nav/categories', data);
   },
   /** 更新指定分类的名称或排序 */
-  updateCategory(categoryId: number, data: Partial<CreateCategoryRequest>): Promise<ApiResponse<null>> {
+  updateCategory(categoryId: string, data: Partial<CreateCategoryRequest>): Promise<ApiResponse<null>> {
     return api.put(`/nav/categories/${categoryId}`, data);
   },
   /** 删除指定导航分类 */
-  deleteCategory(categoryId: number): Promise<ApiResponse<null>> {
+  deleteCategory(categoryId: string): Promise<ApiResponse<null>> {
     return api.delete(`/nav/categories/${categoryId}`);
   },
 
   // 快捷方式
   /** 获取快捷方式列表，可按分类 ID 筛选 */
-  getShortcuts(categoryId?: number): Promise<ApiResponse<NavShortcut[]>> {
+  getShortcuts(categoryId?: string): Promise<ApiResponse<NavShortcut[]>> {
     const query = categoryId ? `?categoryId=${categoryId}` : '';
     return api.get(`/nav/shortcuts${query}`);
   },
   /** 批量创建快捷方式并归属到指定分类 */
-  batchCreateShortcuts(data: BatchCreateRequest): Promise<ApiResponse<{ shortcutId: number; name: string }[]>> {
+  batchCreateShortcuts(data: BatchCreateRequest): Promise<ApiResponse<{ shortcutId: string; name: string }[]>> {
     return api.post('/nav/shortcuts/batch', data);
   },
   /** 更新指定快捷方式的名称、URL、图标等信息 */
-  updateShortcut(shortcutId: number, data: UpdateShortcutRequest): Promise<ApiResponse<NavShortcut>> {
+  updateShortcut(shortcutId: string, data: UpdateShortcutRequest): Promise<ApiResponse<NavShortcut>> {
     return api.put(`/nav/shortcuts/${shortcutId}`, data);
   },
   /** 删除指定快捷方式 */
-  deleteShortcut(shortcutId: number): Promise<ApiResponse<null>> {
+  deleteShortcut(shortcutId: string): Promise<ApiResponse<null>> {
     return api.delete(`/nav/shortcuts/${shortcutId}`);
   },
   /** 批量更新快捷方式排序，传入 shortcutId 与目标 sortOrder 列表 */

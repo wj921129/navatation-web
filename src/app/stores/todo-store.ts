@@ -112,8 +112,8 @@ class TodoStore {
         const res = await todoService.create(content);
         if (res.code === 200) await this.loadTodos(isLoggedIn);
       } else {
-        // 游客本地 ID 使用负随机数，避免与云端正整数 ID 冲突
-        const localId = -Math.floor(Math.random() * 100_000_000) - 1;
+        // 游客本地 ID 使用字符串前缀加上随机值
+        const localId = "TD-local-" + Math.floor(Math.random() * 100_000_000);
         const newTodo: TodoItem = {
           todoId: localId,
           content,
@@ -132,7 +132,7 @@ class TodoStore {
   }
 
   /** 切换指定待办事项的完成状态，登录时同步云端 */
-  async toggleTodo(todoId: number, isLoggedIn: boolean): Promise<void> {
+  async toggleTodo(todoId: string, isLoggedIn: boolean): Promise<void> {
     try {
       if (isLoggedIn) {
         const res = await todoService.toggle(todoId);
@@ -152,7 +152,7 @@ class TodoStore {
   }
 
   /** 编辑指定待办事项的内容，登录时同步云端 */
-  async updateTodo(todoId: number, content: string, isLoggedIn: boolean): Promise<void> {
+  async updateTodo(todoId: string, content: string, isLoggedIn: boolean): Promise<void> {
     try {
       if (isLoggedIn) {
         const res = await todoService.update(todoId, content);
@@ -170,7 +170,7 @@ class TodoStore {
   }
 
   /** 删除指定待办事项，登录时同步云端 */
-  async deleteTodo(todoId: number, isLoggedIn: boolean): Promise<void> {
+  async deleteTodo(todoId: string, isLoggedIn: boolean): Promise<void> {
     try {
       if (isLoggedIn) {
         const res = await todoService.delete(todoId);

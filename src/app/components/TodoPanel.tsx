@@ -34,12 +34,12 @@ function formatDate(isoString: string): string {
 export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
   const [todoState, setTodoState] = useState(todoStore.getState());
   const [inputValue, setInputValue] = useState('');
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [authState, setAuthState] = useState(authStore.getState());
   const inputRef = useRef<HTMLInputElement>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
-  const [detailTodoId, setDetailTodoId] = useState<number | null>(null);
+  const [detailTodoId, setDetailTodoId] = useState<string | null>(null);
   const [detailEditValue, setDetailEditValue] = useState('');
   const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
 
@@ -141,7 +141,7 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
   };
 
   // 删除待办
-  const handleDelete = async (todoId: number) => {
+  const handleDelete = async (todoId: string) => {
     await todoStore.deleteTodo(todoId, authState.isLoggedIn);
   };
 
@@ -335,7 +335,7 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
                           </span>
                         ) : null}
                         <span
-                          className={`text-sm transition-all duration-200 select-none ${
+                          className={`text-sm transition-all duration-200 select-none line-clamp-5 break-all ${
                             todo.completed ? 'text-gray-400 dark:text-gray-500 line-through' : 'text-gray-700 dark:text-gray-200'
                           }`}
                           onDoubleClick={() => handleStartEdit(todo)}
@@ -383,14 +383,16 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
                         </button>
                       ) : null}
 
-                      {/* 删除按钮 */}
-                      <button
-                        onClick={() => handleDelete(todo.todoId)}
-                        className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-950/20 text-red-400 hover:text-red-500 dark:text-red-400 dark:hover:text-red-300 transition-colors flex items-center justify-center cursor-pointer"
-                        title="删除任务"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                      {/* 删除按钮 (仅已完成项显示) */}
+                      {todo.completed ? (
+                        <button
+                          onClick={() => handleDelete(todo.todoId)}
+                          className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-950/20 text-red-400 hover:text-red-500 dark:text-red-400 dark:hover:text-red-300 transition-colors flex items-center justify-center cursor-pointer"
+                          title="删除任务"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      ) : null}
                     </div>
                   </div>
                 ))}

@@ -43,7 +43,7 @@ export function SearchEngineSelect({ value, onChange }: SearchEngineSelectProps)
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
+        className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
       >
         <img src={currentEngine.icon} alt={currentEngine.name} className="w-5 h-5 object-contain" />
       </button>

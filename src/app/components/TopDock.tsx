@@ -6,13 +6,26 @@ interface TopDockProps {
   onToggleTodo: () => void;
   onRandomWallpaper: () => Promise<void>;
   onToggleTheme: () => void;
+  onMouseEnterTheme?: () => void;
+  brightnessPanel?: React.ReactNode;
+  onMouseEnterOtherWidget?: () => void;
+  isHoveringBrightness?: boolean;
 }
 
 /**
  * 首页顶部快捷多功能小组件工具栏 (TopDock)
  * 采用精致的 Glassmorphism 玻璃拟态设计，集成了待办事项、随机壁纸、快捷主题切换、专注时钟（番茄钟）微组件。
  */
-export function TopDock({ theme, onToggleTodo, onRandomWallpaper, onToggleTheme }: TopDockProps) {
+export function TopDock({
+  theme,
+  onToggleTodo,
+  onRandomWallpaper,
+  onToggleTheme,
+  onMouseEnterTheme,
+  brightnessPanel,
+  onMouseEnterOtherWidget,
+  isHoveringBrightness = false
+}: TopDockProps) {
   const [shuffling, setShuffling] = useState(false);
   
   // 专注时钟 (Pomodoro Zen Timer) 状态
@@ -77,28 +90,28 @@ export function TopDock({ theme, onToggleTodo, onRandomWallpaper, onToggleTheme 
   };
 
   return (
-    <div className="flex items-center gap-1.5 px-4 py-1 rounded-b-2xl border-t-0 border border-white/25 dark:border-white/15 bg-white/15 dark:bg-black/15 backdrop-blur-md shadow-md opacity-70 hover:opacity-100 hover:bg-white/25 dark:hover:bg-black/25 hover:backdrop-blur-xl transition-all duration-300 cursor-default">
+    <div className="flex items-center gap-1.5 px-4 py-1 rounded-b-2xl border-t-0 border border-white/25 dark:border-white/15 bg-white/15 dark:bg-black/40 backdrop-blur-md shadow-md opacity-70 hover:opacity-100 hover:bg-white/25 dark:hover:bg-black/60 hover:backdrop-blur-xl transition-all duration-300 cursor-default">
       {/* 待办事项小组件 */}
-      <div className="relative group">
+      <div className="relative group" onMouseEnter={onMouseEnterOtherWidget}>
         <button
           onClick={onToggleTodo}
-          className="p-2 rounded-full hover:bg-white/20 text-white transition-all duration-200 active:scale-95 flex items-center justify-center cursor-pointer"
+          className="p-2 rounded-full text-gray-700 dark:text-white hover:bg-black/5 dark:hover:bg-white/20 transition-all duration-200 active:scale-95 flex items-center justify-center cursor-pointer"
           aria-label="待办事项"
         >
           <CheckSquare className="w-4 h-4" />
         </button>
-        <span className="pointer-events-none absolute top-12 left-1/2 -translate-x-1/2 px-2 py-1 bg-black/80 dark:bg-white/90 text-white dark:text-black text-[10px] rounded opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap z-50">
+        <span className="pointer-events-none absolute top-[42px] left-1/2 -translate-x-1/2 px-2 py-1 bg-white/95 dark:bg-neutral-800/95 text-gray-800 dark:text-white border border-gray-100 dark:border-neutral-700/50 shadow-md text-[10px] rounded opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap z-50">
           待办事项
         </span>
       </div>
 
-      <div className="w-[1px] h-4 bg-white/20 dark:bg-white/10" />
+      <div className="w-[1px] h-4 bg-gray-300 dark:bg-white/10" />
 
       {/* 随机壁纸小组件 */}
-      <div className="relative group">
+      <div className="relative group" onMouseEnter={onMouseEnterOtherWidget}>
         <button
           onClick={handleRandomWallpaperClick}
-          className="p-2 rounded-full hover:bg-white/20 text-white transition-all duration-200 active:scale-95 flex items-center justify-center cursor-pointer"
+          className="p-2 rounded-full text-gray-700 dark:text-white hover:bg-black/5 dark:hover:bg-white/20 transition-all duration-200 active:scale-95 flex items-center justify-center cursor-pointer"
           aria-label="随机壁纸"
           disabled={shuffling}
         >
@@ -108,18 +121,18 @@ export function TopDock({ theme, onToggleTodo, onRandomWallpaper, onToggleTheme 
             <Shuffle className="w-4 h-4 transition-transform duration-300 group-hover:rotate-45" />
           )}
         </button>
-        <span className="pointer-events-none absolute top-12 left-1/2 -translate-x-1/2 px-2 py-1 bg-black/80 dark:bg-white/90 text-white dark:text-black text-[10px] rounded opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap z-50">
+        <span className="pointer-events-none absolute top-[42px] left-1/2 -translate-x-1/2 px-2 py-1 bg-white/95 dark:bg-neutral-800/95 text-gray-800 dark:text-white border border-gray-100 dark:border-neutral-700/50 shadow-md text-[10px] rounded opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap z-50">
           随机壁纸
         </span>
       </div>
 
-      <div className="w-[1px] h-4 bg-white/20 dark:bg-white/10" />
+      <div className="w-[1px] h-4 bg-gray-300 dark:bg-white/10" />
 
       {/* 快速主题切换小组件 */}
-      <div className="relative group">
+      <div className="relative group" onMouseEnter={onMouseEnterTheme}>
         <button
           onClick={onToggleTheme}
-          className="p-2 rounded-full hover:bg-white/20 text-white transition-all duration-200 active:scale-95 flex items-center justify-center cursor-pointer"
+          className="p-2 rounded-full text-gray-700 dark:text-white hover:bg-black/5 dark:hover:bg-white/20 transition-all duration-200 active:scale-95 flex items-center justify-center cursor-pointer"
           aria-label="切换主题"
         >
           {theme === 'dark' ? (
@@ -128,38 +141,43 @@ export function TopDock({ theme, onToggleTodo, onRandomWallpaper, onToggleTheme 
             <Moon className="w-4 h-4 transition-transform duration-300 group-hover:-rotate-12" />
           )}
         </button>
-        <span className="pointer-events-none absolute top-12 left-1/2 -translate-x-1/2 px-2 py-1 bg-black/80 dark:bg-white/90 text-white dark:text-black text-[10px] rounded opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap z-50">
+        <span className={`pointer-events-none absolute top-[42px] left-1/2 -translate-x-1/2 px-2 py-1 bg-white/95 dark:bg-neutral-800/95 text-gray-800 dark:text-white border border-gray-100 dark:border-neutral-700/50 shadow-md text-[10px] rounded opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap z-50 ${
+          isHoveringBrightness ? '!opacity-0 !scale-95' : ''
+        }`}>
           切换主题
         </span>
+        {brightnessPanel}
       </div>
 
-      <div className="w-[1px] h-4 bg-white/20 dark:bg-white/10" />
+      <div className="w-[1px] h-4 bg-gray-300 dark:bg-white/10" />
 
       {/* 专注番茄时钟小组件 */}
-      <div className="relative group">
+      <div className="relative group" onMouseEnter={onMouseEnterOtherWidget}>
         <div 
           onClick={handleTimerToggle}
-          className={`flex items-center gap-1.5 px-2 py-1 rounded-full cursor-pointer hover:bg-white/20 text-white transition-all duration-300 select-none ${
-            isTimerActive ? 'bg-red-500/30 border border-red-500/50 hover:bg-red-500/40' : ''
+          className={`flex items-center gap-1.5 px-2 py-1 rounded-full cursor-pointer transition-all duration-300 select-none ${
+            isTimerActive 
+              ? 'bg-red-500/30 border border-red-500/50 hover:bg-red-500/40 text-red-600 dark:text-red-200' 
+              : 'text-gray-700 dark:text-white hover:bg-black/5 dark:hover:bg-white/20'
           }`}
         >
           {isTimerActive ? (
             <>
-              <Square className="w-3.5 h-3.5 text-red-400 fill-red-400 animate-pulse" />
-              <span className="text-[11px] font-medium font-mono text-red-200 tabular-nums">
+              <Square className="w-3.5 h-3.5 text-red-500 dark:text-red-400 fill-red-500 dark:fill-red-400 animate-pulse" />
+              <span className="text-[11px] font-medium font-mono text-red-600 dark:text-red-200 tabular-nums">
                 {formatTime(timeLeft)}
               </span>
             </>
           ) : (
             <>
               <Timer className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
-              <span className="text-[11px] font-light max-w-0 overflow-hidden group-hover:max-w-[60px] transition-all duration-300 whitespace-nowrap text-white/70 group-hover:ml-0.5">
+              <span className="text-[11px] font-light max-w-0 overflow-hidden group-hover:max-w-[60px] transition-all duration-300 whitespace-nowrap text-gray-500 dark:text-white/70 group-hover:ml-0.5">
                 专注
               </span>
             </>
           )}
         </div>
-        <span className="pointer-events-none absolute top-12 left-1/2 -translate-x-1/2 px-2 py-1 bg-black/80 dark:bg-white/90 text-white dark:text-black text-[10px] rounded opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap z-50">
+        <span className="pointer-events-none absolute top-[42px] left-1/2 -translate-x-1/2 px-2 py-1 bg-white/95 dark:bg-neutral-800/95 text-gray-800 dark:text-white border border-gray-100 dark:border-neutral-700/50 shadow-md text-[10px] rounded opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap z-50">
           {isTimerActive ? '结束专注' : '开启 25 分钟专注'}
         </span>
       </div>

@@ -2,3 +2,35 @@
 @import './tailwind.css';
 @import './theme.css';
 @import './globals.css';
+
+/* 屏幕亮度调节卡片进入与向上渐出隐藏动画 (采用 margin-top 过渡，彻底避免与 transform/translate 水平居中冲突) */
+.brightness-panel-enter {
+  animation: brightnessSlideIn 260ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.brightness-panel-exit {
+  animation: brightnessSlideOut 260ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes brightnessSlideIn {
+  from {
+    opacity: 0;
+    margin-top: -8px;
+  }
+  to {
+    opacity: 1;
+    margin-top: 0;
+  }
+}
+
+@keyframes brightnessSlideOut {
+  from {
+    opacity: 1;
+    margin-top: 0;
+  }
+  to {
+    opacity: 0;
+    margin-top: -8px;
+  }
+}
+

@@ -37,7 +37,7 @@ export function TodoListWidget({ onOpenTodoPanel }: TodoListWidgetProps) {
   if (uncompletedTodos.length === 0) return null;
 
   // 勾选完成某个待办事项
-  const handleToggle = async (e: React.MouseEvent, todoId: number) => {
+  const handleToggle = async (e: React.MouseEvent, todoId: string) => {
     e.stopPropagation(); // 阻止触发卡片整体点击事件
     await todoStore.toggleTodo(todoId, authState.isLoggedIn);
   };
@@ -45,15 +45,15 @@ export function TodoListWidget({ onOpenTodoPanel }: TodoListWidgetProps) {
   return (
     <div 
       onClick={onOpenTodoPanel}
-      className="flex flex-col gap-2 px-4 py-2.5 rounded-b-2xl border-t-0 border border-white/25 dark:border-white/15 bg-white/15 dark:bg-black/15 backdrop-blur-md shadow-md opacity-70 hover:opacity-100 hover:bg-white/25 dark:hover:bg-black/25 hover:backdrop-blur-xl transition-all duration-300 cursor-pointer w-64 max-h-[220px] overflow-hidden group select-none"
+      className="flex flex-col gap-2 px-4 py-2.5 rounded-b-2xl border-t-0 border border-white/25 dark:border-white/15 bg-white/15 dark:bg-black/40 backdrop-blur-md shadow-md opacity-70 hover:opacity-100 hover:bg-white/25 dark:hover:bg-black/60 hover:backdrop-blur-xl transition-all duration-300 cursor-pointer w-64 max-h-[220px] overflow-hidden group select-none"
     >
       {/* 头部标题与统计 */}
-      <div className="flex items-center justify-between text-white border-b border-white/15 pb-1">
+      <div className="flex items-center justify-between text-gray-700 dark:text-white border-b border-black/10 dark:border-white/15 pb-1">
         <div className="flex items-center gap-1.5">
-          <ListTodo className="w-3.5 h-3.5 text-blue-300" />
-          <span className="text-xs font-medium tracking-wide">待办清单</span>
+          <ListTodo className="w-3.5 h-3.5 text-blue-600 dark:text-blue-300" />
+          <span className="text-xs font-semibold dark:font-medium tracking-wide">待办清单</span>
         </div>
-        <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-white/10 text-white/90">
+        <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-black/5 dark:bg-white/10 text-gray-600 dark:text-white/90">
           {uncompletedTodos.length} 项未完结
         </span>
       </div>
@@ -61,7 +61,7 @@ export function TodoListWidget({ onOpenTodoPanel }: TodoListWidgetProps) {
       {/* 待办事项精简列表 */}
       <div className="flex-1 overflow-y-auto space-y-1.5 pr-0.5 max-h-[140px] scrollbar-thin">
         {uncompletedTodos.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-4 text-white/50">
+          <div className="flex flex-col items-center justify-center py-4 text-gray-400 dark:text-white/50">
             <span className="text-[11px] font-light">🎉 任务已全部完成！</span>
           </div>
         ) : (
@@ -69,15 +69,15 @@ export function TodoListWidget({ onOpenTodoPanel }: TodoListWidgetProps) {
             <div
               key={todo.todoId}
               onClick={(e) => handleToggle(e, todo.todoId)}
-              className="flex items-start gap-2 py-1 px-1.5 rounded hover:bg-white/10 group/item transition-colors"
+              className="flex items-start gap-2 py-1 px-1.5 rounded hover:bg-black/5 dark:hover:bg-white/10 group/item transition-colors"
             >
               {/* 一键勾选圆环 */}
               <div className="flex-shrink-0 mt-0.5 cursor-pointer">
-                <Circle className="w-3.5 h-3.5 text-white/40 group-hover/item:text-green-400 group-hover/item:scale-110 transition-all duration-200" />
+                <Circle className="w-3.5 h-3.5 text-gray-400 dark:text-white/40 group-hover/item:text-green-500 dark:group-hover/item:text-green-400 group-hover/item:scale-110 transition-all duration-200" />
               </div>
 
               {/* 任务简短文字 */}
-              <span className="text-[11px] font-light text-white/90 line-clamp-3 whitespace-normal break-all flex-1 group-hover/item:text-white transition-colors">
+              <span className="text-[11px] font-light text-gray-700 dark:text-white/90 line-clamp-3 whitespace-normal break-all flex-1 group-hover/item:text-gray-900 dark:group-hover/item:text-white transition-colors">
                 {todo.content}
               </span>
             </div>
@@ -86,7 +86,7 @@ export function TodoListWidget({ onOpenTodoPanel }: TodoListWidgetProps) {
       </div>
       
       {/* 底部悬浮指引 */}
-      <div className="text-[9px] text-white/40 text-center pt-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+      <div className="text-[9px] text-gray-400 dark:text-white/40 text-center pt-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         点击面板查看完整列表
       </div>
     </div>

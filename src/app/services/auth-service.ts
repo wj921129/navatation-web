@@ -19,7 +19,7 @@ export interface ChangePasswordRequest {
 }
 
 export interface UserInfo {
-  userId: number;
+  userId: string;
   username: string;
   avatar: string | null;
   createdAt: string;
@@ -34,7 +34,7 @@ export interface LoginResult {
 }
 
 export interface RegisterResult {
-  userId: number;
+  userId: string;
   username: string;
 }
 

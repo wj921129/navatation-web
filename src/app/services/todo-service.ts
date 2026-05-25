@@ -1,7 +1,7 @@
 import { api, ApiResponse } from './api-client';
 
 export interface TodoItem {
-  todoId: number;
+  todoId: string;
   content: string;
   completed: boolean;
   sortOrder: number;
@@ -10,7 +10,7 @@ export interface TodoItem {
 }
 
 export interface TodoSortItem {
-  todoId: number;
+  todoId: string;
   sortOrder: number;
 }
 
@@ -27,17 +27,17 @@ export const todoService = {
   },
 
   /** 更新指定待办事项的内容文本 */
-  update(todoId: number, content: string): Promise<ApiResponse<null>> {
+  update(todoId: string, content: string): Promise<ApiResponse<null>> {
     return api.put(`/todo/${todoId}`, { content });
   },
 
   /** 切换指定待办事项的完成状态（完成 ↔ 未完成） */
-  toggle(todoId: number): Promise<ApiResponse<{ todoId: number; completed: boolean; completedAt: string | null }>> {
+  toggle(todoId: string): Promise<ApiResponse<{ todoId: string; completed: boolean; completedAt: string | null }>> {
     return api.patch(`/todo/${todoId}/toggle`);
   },
 
   /** 删除指定待办事项 */
-  delete(todoId: number): Promise<ApiResponse<null>> {
+  delete(todoId: string): Promise<ApiResponse<null>> {
     return api.delete(`/todo/${todoId}`);
   },
 
