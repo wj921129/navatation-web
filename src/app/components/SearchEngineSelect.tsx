@@ -43,13 +43,13 @@ export function SearchEngineSelect({ value, onChange }: SearchEngineSelectProps)
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+        className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-input-bg transition-colors"
       >
         <img src={currentEngine.icon} alt={currentEngine.name} className="w-5 h-5 object-contain" />
       </button>
 
       {isOpen && (
-        <div className="absolute top-full mt-2 left-0 bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden z-20 min-w-[140px]">
+        <div className="absolute top-full mt-2 left-0 bg-widget-bg border border-widget-border backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden z-20 min-w-[140px]">
           {searchEngines.map((engine) => (
             <button
               key={engine.value}
@@ -58,14 +58,14 @@ export function SearchEngineSelect({ value, onChange }: SearchEngineSelectProps)
                 onChange(engine.value);
                 setIsOpen(false);
               }}
-              className="w-full flex items-center justify-between px-4 py-3 hover:bg-black/5 transition-colors text-left"
+              className="w-full flex items-center justify-between px-4 py-3 hover:bg-input-bg text-text-primary transition-colors text-left"
             >
               <div className="flex items-center gap-3">
                 <img src={engine.icon} alt={engine.name} className="w-5 h-5 object-contain" />
-                <span className="text-gray-800 text-sm">{engine.name}</span>
+                <span className="text-text-primary text-sm">{engine.name}</span>
               </div>
               {engine.value === value && (
-                <Check className="w-4 h-4 text-blue-600" />
+                <Check className="w-4 h-4 text-blue-500 dark:text-blue-400" />
               )}
             </button>
           ))}

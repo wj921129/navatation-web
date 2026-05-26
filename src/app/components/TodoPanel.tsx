@@ -145,7 +145,7 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
     await todoStore.deleteTodo(todoId, authState.isLoggedIn);
   };
 
-  // 清除所有已完成待办
+  // 清除已完成
   const handleClearCompleted = async () => {
     await todoStore.clearCompleted(authState.isLoggedIn);
   };
@@ -164,24 +164,24 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
       />
 
       {/* 左侧面板 */}
-      <div className="fixed top-0 left-0 h-full w-96 bg-white/95 dark:bg-card/95 backdrop-blur-xl shadow-2xl z-50 flex flex-col cursor-default text-gray-800 dark:text-gray-100 transition-colors duration-300">
+      <div className="fixed top-0 left-0 h-full w-96 glass-panel shadow-2xl z-50 flex flex-col cursor-default text-text-primary transition-colors duration-300">
         {/* 面板头部 */}
-        <div className="sticky top-0 bg-white/95 dark:bg-card/95 backdrop-blur-xl border-b border-gray-200 dark:border-border px-4 py-3 flex items-center justify-between transition-colors duration-300">
-          <h2 className="text-base text-gray-800 dark:text-gray-200 flex items-center gap-2 font-medium">
+        <div className="sticky top-0 bg-widget-bg backdrop-blur-xl border-b border-widget-border px-4 py-3 flex items-center justify-between transition-colors duration-300">
+          <h2 className="text-base text-text-primary flex items-center gap-2 font-medium">
             <CheckSquare className="w-4 h-4 text-blue-500 dark:text-blue-400" />
             待办事项
           </h2>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+            className="p-1.5 rounded-full hover:bg-input-bg transition-colors cursor-pointer"
           >
-            <X className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+            <X className="w-4 h-4 text-text-secondary" />
           </button>
         </div>
 
         {/* 输入区域 */}
         {detailTodoId === null ? (
-          <div className="px-4 py-3 border-b border-gray-100 dark:border-border transition-colors duration-300">
+          <div className="px-4 py-3 border-b border-widget-border transition-colors duration-300">
             <input
               ref={inputRef}
               type="text"
@@ -191,19 +191,19 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
                 if (e.key === 'Enter') handleCreate();
               }}
               placeholder="新增待办事项，按回车添加..."
-              className="w-full px-3 py-2 bg-gray-100 dark:bg-card border border-gray-200 dark:border-border rounded-lg text-xs text-gray-800 dark:text-gray-100 outline-none focus:border-blue-500 focus:bg-white dark:focus:bg-neutral-900 transition-all placeholder-gray-400 dark:placeholder-gray-500"
+              className="w-full px-3 py-2 bg-input-bg border border-input-border rounded-lg text-xs text-text-primary outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:bg-white dark:focus:bg-neutral-900 transition-all placeholder-text-placeholder"
             />
           </div>
         ) : null}
 
         {/* 待办列表 / 详情专注视图 */}
-        <div className="flex-1 flex flex-col min-h-0 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto min-h-0 flex flex-col">
           {detailTodoId !== null ? (
             (() => {
               const detailTodo = todoState.todos.find(t => t.todoId === detailTodoId);
               if (!detailTodo) {
                 return (
-                  <div className="flex flex-col items-center justify-center py-16 text-gray-400 dark:text-gray-500">
+                  <div className="flex flex-col items-center justify-center py-16 text-text-secondary">
                     <p className="text-xs">该事项不存在</p>
                     <button
                       onClick={() => setDetailTodoId(null)}
@@ -215,23 +215,23 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
                 );
               }
               return (
-                <div className="flex-1 flex flex-col h-full bg-card cursor-default transition-colors duration-300">
+                <div className="flex-1 flex flex-col h-full bg-widget-bg cursor-default transition-colors duration-300">
                   {/* 返回顶栏 */}
-                  <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-background cursor-default transition-colors duration-300">
+                  <div className="flex items-center gap-2 px-4 py-2.5 border-b border-widget-border bg-widget-bg cursor-default transition-colors duration-300">
                     <button
                       onClick={() => setDetailTodoId(null)}
-                      className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer flex items-center justify-center"
+                      className="p-1 rounded-full hover:bg-input-bg transition-colors cursor-pointer flex items-center justify-center"
                       title="返回列表"
                     >
-                      <ArrowLeft className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" />
+                      <ArrowLeft className="w-3.5 h-3.5 text-text-secondary" />
                     </button>
-                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-200">编辑待办详情</span>
+                    <span className="text-xs font-semibold text-text-primary">编辑待办详情</span>
                   </div>
 
                   {/* 沉浸式文本框编辑区 - 明暗自适应对比布局 */}
-                  <div className="flex-1 p-4 flex flex-col gap-3 min-h-0 cursor-default bg-background transition-colors duration-300">
+                  <div className="flex-1 p-4 flex flex-col gap-3 min-h-0 cursor-default bg-widget-bg/30 transition-colors duration-300">
                     {detailTodo.createdAt ? (
-                      <div className="text-[10px] text-gray-400 dark:text-gray-500 font-light select-none cursor-default">
+                      <div className="text-[10px] text-text-secondary font-light select-none cursor-default">
                         创建时间：{formatDate(detailTodo.createdAt)}
                       </div>
                     ) : null}
@@ -244,7 +244,7 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
                         }
                       }}
                       placeholder="在这里输入待办的详细内容..."
-                      className="flex-1 w-full p-4 bg-card border border-border rounded-xl text-xs text-gray-800 dark:text-gray-100 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 resize-none transition-colors duration-200 leading-relaxed shadow-xs dark:shadow-none caret-gray-900 dark:caret-gray-100"
+                      className="flex-1 w-full p-4 bg-input-bg border border-input-border rounded-xl text-xs text-text-primary outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500/20 resize-none transition-colors duration-200 leading-relaxed caret-text-primary"
                       style={{
                         cursor: customCursor
                       }}
@@ -254,7 +254,7 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
                     <div className="flex gap-2 justify-end mt-1">
                       <button
                         onClick={() => setDetailTodoId(null)}
-                        className="px-3 py-1.5 bg-gray-100 dark:bg-card hover:bg-gray-200 dark:hover:bg-neutral-800 text-gray-700 dark:text-gray-300 rounded-lg transition-colors text-xs cursor-pointer"
+                        className="px-3 py-1.5 bg-input-bg hover:bg-gray-200 dark:hover:bg-neutral-800 text-text-primary rounded-lg transition-colors text-xs cursor-pointer border border-input-border"
                       >
                         返回
                       </button>
@@ -277,11 +277,11 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
           ) : (
             todoState.loading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+                <Loader2 className="w-5 h-5 text-text-secondary animate-spin" />
               </div>
             ) : sortedTodos.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-gray-400 dark:text-gray-500">
-                <CheckSquare className="w-10 h-10 mb-3 opacity-50 text-gray-300 dark:text-neutral-700" />
+              <div className="flex flex-col items-center justify-center py-16 text-text-secondary">
+                <CheckSquare className="w-10 h-10 mb-3 opacity-50 text-text-secondary" />
                 <p className="text-sm">暂无待办事项</p>
               </div>
             ) : (
@@ -289,7 +289,7 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
                 {sortedTodos.map(todo => (
                   <div
                     key={todo.todoId}
-                    className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50/50 dark:hover:bg-neutral-800/50 group transition-colors"
+                    className="flex items-center gap-3 px-4 py-2.5 hover:bg-input-bg group transition-colors"
                   >
                     {/* 复选框 */}
                     <button
@@ -304,7 +304,7 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
                         <CheckCircle2 className="w-3.5 h-3.5 text-white" strokeWidth={3} />
                       )}
                       {!todo.completed && (
-                        <Circle className="w-3.5 h-3.5 text-gray-300 dark:text-neutral-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <Circle className="w-3.5 h-3.5 text-text-secondary opacity-0 group-hover:opacity-100 transition-opacity" />
                       )}
                     </button>
 
@@ -321,7 +321,7 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
                             if (e.key === 'Enter') handleSaveEdit(todo);
                             if (e.key === 'Escape') setEditingId(null);
                           }}
-                          className="w-full px-2 py-1 bg-white dark:bg-neutral-800 border border-blue-300 dark:border-blue-700 rounded text-xs text-gray-800 dark:text-gray-100 outline-none focus:border-blue-500"
+                          className="w-full px-2 py-1 bg-input-bg border border-input-border rounded text-xs text-text-primary outline-none focus:border-blue-500 dark:focus:border-blue-400"
                           style={{
                             cursor: customCursor
                           }}
@@ -330,13 +330,13 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
                     ) : (
                       <div className="flex-1 flex flex-col min-w-0">
                         {todo.createdAt ? (
-                          <span className="text-[10px] text-gray-400 dark:text-gray-500 font-light origin-left select-none mb-0.5">
+                          <span className="text-[10px] text-text-secondary font-light origin-left select-none mb-0.5">
                             {formatDate(todo.createdAt)}
                           </span>
                         ) : null}
                         <span
                           className={`text-sm transition-all duration-200 select-none line-clamp-5 break-all ${
-                            todo.completed ? 'text-gray-400 dark:text-gray-500 line-through' : 'text-gray-700 dark:text-gray-200'
+                            todo.completed ? 'text-text-secondary line-through' : 'text-text-primary'
                           }`}
                           onDoubleClick={() => handleStartEdit(todo)}
                           title="双击编辑"
@@ -357,7 +357,7 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
                           e.stopPropagation();
                           setDetailTodoId(todo.todoId);
                         }}
-                        className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 transition-colors flex items-center justify-center cursor-pointer"
+                        className="p-1 rounded hover:bg-input-bg text-text-secondary hover:text-text-primary transition-colors flex items-center justify-center cursor-pointer"
                         title="查看详情"
                       >
                         <FileText className="w-3.5 h-3.5" />
@@ -366,7 +366,7 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
                       {/* 复制按钮 */}
                       <button
                         onClick={(e) => handleCopy(e, todo.content)}
-                        className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5 text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 transition-colors flex items-center justify-center cursor-pointer"
+                        className="p-1 rounded hover:bg-input-bg text-text-secondary hover:text-text-primary transition-colors flex items-center justify-center cursor-pointer"
                         title="复制文本"
                       >
                         <Copy className="w-3.5 h-3.5" />
@@ -403,10 +403,10 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
 
         {/* 底部：清除已完成按钮 */}
         {detailTodoId === null && hasCompleted ? (
-          <div className="sticky bottom-0 bg-white/95 dark:bg-card/95 backdrop-blur-xl border-t border-gray-200 dark:border-border p-3 transition-colors duration-300">
+          <div className="sticky bottom-0 bg-widget-bg backdrop-blur-xl border-t border-widget-border p-3 transition-colors duration-300">
             <button
               onClick={handleClearCompleted}
-              className="w-full py-2 bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-950/40 text-red-500 dark:text-red-400 rounded-lg transition-colors text-xs flex items-center justify-center gap-1.5 cursor-pointer font-medium"
+              className="w-full py-2 bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-950/40 text-red-500 dark:text-red-400 rounded-lg transition-colors text-xs flex items-center justify-center gap-1.5 cursor-pointer font-medium border border-red-200 dark:border-red-900/30"
             >
               <Trash2 className="w-3 h-3" />
               清除已完成（{completedCount}）

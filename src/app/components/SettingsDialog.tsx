@@ -249,7 +249,7 @@ export function SettingsDialog({ isOpen, onClose, onSave, onPreview, settings, b
               <input
                 type="range"
                 min="100"
-                max="300"
+                max="600"
                 value={draftSettings.searchBoxMarginTop}
                 onChange={(e) => handleChange('searchBoxMarginTop', Number(e.target.value))}
                 className="w-full h-1.5 bg-gray-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
@@ -323,8 +323,8 @@ export function SettingsDialog({ isOpen, onClose, onSave, onPreview, settings, b
               </label>
               <input
                 type="range"
-                min="24"
-                max="72"
+                min="8"
+                max="120"
                 value={draftSettings.iconSpacingY}
                 onChange={(e) => handleChange('iconSpacingY', Number(e.target.value))}
                 className="w-full h-1.5 bg-gray-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
