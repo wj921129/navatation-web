@@ -12,6 +12,10 @@ const searchEngines: SearchEngine[] = [
   { name: '谷歌', value: 'google', url: 'https://www.google.com/search?q=', icon: '/icons/google.svg' },
   { name: '百度', value: 'baidu', url: 'https://www.baidu.com/s?wd=', icon: '/icons/baidu.svg' },
   { name: '必应', value: 'bing', url: 'https://www.bing.com/search?q=', icon: '/icons/bing.svg' },
+  { name: 'ChatGPT', value: 'chatgpt', url: 'ai://chatgpt', icon: '/icons/chatgpt.svg' },
+  { name: '通义千问', value: 'qwen', url: 'ai://qwen', icon: '/icons/qwen.svg' },
+  { name: '豆包', value: 'doubao', url: 'ai://doubao', icon: '/icons/doubao.svg' },
+  { name: 'AI 聚合搜索', value: 'ai-aggregator', url: 'ai://aggregator', icon: '/icons/ai-aggregator.svg' },
 ];
 
 interface SearchEngineSelectProps {

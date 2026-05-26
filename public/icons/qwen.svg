@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <linearGradient id="qwen-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6E44FF" />
+      <stop offset="100%" stop-color="#4C22D6" />
+    </linearGradient>
+  </defs>
+  <rect width="24" height="24" rx="6" fill="url(#qwen-grad)" />
+  <path d="M12 5.5c-3.59 0-6.5 2.91-6.5 6.5s2.91 6.5 6.5 6.5c1.47 0 2.83-.49 3.93-1.32L17.7 18.9a.75.75 0 1 0 1.06-1.06l-1.72-1.72A6.456 6.456 0 0 0 18.5 12c0-3.59-2.91-6.5-6.5-6.5zm-4 6.5c0-2.21 1.79-4 4-4s4 1.79 4 4c0 1.06-.41 2.02-1.09 2.74L13.1 12.9a1.5 1.5 0 1 0-2.12-2.12L9.2 12.56C8.45 12.44 8 12 8 12z" fill="#ffffff" />
+</svg>

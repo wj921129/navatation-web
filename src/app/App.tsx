@@ -16,6 +16,7 @@ import { authStore } from './stores/auth-store';
 
 import { SearchBox } from './components/SearchBox';
 import { DraggableShortcut } from './components/DraggableShortcut';
+import { AiSearchOverlay } from './components/AiSearchOverlay';
 
 import { useBrightness } from './hooks/useBrightness';
 import { useSettings } from './hooks/useSettings';
@@ -31,6 +32,15 @@ export default function App() {
   const { theme, setTheme } = useTheme();
   const [searchEngine, setSearchEngine] = useState(() => localStorage.getItem('navatation_search_engine') || 'google');
   const [isTodoOpen, setIsTodoOpen] = useState(false);
+  const [isAiSearchOpen, setIsAiSearchOpen] = useState(false);
+  const [aiSearchQuery, setAiSearchQuery] = useState('');
+  const [aiSearchEngine, setAiSearchEngine] = useState('');
+
+  const handleAiSearch = useCallback((query: string, engine: string) => {
+    setAiSearchQuery(query);
+    setAiSearchEngine(engine);
+    setIsAiSearchOpen(true);
+  }, []);
 
   // 1. 订阅登录状态
   const [authState, setAuthState] = useState(authStore.getState());
@@ -222,6 +232,7 @@ export default function App() {
           <SearchBox
             searchEngine={searchEngine}
             onSearchEngineChange={handleSearchEngineChange}
+            onAiSearch={handleAiSearch}
             settings={settings}
           />
 
@@ -439,6 +450,12 @@ export default function App() {
             shortcut={editingShortcut.shortcut}
           />
         ) : null}
+        <AiSearchOverlay
+          isOpen={isAiSearchOpen}
+          onClose={() => setIsAiSearchOpen(false)}
+          initialQuery={aiSearchQuery}
+          initialEngine={aiSearchEngine}
+        />
       </div>
     </DndProvider>
   );

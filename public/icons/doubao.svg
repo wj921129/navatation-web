@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <linearGradient id="doubao-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00C9FF" />
+      <stop offset="100%" stop-color="#92FE9D" />
+    </linearGradient>
+  </defs>
+  <rect width="24" height="24" rx="6" fill="url(#doubao-grad)" />
+  <path d="M12 5C8.13 5 5 7.69 5 11c0 1.95 1.08 3.67 2.76 4.7L7 19.5l3.86-1.93c.37.11.75.18 1.14.18 3.87 0 7-2.69 7-6s-3.13-6-7-6zm-1.5 8c-.83 0-1.5-.67-1.5-1.5S9.67 10 10.5 10s1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm3 0c-.83 0-1.5-.67-1.5-1.5S12.67 10 13.5 10s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" fill="#ffffff" />
+</svg>

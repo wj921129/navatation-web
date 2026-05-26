@@ -5,6 +5,7 @@ import { SearchEngineSelect, searchEngines } from './SearchEngineSelect';
 interface SearchBoxProps {
   searchEngine: string;
   onSearchEngineChange: (engine: string) => void;
+  onAiSearch?: (query: string, engine: string) => void;
   settings: {
     searchBoxWidth: number;
     searchBoxHeight: number;
@@ -15,7 +16,7 @@ interface SearchBoxProps {
 /**
  * 隔离搜索输入框状态的局部组件，防止打字输入时导致整个 App 巨型组件频繁重渲染。
  */
-export function SearchBox({ searchEngine, onSearchEngineChange, settings }: SearchBoxProps) {
+export function SearchBox({ searchEngine, onSearchEngineChange, onAiSearch, settings }: SearchBoxProps) {
   const [query, setQuery] = useState('');
 
   const handleSearch = (e: React.FormEvent) => {
@@ -23,7 +24,11 @@ export function SearchBox({ searchEngine, onSearchEngineChange, settings }: Sear
     if (query.trim()) {
       const engine = searchEngines.find(ev => ev.value === searchEngine);
       if (engine) {
-        window.open(`${engine.url}${encodeURIComponent(query)}`, '_blank');
+        if (engine.url.startsWith('ai://')) {
+          onAiSearch?.(query, engine.value);
+        } else {
+          window.open(`${engine.url}${encodeURIComponent(query)}`, '_blank');
+        }
       }
     }
   };
