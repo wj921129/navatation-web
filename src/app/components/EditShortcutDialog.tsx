@@ -34,7 +34,7 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
     setUploadError(null);
   }, [shortcut]);
 
-  // 当网址链接改变且不等于原网址时，自动拉取 Favicon 图标进行检测
+  // 当网址链接改变且不等于原网址时，防抖并渐进式检测网站图标
   useEffect(() => {
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
@@ -46,22 +46,34 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
     }
     
     const fullUrl = currentUrl.startsWith('http') ? currentUrl : `https://${currentUrl}`;
-    try { new URL(fullUrl); } catch { setFaviconStatus('idle'); return; }
+    
+    let host = '';
+    try {
+      const parsed = new URL(fullUrl);
+      host = parsed.host;
+    } catch {
+      setFaviconStatus('idle');
+      return;
+    }
 
-    setFaviconStatus('loading');
+    // 1. 瞬时响应：直接基于域名生成 Google 64px 高清 Favicon CDN 地址进行立刻预览
+    const cdnFaviconUrl = `https://www.google.com/s2/favicons?sz=64&domain=${host}`;
+    setIconValue(cdnFaviconUrl);
+    setIconType('FAVICON');
+    setFaviconStatus('detected');
+
+    // 2. 异步升级：后台请求后端 Jsoup 解析器以获取更高清的真实图标
     debounceTimer.current = setTimeout(() => {
       navService.fetchFavicon(fullUrl).then(res => {
         if (res.code === 200 && res.data?.faviconUrl) {
+          // 若后端解析到了更具体的真实图标，平滑升级更新它
           setIconValue(res.data.faviconUrl);
           setIconType('FAVICON');
-          setFaviconStatus('detected');
-        } else {
-          setFaviconStatus('error');
         }
       }).catch(() => {
-        setFaviconStatus('error');
+        // 后台错误直接忽略，保持使用已渲染好的 CDN 预览
       });
-    }, 600);
+    }, 800);
 
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
