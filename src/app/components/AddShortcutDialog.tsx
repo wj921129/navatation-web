@@ -171,9 +171,19 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
     };
   }, [customUrl]);
 
-  // 监听对话框打开状态，自动拉取后端推荐网站分类数据
+  // 监听对话框打开状态，自动拉取后端推荐网站分类数据并清空上一次的输入和识别内容
   useEffect(() => {
     if (isOpen) {
+      // 每次打开弹窗，重置自定义栏的全部输入与识别数据
+      setCustomName('');
+      setCustomUrl('');
+      setCustomIconUrl('');
+      setCustomIconFile(null);
+      setFaviconStatus('idle');
+      setIconFromUpload(false);
+      setUploadError(null);
+      setActiveTab('recommended'); // 默认重置回推荐页签
+
       navService.getRecommended().then(res => {
         if (res.code === 200 && res.data && res.data.length > 0) {
           // 格式化后端推荐数据为组件渲染结构
