@@ -1,4 +1,4 @@
-import { X, Link, Upload, Video, Cpu, Code, ShoppingBag, Newspaper, Gamepad2, Music as MusicIcon, BookOpen, Camera, Briefcase, Trash2, Loader2, Check } from 'lucide-react';
+import { X, Link, Upload, Video, Cpu, Code, ShoppingBag, Newspaper, Gamepad2, Music as MusicIcon, BookOpen, Camera, Briefcase, Trash2, Loader2, Check, RotateCw } from 'lucide-react';
 import { IconMap } from './ui/IconMap';
 import { useState, useEffect, useRef } from 'react';
 import { navService } from '../services/nav-service';
@@ -599,7 +599,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                 }
                               }}
                               placeholder="https://example.com/icon.png"
-                              className="w-full px-4 py-3 pr-10 bg-background border border-border rounded-xl text-foreground outline-none focus:border-blue-500 focus:bg-card transition-all placeholder-gray-400 dark:placeholder-gray-500"
+                              className="w-full px-4 py-3 pr-10 bg-background border border-border rounded-xl text-foreground outline-none focus:border-blue-500 focus:bg-card transition-all placeholder-gray-400 dark:placeholder-gray-500 h-[46px]"
                               disabled={!!customIconFile}
                             />
                             {(faviconStatus === 'loading' || faviconStatus === 'uploading') && (
@@ -612,7 +612,18 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                               <Link className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                             )}
                           </div>
-                          <label className={`px-4 py-3 rounded-xl cursor-pointer flex items-center gap-2 transition-colors ${
+
+                          <button
+                            type="button"
+                            onClick={() => triggerSearch(customUrl)}
+                            disabled={!isValidDomainOrUrl(customUrl) || faviconStatus === 'loading' || faviconStatus === 'uploading'}
+                            className="p-3 bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-700 dark:text-gray-300 rounded-xl flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer h-[46px] w-[46px] flex-shrink-0"
+                            title="重新检测网址图标"
+                          >
+                            <RotateCw className={`w-4 h-4 ${faviconStatus === 'loading' ? 'animate-spin' : ''}`} />
+                          </button>
+
+                          <label className={`px-4 py-3 rounded-xl cursor-pointer flex items-center gap-2 transition-colors h-[46px] flex-shrink-0 ${
                               faviconStatus === 'uploading'
                                 ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-500 dark:text-blue-400 cursor-not-allowed'
                                 : 'bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-700 dark:text-gray-300'
@@ -622,7 +633,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                             ) : (
                               <Upload className="w-4 h-4" />
                             )}
-                            <span className="text-sm">{faviconStatus === 'uploading' ? '上传中...' : '上传'}</span>
+                            <span className="text-sm">{faviconStatus === 'uploading' ? '上传中' : '上传'}</span>
                             <input
                               type="file"
                               accept="image/*"
