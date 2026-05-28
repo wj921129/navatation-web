@@ -15,6 +15,19 @@ interface EditShortcutDialogProps {
   };
 }
 
+
+/**
+ * 校验输入是否为合法且完整的域名或 URL。
+ * 要求必须包含 dot 且顶级域名 (TLD) 至少为 2 位字母，排除未输入完的情况。
+ */
+const isValidDomainOrUrl = (input: string): boolean => {
+  const url = input.trim();
+  if (!url) return false;
+  // 匹配常见域名结构，要求包含 dot 且顶级域名(TLD)至少为 2 位字母，排除以 dot 结尾
+  const domainRegex = /^(https?:\/\/)?([a-zA-Z0-9][-a-zA-Z0-9]{0,62}\.)+[a-zA-Z]{2,63}(\/.*)?$/;
+  return domainRegex.test(url);
+};
+
 export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditShortcutDialogProps) {
   const [name, setName] = useState(shortcut.name);
   const [url, setUrl] = useState(shortcut.url);
@@ -45,6 +58,12 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
     if (!currentUrl || currentUrl === shortcut.url) {
       setFaviconStatus('idle');
       setDetectedIcons([]);
+      return;
+    }
+
+    // 若域名格式不完整或不合法，不进行搜索
+    if (!isValidDomainOrUrl(currentUrl)) {
+      setFaviconStatus('idle');
       return;
     }
     
