@@ -13,6 +13,8 @@ export const DEFAULT_SETTINGS = {
   textSize: 14,            // 捷径文字大小，单位像素 (px)
   iconsMarginTop: 64,      // 搜索框与下方图标区的间距（作为搜索框下间距使用），单位像素 (px)
   iconsMarginX: 10,        // 图标区左右边距，控制网格水平收缩，单位百分比 (%)
+  dockMaxScale: 1.5,       // 顶部小组件Dock最大缩放倍数，无单位（如 1.5）
+  dockEffectRadius: 120,   // 顶部小组件Dock缩放影响半径，单位像素 (px)
 };
 
 // 游客模式默认预设的网址捷径列表

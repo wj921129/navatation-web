@@ -11,6 +11,8 @@ interface TopDockProps {
   brightnessPanel?: React.ReactNode;
   onMouseEnterOtherWidget?: () => void;
   isHoveringBrightness?: boolean;
+  dockMaxScale?: number;
+  dockEffectRadius?: number;
 }
 
 /**
@@ -26,7 +28,9 @@ export function TopDock({
   onMouseLeaveTheme,
   brightnessPanel,
   onMouseEnterOtherWidget,
-  isHoveringBrightness = false
+  isHoveringBrightness = false,
+  dockMaxScale = 1.5,
+  dockEffectRadius = 120
 }: TopDockProps) {
   const [shuffling, setShuffling] = useState(false);
   
@@ -34,6 +38,63 @@ export function TopDock({
   const [isTimerActive, setIsTimerActive] = useState(false);
   const [timeLeft, setTimeLeft] = useState(25 * 60); // 25分钟
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // 鱼眼特效 Refs 数组，用于高性能直接修改 style 避免触发 React 重渲染
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // 鼠标在顶部工具栏移动时的鱼眼放大交互逻辑
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    // 卫语句：如果正在调节屏幕亮度，强制恢复为原始大小，避免产生交互冲突
+    if (isHoveringBrightness) {
+      handleMouseLeave();
+      return;
+    }
+
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+
+    itemRefs.current.forEach((item) => {
+      if (!item) return;
+      const rect = item.getBoundingClientRect();
+      // 获取当前子组件中心点视口坐标
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      // 欧氏直线距离
+      const distance = Math.sqrt(
+        Math.pow(mouseX - centerX, 2) + Math.pow(mouseY - centerY, 2)
+      );
+
+      let scale = 1;
+      if (distance < dockEffectRadius) {
+        // 使用非常平滑饱满的二次衰减抛物线过渡效果
+        const ratio = distance / dockEffectRadius;
+        scale = 1 + (dockMaxScale - 1) * Math.pow(1 - ratio, 2);
+      }
+
+      // 移动时配置 0.05s 极短过渡以提供微弱阻尼感，同时保证卓越的跟手度和极致的 60fps 帧率
+      item.style.transition = 'transform 0.05s ease-out';
+      item.style.transform = `scale(${scale})`;
+      item.style.transformOrigin = 'center center';
+    });
+  };
+
+  // 鼠标移出顶部工具栏时，所有组件平滑回弹至原始大小
+  const handleMouseLeave = () => {
+    itemRefs.current.forEach((item) => {
+      if (!item) return;
+      // 移出时，使用经典的苹果贝塞尔缓动函数平滑过渡缩回
+      item.style.transition = 'transform 0.25s cubic-bezier(0.25, 1, 0.5, 1)';
+      item.style.transform = 'scale(1)';
+    });
+  };
+
+  // 副作用：当调节亮度面板显示，或 hover 亮度面板状态改变时，主动触发平滑回弹，防止卡死在放大状态
+  useEffect(() => {
+    if (isHoveringBrightness) {
+      handleMouseLeave();
+    }
+  }, [isHoveringBrightness]);
 
   // 随机壁纸触发处理器
   const handleRandomWallpaperClick = async () => {
@@ -92,9 +153,17 @@ export function TopDock({
   };
 
   return (
-    <div className="flex items-center gap-1.5 px-4 py-1 rounded-b-2xl border-t-0 border border-widget-border bg-widget-bg backdrop-blur-md shadow-md opacity-70 hover:opacity-100 hover:bg-widget-bg/90 hover:backdrop-blur-xl transition-all duration-300 cursor-default text-text-primary">
+    <div 
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className="flex items-center gap-1.5 px-4 py-1.5 rounded-b-2xl border-t-0 border border-widget-border bg-widget-bg backdrop-blur-md shadow-md opacity-70 hover:opacity-100 hover:bg-widget-bg/90 hover:backdrop-blur-xl transition-all duration-300 cursor-default text-text-primary overflow-visible"
+    >
       {/* 待办事项小组件 */}
-      <div className="relative group" onMouseEnter={onMouseEnterOtherWidget}>
+      <div 
+        ref={(el) => { itemRefs.current[0] = el; }}
+        className="relative group will-change-transform" 
+        onMouseEnter={onMouseEnterOtherWidget}
+      >
         <button
           onClick={onToggleTodo}
           className="p-2 rounded-full text-text-secondary hover:text-text-primary hover:bg-input-bg transition-all duration-200 active:scale-95 flex items-center justify-center cursor-pointer"
@@ -110,7 +179,11 @@ export function TopDock({
       <div className="w-[1px] h-4 bg-widget-border" />
 
       {/* 随机壁纸小组件 */}
-      <div className="relative group" onMouseEnter={onMouseEnterOtherWidget}>
+      <div 
+        ref={(el) => { itemRefs.current[1] = el; }}
+        className="relative group will-change-transform" 
+        onMouseEnter={onMouseEnterOtherWidget}
+      >
         <button
           onClick={handleRandomWallpaperClick}
           className="p-2 rounded-full text-text-secondary hover:text-text-primary hover:bg-input-bg transition-all duration-200 active:scale-95 flex items-center justify-center cursor-pointer"
@@ -131,7 +204,12 @@ export function TopDock({
       <div className="w-[1px] h-4 bg-widget-border" />
 
       {/* 快速主题切换小组件 */}
-      <div className="relative group" onMouseEnter={onMouseEnterTheme} onMouseLeave={onMouseLeaveTheme}>
+      <div 
+        ref={(el) => { itemRefs.current[2] = el; }}
+        className="relative group will-change-transform" 
+        onMouseEnter={onMouseEnterTheme} 
+        onMouseLeave={onMouseLeaveTheme}
+      >
         <button
           onClick={onToggleTheme}
           className="p-2 rounded-full text-text-secondary hover:text-text-primary hover:bg-input-bg transition-all duration-200 active:scale-95 flex items-center justify-center cursor-pointer"
@@ -154,7 +232,11 @@ export function TopDock({
       <div className="w-[1px] h-4 bg-widget-border" />
 
       {/* 专注番茄时钟小组件 */}
-      <div className="relative group" onMouseEnter={onMouseEnterOtherWidget}>
+      <div 
+        ref={(el) => { itemRefs.current[3] = el; }}
+        className="relative group will-change-transform" 
+        onMouseEnter={onMouseEnterOtherWidget}
+      >
         <div 
           onClick={handleTimerToggle}
           className={`flex items-center gap-1.5 px-2 py-1 rounded-full cursor-pointer transition-all duration-300 select-none ${

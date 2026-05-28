@@ -181,6 +181,8 @@ export default function App() {
             onMouseLeaveTheme={handleMouseLeaveTheme}
             onMouseEnterOtherWidget={handleMouseEnterOtherWidget}
             isHoveringBrightness={isHoveringBrightness}
+            dockMaxScale={settings.dockMaxScale}
+            dockEffectRadius={settings.dockEffectRadius}
             brightnessPanel={
               isBrightnessOpen && theme === 'dark' && (
                 <div

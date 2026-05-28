@@ -44,6 +44,8 @@ export function useSettings(
             textSize: data.textSize,
             iconsMarginTop: data.iconsMarginTop,
             iconsMarginX: data.iconsMarginX || 0,
+            dockMaxScale: data.dockMaxScale ?? 1.5,
+            dockEffectRadius: data.dockEffectRadius ?? 120,
           });
           // 单独更新背景图和默认搜索引擎
           if (data.backgroundImage) {

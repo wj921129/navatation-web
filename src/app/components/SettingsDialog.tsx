@@ -19,6 +19,8 @@ interface SettingsDialogProps {
     textSize: number;
     iconsMarginTop: number;
     iconsMarginX: number;
+    dockMaxScale?: number;
+    dockEffectRadius?: number;
   };
   backgroundImage: string;
   currentTheme: string;
@@ -374,6 +376,41 @@ export function SettingsDialog({ isOpen, onClose, onSave, onPreview, settings, b
                 max="18"
                 value={draftSettings.textSize}
                 onChange={(e) => handleChange('textSize', Number(e.target.value))}
+                className="w-full h-1.5 bg-gray-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
+              />
+            </div>
+          </div>
+
+          {/* 顶部小组件交互设置 */}
+          <div className="space-y-3">
+            <h3 className="text-sm text-gray-900 dark:text-gray-100 font-medium">顶部小组件交互</h3>
+
+            <div>
+              <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
+                最大放大倍数: {draftSettings.dockMaxScale ?? 1.5}x
+              </label>
+              <input
+                type="range"
+                min="1.0"
+                max="2.5"
+                step="0.1"
+                value={draftSettings.dockMaxScale ?? 1.5}
+                onChange={(e) => handleChange('dockMaxScale', Number(e.target.value))}
+                className="w-full h-1.5 bg-gray-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">
+                触发影响半径: {draftSettings.dockEffectRadius ?? 120}px
+              </label>
+              <input
+                type="range"
+                min="50"
+                max="300"
+                step="10"
+                value={draftSettings.dockEffectRadius ?? 120}
+                onChange={(e) => handleChange('dockEffectRadius', Number(e.target.value))}
                 className="w-full h-1.5 bg-gray-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
               />
             </div>
