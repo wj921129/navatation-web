@@ -1,4 +1,4 @@
-import { X, Upload, Loader2, Check, Link } from 'lucide-react';
+import { X, Upload, Loader2, Check, Link, RotateCw } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { navService } from '../services/nav-service';
 
@@ -91,12 +91,13 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
   }, [shortcut]);
 
   // 触发网址图标搜索的核心逻辑
-  const triggerSearch = (currentUrl: string) => {
+  const triggerSearch = (currentUrl: string, force: boolean = false) => {
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
     }
     const targetUrl = currentUrl.trim();
-    if (!targetUrl || targetUrl === shortcut.url) {
+    // 只有在非强制刷新时，才拦截 targetUrl === shortcut.url
+    if (!targetUrl || (!force && targetUrl === shortcut.url)) {
       setFaviconStatus('idle');
       setDetectedIcons([]);
       return;
@@ -288,7 +289,7 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
                       }
                     }}
                     placeholder="https://example.com/icon.png"
-                    className="w-full px-4 py-3 pr-10 bg-background border border-border rounded-xl text-foreground outline-none focus:border-blue-500 focus:bg-card transition-all placeholder-gray-400 dark:placeholder-gray-500"
+                    className="w-full px-4 py-3 pr-10 bg-background border border-border rounded-xl text-foreground outline-none focus:border-blue-500 focus:bg-card transition-all placeholder-gray-400 dark:placeholder-gray-500 h-[46px]"
                   />
                   {(faviconStatus === 'loading' || faviconStatus === 'uploading') && (
                     <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-500 animate-spin" />
@@ -300,7 +301,18 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
                     <Link className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   )}
                 </div>
-                <label className={`px-4 py-3 rounded-xl cursor-pointer flex items-center gap-2 transition-colors ${
+
+                <button
+                  type="button"
+                  onClick={() => triggerSearch(url, true)}
+                  disabled={!isValidDomainOrUrl(url) || faviconStatus === 'loading' || faviconStatus === 'uploading'}
+                  className="p-3 bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-700 dark:text-gray-300 rounded-xl flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer h-[46px] w-[46px] flex-shrink-0"
+                  title="重新检测网址图标"
+                >
+                  <RotateCw className={`w-4 h-4 ${faviconStatus === 'loading' ? 'animate-spin' : ''}`} />
+                </button>
+
+                <label className={`px-4 py-3 rounded-xl cursor-pointer flex items-center gap-2 transition-colors h-[46px] flex-shrink-0 ${
                   faviconStatus === 'uploading'
                     ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-500 dark:text-blue-400 cursor-not-allowed'
                     : 'bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-700 dark:text-gray-300'
@@ -310,7 +322,7 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
                   ) : (
                     <Upload className="w-4 h-4" />
                   )}
-                  <span className="text-sm">{faviconStatus === 'uploading' ? '上传中...' : '上传'}</span>
+                  <span className="text-sm">{faviconStatus === 'uploading' ? '上传中' : '上传'}</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -323,40 +335,45 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
               
               {/* 实时图标预览与选择 */}
               {detectedIcons.length > 0 && (
-                <div className="mt-3 flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-neutral-800">
-                  {detectedIcons.map((iconUrl, idx) => (
-                    <button
-                      key={idx}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setIconValue(iconUrl);
-                        setIconType(iconUrl.includes('/uploads/') ? 'CUSTOM_UPLOAD' : 'FAVICON');
-                      }}
-                      className={`w-12 h-12 flex-shrink-0 bg-card shadow-sm border rounded-xl flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
-                        iconValue === iconUrl && showImagePreview ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-border hover:border-gray-400 dark:hover:border-gray-500'
-                      }`}
-                    >
-                      <img
-                        src={iconUrl}
-                        alt="Icon Option"
-                        className="w-6 h-6 object-contain"
-                      />
-                    </button>
-                  ))}
-                  {showImagePreview && iconValue && (
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setIconType('BUILTIN');
-                        setIconValue('Link');
-                        setDetectedIcons([]);
-                      }}
-                      className="w-12 h-12 flex-shrink-0 bg-red-50/50 dark:bg-red-950/20 text-red-500 rounded-xl flex items-center justify-center hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors cursor-pointer"
-                      title="清除图标"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  )}
+                <div className="mt-3">
+                  <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-neutral-800">
+                    {detectedIcons.map((iconUrl, idx) => (
+                      <button
+                        key={idx}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setIconValue(iconUrl);
+                          setIconType(iconUrl.includes('/uploads/') ? 'CUSTOM_UPLOAD' : 'FAVICON');
+                        }}
+                        className={`w-12 h-12 flex-shrink-0 bg-card shadow-sm border rounded-xl flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
+                          iconValue === iconUrl && showImagePreview ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-border hover:border-gray-400 dark:hover:border-gray-500'
+                        }`}
+                      >
+                        <img
+                          src={iconUrl}
+                          alt="Icon Option"
+                          className="w-6 h-6 object-contain"
+                        />
+                      </button>
+                    ))}
+                    {showImagePreview && iconValue && (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setIconType('BUILTIN');
+                          setIconValue('Link');
+                          setDetectedIcons([]);
+                        }}
+                        className="w-12 h-12 flex-shrink-0 bg-red-50/50 dark:bg-red-950/20 text-red-500 rounded-xl flex items-center justify-center hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors cursor-pointer"
+                        title="清除图标"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                  <p className="mt-1.5 text-xs text-red-500 dark:text-red-400 font-medium flex items-center gap-1">
+                    <span>*</span> 提示：可点击上方检测出的图标进行切换选择
+                  </p>
                 </div>
               )}
               {/* 当没有列表但存在自定义图标（例如刚打开弹窗回显） */}

@@ -633,39 +633,44 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                           </label>
                         </div>
                         {detectedIcons.length > 0 && (
-                          <div className="mt-3 flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-neutral-800">
-                            {detectedIcons.map((url, idx) => (
-                              <button
-                                key={idx}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  setCustomIconUrl(url);
-                                }}
-                                className={`w-12 h-12 flex-shrink-0 bg-card shadow-sm border rounded-xl flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
-                                  customIconUrl === url ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-border hover:border-gray-400 dark:hover:border-gray-500'
-                                }`}
-                              >
-                                <img
-                                  src={url}
-                                  alt="Icon Option"
-                                  className="w-6 h-6 object-contain"
-                                />
-                              </button>
-                            ))}
-                            {customIconUrl && (
-                              <button
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  setCustomIconUrl('');
-                                  setDetectedIcons([]);
-                                  setIconFromUpload(false);
-                                }}
-                                className="w-12 h-12 flex-shrink-0 bg-red-50/50 dark:bg-red-950/20 text-red-500 rounded-xl flex items-center justify-center hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors cursor-pointer"
-                                title="清除图标"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            )}
+                          <div className="mt-3">
+                            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-neutral-800">
+                              {detectedIcons.map((url, idx) => (
+                                <button
+                                  key={idx}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setCustomIconUrl(url);
+                                  }}
+                                  className={`w-12 h-12 flex-shrink-0 bg-card shadow-sm border rounded-xl flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
+                                    customIconUrl === url ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-border hover:border-gray-400 dark:hover:border-gray-500'
+                                  }`}
+                                >
+                                  <img
+                                    src={url}
+                                    alt="Icon Option"
+                                    className="w-6 h-6 object-contain"
+                                  />
+                                </button>
+                              ))}
+                              {customIconUrl && (
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setCustomIconUrl('');
+                                    setDetectedIcons([]);
+                                    setIconFromUpload(false);
+                                  }}
+                                  className="w-12 h-12 flex-shrink-0 bg-red-50/50 dark:bg-red-950/20 text-red-500 rounded-xl flex items-center justify-center hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors cursor-pointer"
+                                  title="清除图标"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+                            <p className="mt-1.5 text-xs text-red-500 dark:text-red-400 font-medium flex items-center gap-1">
+                              <span>*</span> 提示：可点击上方检测出的图标进行切换选择
+                            </p>
                           </div>
                         )}
                         {uploadError && (
