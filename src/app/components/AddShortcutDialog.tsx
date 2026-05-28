@@ -121,6 +121,47 @@ const isValidDomainOrUrl = (input: string): boolean => {
 };
 
 /**
+ * 根据域名后缀智能获取防抖延迟时间，防止后缀未输入完毕就急于触发搜索。
+ */
+const getDebounceDelay = (input: string): number => {
+  const url = input.trim();
+  if (!url) return 500;
+  
+  let host = '';
+  try {
+    const fullUrl = url.startsWith('http') ? url : `https://${url}`;
+    const parsed = new URL(fullUrl);
+    host = parsed.host;
+  } catch {
+    return 500;
+  }
+  
+  const parts = host.split('.');
+  if (parts.length < 2) return 500;
+  
+  const tld = parts[parts.length - 1].toLowerCase();
+  
+  // 著名 3+ 位域名的 2 位未完成前缀，如 .co -> .com, .ne -> .net, .or -> .org 等
+  const incompletePrefixes = ['co', 'ne', 'or', 'ed', 'go'];
+  
+  // 常见已输入完的后缀
+  const commonCompletedTlds = ['com', 'net', 'org', 'edu', 'gov', 'cn', 'cc', 'io', 'me', 'tv', 'so', 'info', 'xyz', 'top', 'vip'];
+  
+  if (incompletePrefixes.includes(tld)) {
+    // 极有可能是正在输入 com, net, org 等，给予 1500ms 充足的输入缓冲时间
+    return 1500; 
+  }
+  
+  if (commonCompletedTlds.includes(tld)) {
+    // 常见已完成的顶级域名，快速响应
+    return 500;
+  }
+  
+  // 其他域名格式，给予 1000ms 缓冲
+  return 1000;
+};
+
+/**
  * 添加捷径对话框组件。
  * 支持浏览并选择推荐网站，以及输入链接与图标来自定义创建捷径。
  */
@@ -138,13 +179,13 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
   const [detectedIcons, setDetectedIcons] = useState<string[]>([]);
   const debounceTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  // 当用户输入网址时，防抖并并行多路检测网站图标
-  useEffect(() => {
+  // 触发网址图标搜索的核心逻辑
+  const triggerSearch = (url: string) => {
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
     }
-    const url = customUrl.trim();
-    if (!url) {
+    const targetUrl = url.trim();
+    if (!targetUrl) {
       setFaviconStatus('idle');
       setUploadError(null);
       setDetectedIcons([]);
@@ -153,12 +194,12 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
     }
 
     // 若域名格式不完整或不合法，不进行搜索
-    if (!isValidDomainOrUrl(url)) {
+    if (!isValidDomainOrUrl(targetUrl)) {
       setFaviconStatus('idle');
       return;
     }
 
-    const fullUrl = url.startsWith('http') ? url : `https://${url}`;
+    const fullUrl = targetUrl.startsWith('http') ? targetUrl : `https://${targetUrl}`;
     
     let host = '';
     try {
@@ -191,26 +232,52 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
       });
     };
 
+    // 1. 瞬时响应：Google CDN
+    const googleCdn = `https://www.google.com/s2/favicons?sz=64&domain=${host}`;
+    handleIconResult(googleCdn);
+
+    // 2. 备用 CDN：DuckDuckGo
+    const ddgCdn = `https://icons.duckduckgo.com/ip3/${host}.ico`;
+    const img = new Image();
+    img.onload = () => handleIconResult(ddgCdn);
+    img.src = ddgCdn;
+
+    // 3. 后端深度爬虫抓取原生图标
+    navService.fetchFavicon(fullUrl).then(res => {
+      if (res.code === 200 && res.data?.faviconUrl) {
+        handleIconResult(res.data.faviconUrl);
+      }
+    }).catch(() => {
+      // 后台错误直接忽略
+    });
+  };
+
+  // 当用户输入网址时，防抖并并行多路检测网站图标
+  useEffect(() => {
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+    const url = customUrl.trim();
+    if (!url) {
+      setFaviconStatus('idle');
+      setUploadError(null);
+      setDetectedIcons([]);
+      setCustomIconUrl('');
+      return;
+    }
+
+    // 若域名格式不完整或不合法，保持静默，状态设为 idle
+    if (!isValidDomainOrUrl(url)) {
+      setFaviconStatus('idle');
+      return;
+    }
+
+    // 智能获取延迟时间，防止后缀（如 .co -> .com）未打完即触发搜索
+    const delay = getDebounceDelay(url);
+
     debounceTimer.current = setTimeout(() => {
-      // 1. 瞬时响应：Google CDN
-      const googleCdn = `https://www.google.com/s2/favicons?sz=64&domain=${host}`;
-      handleIconResult(googleCdn);
-
-      // 2. 备用 CDN：DuckDuckGo
-      const ddgCdn = `https://icons.duckduckgo.com/ip3/${host}.ico`;
-      const img = new Image();
-      img.onload = () => handleIconResult(ddgCdn);
-      img.src = ddgCdn;
-
-      // 3. 后端深度爬虫抓取原生图标
-      navService.fetchFavicon(fullUrl).then(res => {
-        if (res.code === 200 && res.data?.faviconUrl) {
-          handleIconResult(res.data.faviconUrl);
-        }
-      }).catch(() => {
-        // 后台错误直接忽略
-      });
-    }, 500);
+      triggerSearch(url);
+    }, delay);
 
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
@@ -498,6 +565,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                           type="text"
                           value={customUrl}
                           onChange={(e) => setCustomUrl(e.target.value)}
+                          onBlur={() => triggerSearch(customUrl)}
                           placeholder="https://example.com"
                           className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground outline-none focus:border-blue-500 focus:bg-card transition-all placeholder-gray-400 dark:placeholder-gray-500"
                         />

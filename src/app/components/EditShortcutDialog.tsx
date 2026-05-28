@@ -28,6 +28,47 @@ const isValidDomainOrUrl = (input: string): boolean => {
   return domainRegex.test(url);
 };
 
+/**
+ * 根据域名后缀智能获取防抖延迟时间，防止后缀未输入完毕就急于触发搜索。
+ */
+const getDebounceDelay = (input: string): number => {
+  const url = input.trim();
+  if (!url) return 500;
+  
+  let host = '';
+  try {
+    const fullUrl = url.startsWith('http') ? url : `https://${url}`;
+    const parsed = new URL(fullUrl);
+    host = parsed.host;
+  } catch {
+    return 500;
+  }
+  
+  const parts = host.split('.');
+  if (parts.length < 2) return 500;
+  
+  const tld = parts[parts.length - 1].toLowerCase();
+  
+  // 著名 3+ 位域名的 2 位未完成前缀，如 .co -> .com, .ne -> .net, .or -> .org 等
+  const incompletePrefixes = ['co', 'ne', 'or', 'ed', 'go'];
+  
+  // 常见已输入完的后缀
+  const commonCompletedTlds = ['com', 'net', 'org', 'edu', 'gov', 'cn', 'cc', 'io', 'me', 'tv', 'so', 'info', 'xyz', 'top', 'vip'];
+  
+  if (incompletePrefixes.includes(tld)) {
+    // 极有可能是正在输入 com, net, org 等，给予 1500ms 充足的输入缓冲时间
+    return 1500; 
+  }
+  
+  if (commonCompletedTlds.includes(tld)) {
+    // 常见已完成的顶级域名，快速响应
+    return 500;
+  }
+  
+  // 其他域名格式，给予 1000ms 缓冲
+  return 1000;
+};
+
 export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditShortcutDialogProps) {
   const [name, setName] = useState(shortcut.name);
   const [url, setUrl] = useState(shortcut.url);
@@ -49,25 +90,25 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
     setDetectedIcons([]);
   }, [shortcut]);
 
-  // 当网址链接改变且不等于原网址时，防抖并并行多路检测网站图标
-  useEffect(() => {
+  // 触发网址图标搜索的核心逻辑
+  const triggerSearch = (currentUrl: string) => {
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
     }
-    const currentUrl = url.trim();
-    if (!currentUrl || currentUrl === shortcut.url) {
+    const targetUrl = currentUrl.trim();
+    if (!targetUrl || targetUrl === shortcut.url) {
       setFaviconStatus('idle');
       setDetectedIcons([]);
       return;
     }
 
     // 若域名格式不完整或不合法，不进行搜索
-    if (!isValidDomainOrUrl(currentUrl)) {
+    if (!isValidDomainOrUrl(targetUrl)) {
       setFaviconStatus('idle');
       return;
     }
     
-    const fullUrl = currentUrl.startsWith('http') ? currentUrl : `https://${currentUrl}`;
+    const fullUrl = targetUrl.startsWith('http') ? targetUrl : `https://${targetUrl}`;
     
     let host = '';
     try {
@@ -96,21 +137,48 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
       });
     };
 
+    // 1. 瞬时响应：Google CDN
+    const googleCdn = `https://www.google.com/s2/favicons?sz=64&domain=${host}`;
+    handleIconResult(googleCdn);
+
+    // 2. 备用 CDN：DuckDuckGo
+    const ddgCdn = `https://icons.duckduckgo.com/ip3/${host}.ico`;
+    const img = new Image();
+    img.onload = () => handleIconResult(ddgCdn);
+    img.src = ddgCdn;
+
+    // 3. 后端抓取
+    navService.fetchFavicon(fullUrl).then(res => {
+      if (res.code === 200 && res.data?.faviconUrl) {
+        handleIconResult(res.data.faviconUrl);
+      }
+    }).catch(() => {});
+  };
+
+  // 当网址链接改变且不等于原网址时，防抖并并行多路检测网站图标
+  useEffect(() => {
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+    const currentUrl = url.trim();
+    if (!currentUrl || currentUrl === shortcut.url) {
+      setFaviconStatus('idle');
+      setDetectedIcons([]);
+      return;
+    }
+
+    // 若域名格式不完整或不合法，保持静默，状态设为 idle
+    if (!isValidDomainOrUrl(currentUrl)) {
+      setFaviconStatus('idle');
+      return;
+    }
+
+    // 智能获取延迟时间，防止后缀（如 .co -> .com）未打完即触发搜索
+    const delay = getDebounceDelay(currentUrl);
+
     debounceTimer.current = setTimeout(() => {
-      const googleCdn = `https://www.google.com/s2/favicons?sz=64&domain=${host}`;
-      handleIconResult(googleCdn);
-
-      const ddgCdn = `https://icons.duckduckgo.com/ip3/${host}.ico`;
-      const img = new Image();
-      img.onload = () => handleIconResult(ddgCdn);
-      img.src = ddgCdn;
-
-      navService.fetchFavicon(fullUrl).then(res => {
-        if (res.code === 200 && res.data?.faviconUrl) {
-          handleIconResult(res.data.faviconUrl);
-        }
-      }).catch(() => {});
-    }, 500);
+      triggerSearch(currentUrl);
+    }, delay);
 
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
@@ -184,6 +252,7 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
                 type="text"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
+                onBlur={() => triggerSearch(url)}
                 placeholder="https://example.com"
                 className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground outline-none focus:border-blue-500 focus:bg-card transition-all placeholder-gray-400 dark:placeholder-gray-500"
               />
