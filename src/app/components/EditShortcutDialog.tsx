@@ -23,6 +23,7 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
   
   const [faviconStatus, setFaviconStatus] = useState<'idle' | 'loading' | 'detected' | 'error' | 'uploading'>('idle');
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [detectedIcons, setDetectedIcons] = useState<string[]>([]);
   const debounceTimer = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
@@ -32,9 +33,10 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
     setIconValue(shortcut.iconValue || 'Link');
     setFaviconStatus('idle');
     setUploadError(null);
+    setDetectedIcons([]);
   }, [shortcut]);
 
-  // 当网址链接改变且不等于原网址时，防抖并渐进式检测网站图标
+  // 当网址链接改变且不等于原网址时，防抖并并行多路检测网站图标
   useEffect(() => {
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
@@ -42,6 +44,7 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
     const currentUrl = url.trim();
     if (!currentUrl || currentUrl === shortcut.url) {
       setFaviconStatus('idle');
+      setDetectedIcons([]);
       return;
     }
     
@@ -53,27 +56,42 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
       host = parsed.host;
     } catch {
       setFaviconStatus('idle');
+      setDetectedIcons([]);
       return;
     }
 
-    // 1. 瞬时响应：直接基于域名生成 Google 64px 高清 Favicon CDN 地址进行立刻预览
-    const cdnFaviconUrl = `https://www.google.com/s2/favicons?sz=64&domain=${host}`;
-    setIconValue(cdnFaviconUrl);
-    setIconType('FAVICON');
-    setFaviconStatus('detected');
+    setFaviconStatus('loading');
+    setDetectedIcons([]);
 
-    // 2. 异步升级：后台请求后端 Jsoup 解析器以获取更高清的真实图标
+    const handleIconResult = (iconUrl: string) => {
+      if (!iconUrl) return;
+      setDetectedIcons(prev => {
+        if (prev.includes(iconUrl)) return prev;
+        const newIcons = [...prev, iconUrl];
+        if (newIcons.length === 1) {
+          setIconValue(iconUrl);
+          setIconType('FAVICON');
+          setFaviconStatus('detected');
+        }
+        return newIcons;
+      });
+    };
+
     debounceTimer.current = setTimeout(() => {
+      const googleCdn = `https://www.google.com/s2/favicons?sz=64&domain=${host}`;
+      handleIconResult(googleCdn);
+
+      const ddgCdn = `https://icons.duckduckgo.com/ip3/${host}.ico`;
+      const img = new Image();
+      img.onload = () => handleIconResult(ddgCdn);
+      img.src = ddgCdn;
+
       navService.fetchFavicon(fullUrl).then(res => {
         if (res.code === 200 && res.data?.faviconUrl) {
-          // 若后端解析到了更具体的真实图标，平滑升级更新它
-          setIconValue(res.data.faviconUrl);
-          setIconType('FAVICON');
+          handleIconResult(res.data.faviconUrl);
         }
-      }).catch(() => {
-        // 后台错误直接忽略，保持使用已渲染好的 CDN 预览
-      });
-    }, 800);
+      }).catch(() => {});
+    }, 500);
 
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
@@ -91,8 +109,10 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
     try {
       const res = await navService.uploadIcon(file);
       if (res.code === 200 && res.data?.iconUrl) {
-        setIconValue(res.data.iconUrl);
+        const url = res.data.iconUrl;
+        setIconValue(url);
         setIconType('CUSTOM_UPLOAD');
+        setDetectedIcons(prev => [url, ...prev.filter(u => u !== url)]);
         setFaviconStatus('detected');
       } else {
         setUploadError(res.message || '上传失败');
@@ -213,8 +233,46 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
                 </label>
               </div>
               
-              {/* 实时图标预览 */}
-              {showImagePreview && iconValue && (
+              {/* 实时图标预览与选择 */}
+              {detectedIcons.length > 0 && (
+                <div className="mt-3 flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-neutral-800">
+                  {detectedIcons.map((iconUrl, idx) => (
+                    <button
+                      key={idx}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setIconValue(iconUrl);
+                        setIconType(iconUrl.includes('/uploads/') ? 'CUSTOM_UPLOAD' : 'FAVICON');
+                      }}
+                      className={`w-12 h-12 flex-shrink-0 bg-card shadow-sm border rounded-xl flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
+                        iconValue === iconUrl && showImagePreview ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-border hover:border-gray-400 dark:hover:border-gray-500'
+                      }`}
+                    >
+                      <img
+                        src={iconUrl}
+                        alt="Icon Option"
+                        className="w-6 h-6 object-contain"
+                      />
+                    </button>
+                  ))}
+                  {showImagePreview && iconValue && (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setIconType('BUILTIN');
+                        setIconValue('Link');
+                        setDetectedIcons([]);
+                      }}
+                      className="w-12 h-12 flex-shrink-0 bg-red-50/50 dark:bg-red-950/20 text-red-500 rounded-xl flex items-center justify-center hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors cursor-pointer"
+                      title="清除图标"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              )}
+              {/* 当没有列表但存在自定义图标（例如刚打开弹窗回显） */}
+              {detectedIcons.length === 0 && showImagePreview && iconValue && (
                 <div className="mt-3 flex items-center gap-3">
                   <div className="w-12 h-12 flex-shrink-0 bg-card border border-border rounded-xl flex items-center justify-center overflow-hidden">
                     <img
@@ -231,7 +289,7 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
                         setIconValue('Link');
                         setFaviconStatus('idle');
                       }}
-                      className="text-xs text-red-500 hover:text-red-600 mt-1 block font-medium"
+                      className="text-xs text-red-500 hover:text-red-600 mt-1 block font-medium cursor-pointer"
                     >
                       移除自定义图标
                     </button>

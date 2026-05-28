@@ -123,9 +123,10 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
   const [faviconStatus, setFaviconStatus] = useState<'idle' | 'loading' | 'detected' | 'error' | 'uploading'>('idle');
   const [iconFromUpload, setIconFromUpload] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [detectedIcons, setDetectedIcons] = useState<string[]>([]);
   const debounceTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  // 当用户输入网址时，防抖并渐进式检测网站图标
+  // 当用户输入网址时，防抖并并行多路检测网站图标
   useEffect(() => {
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
@@ -134,6 +135,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
     if (!url) {
       setFaviconStatus('idle');
       setUploadError(null);
+      setDetectedIcons([]);
       return;
     }
     const fullUrl = url.startsWith('http') ? url : `https://${url}`;
@@ -145,26 +147,50 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
     } catch {
       setFaviconStatus('idle');
       setUploadError(null);
+      setDetectedIcons([]);
       return;
     }
 
-    // 1. 瞬时响应：直接基于域名生成 Google 64px 高清 Favicon CDN 地址进行立刻预览
-    const cdnFaviconUrl = `https://www.google.com/s2/favicons?sz=64&domain=${host}`;
-    setCustomIconUrl(cdnFaviconUrl);
-    setCustomIconFile(null);
-    setFaviconStatus('detected');
+    setFaviconStatus('loading');
+    setDetectedIcons([]);
+    setCustomIconUrl('');
 
-    // 2. 异步升级：后台请求后端 Jsoup 解析器以获取更高清的真实图标
+    // 处理并去重追加图标的函数
+    const handleIconResult = (iconUrl: string) => {
+      if (!iconUrl) return;
+      setDetectedIcons(prev => {
+        if (prev.includes(iconUrl)) return prev;
+        const newIcons = [...prev, iconUrl];
+        // 竞速：第一个有效到达的图标作为默认选中
+        if (newIcons.length === 1) {
+          setCustomIconUrl(iconUrl);
+          setCustomIconFile(null);
+          setFaviconStatus('detected');
+        }
+        return newIcons;
+      });
+    };
+
     debounceTimer.current = setTimeout(() => {
+      // 1. 瞬时响应：Google CDN
+      const googleCdn = `https://www.google.com/s2/favicons?sz=64&domain=${host}`;
+      handleIconResult(googleCdn);
+
+      // 2. 备用 CDN：DuckDuckGo
+      const ddgCdn = `https://icons.duckduckgo.com/ip3/${host}.ico`;
+      const img = new Image();
+      img.onload = () => handleIconResult(ddgCdn);
+      img.src = ddgCdn;
+
+      // 3. 后端深度爬虫抓取原生图标
       navService.fetchFavicon(fullUrl).then(res => {
         if (res.code === 200 && res.data?.faviconUrl) {
-          // 若后端解析到了更具体的真实图标，平滑升级更新它
-          setCustomIconUrl(res.data.faviconUrl);
+          handleIconResult(res.data.faviconUrl);
         }
       }).catch(() => {
-        // 后台错误直接忽略，保持使用已渲染好的 CDN 预览
+        // 后台错误直接忽略
       });
-    }, 800); // 稍微加长后台防抖，避免高频打字时增加无谓的请求
+    }, 500);
 
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
@@ -182,6 +208,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
       setFaviconStatus('idle');
       setIconFromUpload(false);
       setUploadError(null);
+      setDetectedIcons([]);
       setActiveTab('recommended'); // 默认重置回推荐页签
 
       navService.getRecommended().then(res => {
@@ -220,7 +247,9 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
     try {
       const res = await navService.uploadIcon(file);
       if (res.code === 200 && res.data?.iconUrl) {
-        setCustomIconUrl(res.data.iconUrl);
+        const url = res.data.iconUrl;
+        setCustomIconUrl(url);
+        setDetectedIcons(prev => [url, ...prev.filter(u => u !== url)]);
         setIconFromUpload(true);
         setFaviconStatus('detected');
       } else {
@@ -514,26 +543,43 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                               disabled={faviconStatus === 'uploading'}
                             />
                           </label>
-                          {customIconUrl && (
-                            <div className="w-12 h-12 flex-shrink-0 bg-card shadow-sm border border-border rounded-full flex items-center justify-center overflow-hidden relative group">
-                              <img
-                                src={customIconUrl}
-                                alt="Preview"
-                                style={{ width: '50%', height: '50%', objectFit: 'contain' }}
-                              />
+                        </div>
+                        {detectedIcons.length > 0 && (
+                          <div className="mt-3 flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-neutral-800">
+                            {detectedIcons.map((url, idx) => (
+                              <button
+                                key={idx}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setCustomIconUrl(url);
+                                }}
+                                className={`w-12 h-12 flex-shrink-0 bg-card shadow-sm border rounded-xl flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
+                                  customIconUrl === url ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-border hover:border-gray-400 dark:hover:border-gray-500'
+                                }`}
+                              >
+                                <img
+                                  src={url}
+                                  alt="Icon Option"
+                                  className="w-6 h-6 object-contain"
+                                />
+                              </button>
+                            ))}
+                            {customIconUrl && (
                               <button
                                 onClick={(e) => {
                                   e.preventDefault();
                                   setCustomIconUrl('');
+                                  setDetectedIcons([]);
                                   setIconFromUpload(false);
                                 }}
-                                className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                className="w-12 h-12 flex-shrink-0 bg-red-50/50 dark:bg-red-950/20 text-red-500 rounded-xl flex items-center justify-center hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors cursor-pointer"
+                                title="清除图标"
                               >
-                                <X className="w-4 h-4 text-white" />
+                                <Trash2 className="w-4 h-4" />
                               </button>
-                            </div>
-                          )}
-                        </div>
+                            )}
+                          </div>
+                        )}
                         {uploadError && (
                           <p className="mt-2 text-xs text-red-500">{uploadError}</p>
                         )}
