@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { settingsService } from '../services/settings-service';
 import { DEFAULT_SETTINGS, DEFAULT_WALLPAPER } from '../../config/app.config';
 
@@ -12,7 +12,19 @@ export function useSettings(
   const [backgroundImage, setBackgroundImage] = useState(() => {
     return localStorage.getItem('navatation_wallpaper') || DEFAULT_WALLPAPER;
   });
-  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+  
+  const [settings, setSettings] = useState(() => {
+    const local = localStorage.getItem('navatation_settings');
+    if (local) {
+      try {
+        return { ...DEFAULT_SETTINGS, ...JSON.parse(local) };
+      } catch {
+        return DEFAULT_SETTINGS;
+      }
+    }
+    return DEFAULT_SETTINGS;
+  });
+
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // 草稿备份
@@ -31,8 +43,7 @@ export function useSettings(
         const res = await settingsService.getSettings();
         if (res.code === 200 && res.data) {
           const data = res.data;
-          // 更新前端对应的主题与尺寸配置
-          setSettings({
+          const serverSettings = {
             searchBoxWidth: data.searchBoxWidth,
             searchBoxHeight: data.searchBoxHeight,
             searchBoxMarginTop: data.searchBoxMarginTop,
@@ -44,7 +55,11 @@ export function useSettings(
             textSize: data.textSize,
             iconsMarginTop: data.iconsMarginTop,
             iconsMarginX: data.iconsMarginX || 0,
-          });
+          };
+          // 更新前端对应的主题与尺寸配置并缓存至本地
+          setSettings(serverSettings);
+          localStorage.setItem('navatation_settings', JSON.stringify(serverSettings));
+          
           // 单独更新背景图和默认搜索引擎
           if (data.backgroundImage) {
             setBackgroundImage(data.backgroundImage);
@@ -60,6 +75,26 @@ export function useSettings(
       }
     }
   }, [authState.isLoggedIn, setSearchEngine]);
+
+  // 当登录状态改变时，自动拉取后端配置，并在登出时回滚至本地或默认配置
+  useEffect(() => {
+    if (authState.isLoggedIn) {
+      fetchSettings();
+    } else {
+      const local = localStorage.getItem('navatation_settings');
+      if (local) {
+        try {
+          setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(local) });
+        } catch {
+          setSettings(DEFAULT_SETTINGS);
+        }
+      } else {
+        setSettings(DEFAULT_SETTINGS);
+      }
+      const localWallpaper = localStorage.getItem('navatation_wallpaper');
+      setBackgroundImage(localWallpaper || DEFAULT_WALLPAPER);
+    }
+  }, [authState.isLoggedIn, fetchSettings]);
 
   /**
    * 打开设置面板，备份当前生效状态以供取消时回滚。
@@ -95,8 +130,9 @@ export function useSettings(
    * 支持本地草稿批量保存及后端持久化。
    */
   const handleSaveSettings = useCallback((draftSettings: any, draftBackgroundImage: string, draftTheme: string) => {
-    // 1. 同步更新前端生效状态
+    // 1. 同步更新前端生效状态与本地缓存
     setSettings(draftSettings);
+    localStorage.setItem('navatation_settings', JSON.stringify(draftSettings));
     setBackgroundImage(draftBackgroundImage);
     localStorage.setItem('navatation_wallpaper', draftBackgroundImage);
     setTheme(draftTheme);
