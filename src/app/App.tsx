@@ -196,7 +196,7 @@ export default function App() {
                       triggerCloseBrightness();
                     }, 1000);
                   }}
-                  className={`absolute top-[68px] left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 px-4 py-2.5 rounded-full bg-black/45 border border-white/10 shadow-xl backdrop-blur-md text-white select-none cursor-default whitespace-nowrap ${
+                  className={`absolute top-[71px] left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 px-4 py-2.5 rounded-full bg-black/45 border border-white/10 shadow-xl backdrop-blur-md text-white select-none cursor-default whitespace-nowrap ${
                     isBrightnessClosing ? 'brightness-panel-exit' : 'brightness-panel-enter'
                   }`}
                 >
