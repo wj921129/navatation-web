@@ -13,13 +13,14 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useTheme } from 'next-themes';
 import { authStore } from './stores/auth-store';
-import { useClocks } from './hooks/useClocks';
+import { useWidgets } from './hooks/useWidgets';
 import { useClockMenu } from './hooks/useClockMenu';
 import ClockWidget from './components/widgets/ClockWidget';
 import { useRef } from 'react';
 import AnalogClock from './components/widgets/AnalogClock';
 import DigitalClock from './components/widgets/DigitalClock';
 import FlipClock from './components/widgets/FlipClock';
+import TraditionalClock from './components/widgets/TraditionalClock';
 
 
 import { SearchBox } from './components/SearchBox';
@@ -89,18 +90,18 @@ export default function App() {
 
   const settingsData = useSettings(authState, theme || 'light', setTheme, searchEngine, setSearchEngine);
   const brightnessData = useBrightness(theme || 'light', setTheme, authState);
-  const clocksData = useClocks(isEditMode);
+  const widgetsData = useWidgets(isEditMode);
   const clockMenuData = useClockMenu();
 
   const {
-    clocks,
-    tempClocks,
-    addClock,
-    removeClock,
-    updateClockPosition,
-    saveClocks,
-    cancelClocks,
-  } = clocksData;
+    widgets,
+    tempWidgets,
+    addWidget,
+    removeWidget,
+    updateWidgetPosition,
+    saveWidgets,
+    cancelWidgets,
+  } = widgetsData;
 
   const {
     isClockOpen,
@@ -118,15 +119,15 @@ export default function App() {
 
   const [activeDraggingId, setActiveDraggingId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const activeDraggingStyleRef = useRef<'analog' | 'digital' | 'flip' | null>(null);
+  const activeDraggingStyleRef = useRef<'analog' | 'digital' | 'flip' | 'traditional' | null>(null);
 
   // Menu drag-and-drop state & refs
-  const [menuDraggingStyle, setMenuDraggingStyle] = useState<'analog' | 'digital' | 'flip' | null>(null);
+  const [menuDraggingStyle, setMenuDraggingStyle] = useState<'analog' | 'digital' | 'flip' | 'traditional' | null>(null);
   const [menuDragPos, setMenuDragPos] = useState({ x: 0, y: 0 });
   const [menuDragHasMoved, setMenuDragHasMoved] = useState(false);
   const menuDragStartPosRef = useRef({ x: 0, y: 0 });
   const menuDragHasMovedRef = useRef(false);
-  const menuDraggingStyleRef = useRef<'analog' | 'digital' | 'flip' | null>(null);
+  const menuDraggingStyleRef = useRef<'analog' | 'digital' | 'flip' | 'traditional' | null>(null);
 
 
   const {
@@ -161,13 +162,13 @@ export default function App() {
   // 统一保存与取消逻辑
   const handleSaveEdits = useCallback(async () => {
     await saveShortcutsEdits();
-    saveClocks();
-  }, [saveShortcutsEdits, saveClocks]);
+    saveWidgets();
+  }, [saveShortcutsEdits, saveWidgets]);
 
   const handleCancelEdits = useCallback(() => {
     cancelShortcutsEdits();
-    cancelClocks();
-  }, [cancelShortcutsEdits, cancelClocks]);
+    cancelWidgets();
+  }, [cancelShortcutsEdits, cancelWidgets]);
 
   // 悬停交互事件融合防重叠
   const handleMouseEnterOtherWidgetCombined = useCallback(() => {
@@ -200,7 +201,7 @@ export default function App() {
 
     let clockWidth = 220;
     let clockHeight = 100;
-    if (style === 'analog') {
+    if (style === 'analog' || style === 'traditional') {
       clockWidth = 160;
       clockHeight = 160;
     } else if (style === 'flip') {
@@ -233,7 +234,7 @@ export default function App() {
       if (distance > 5 || menuDragHasMovedRef.current) {
         let clockWidth = 220;
         let clockHeight = 100;
-        if (style === 'analog') {
+        if (style === 'analog' || style === 'traditional') {
           clockWidth = 160;
           clockHeight = 160;
         } else if (style === 'flip') {
@@ -252,9 +253,9 @@ export default function App() {
 
         const xPercent = (newX / window.innerWidth) * 100;
         const yPercent = (newY / window.innerHeight) * 100;
-        addClock(style, xPercent, yPercent);
+        addWidget('clock', style, xPercent, yPercent);
       } else {
-        addClock(style, 40, 30);
+        addWidget('clock', style, 40, 30);
       }
     }
 
@@ -266,9 +267,9 @@ export default function App() {
 
     window.removeEventListener('pointermove', handleMenuDragMove);
     window.removeEventListener('pointerup', handleMenuDragUp);
-  }, [addClock, triggerCloseClock, handleMenuDragMove]);
+  }, [addWidget, triggerCloseClock, handleMenuDragMove]);
 
-  const handleDragStartFromMenu = useCallback((e: React.PointerEvent<HTMLButtonElement>, style: 'analog' | 'digital' | 'flip') => {
+  const handleDragStartFromMenu = useCallback((e: React.PointerEvent<HTMLButtonElement>, style: 'analog' | 'digital' | 'flip' | 'traditional') => {
     e.preventDefault();
     menuDragStartPosRef.current = { x: e.clientX, y: e.clientY };
     menuDraggingStyleRef.current = style;
@@ -278,7 +279,7 @@ export default function App() {
 
     let clockWidth = 220;
     let clockHeight = 100;
-    if (style === 'analog') {
+    if (style === 'analog' || style === 'traditional') {
       clockWidth = 160;
       clockHeight = 160;
     } else if (style === 'flip') {
@@ -318,7 +319,7 @@ export default function App() {
 
     let clockWidth = 220;
     let clockHeight = 100;
-    if (activeDraggingStyleRef.current === 'analog') {
+    if (activeDraggingStyleRef.current === 'analog' || activeDraggingStyleRef.current === 'traditional') {
       clockWidth = 160;
       clockHeight = 160;
     } else if (activeDraggingStyleRef.current === 'flip') {
@@ -335,8 +336,8 @@ export default function App() {
     const xPercent = (newX / window.innerWidth) * 100;
     const yPercent = (newY / window.innerHeight) * 100;
 
-    updateClockPosition(activeDraggingId, xPercent, yPercent);
-  }, [activeDraggingId, dragOffset, updateClockPosition]);
+    updateWidgetPosition(activeDraggingId, xPercent, yPercent);
+  }, [activeDraggingId, dragOffset, updateWidgetPosition]);
 
   const handlePointerUpGlobal = useCallback(() => {
     setActiveDraggingId(null);
@@ -385,6 +386,22 @@ export default function App() {
             <div className="w-1 h-1 rounded-full bg-red-500 absolute top-[23px] left-[23px]" />
           </div>
           <span className="text-[10px] text-neutral-300 font-light group-hover/btn:text-white">模拟</span>
+        </button>
+
+        {/* Traditional style */}
+        <button
+          onPointerDown={(e) => handleDragStartFromMenu(e, 'traditional')}
+          className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-white/10 transition-colors cursor-grab active:cursor-grabbing group/btn"
+        >
+          <div className="w-12 h-12 rounded-full border-2 border-white/40 group-hover/btn:border-white flex items-center justify-center relative">
+            <span className="text-[8px] font-bold text-neutral-300 group-hover/btn:text-white absolute top-0.5">12</span>
+            <span className="text-[8px] font-bold text-neutral-300 group-hover/btn:text-white absolute bottom-0.5">6</span>
+            <span className="text-[8px] font-bold text-neutral-300 group-hover/btn:text-white absolute left-0.5">9</span>
+            <span className="text-[8px] font-bold text-neutral-300 group-hover/btn:text-white absolute right-0.5">3</span>
+            <div className="w-0.5 h-3 bg-neutral-300 group-hover/btn:bg-white absolute top-[16px] left-[23px] origin-bottom transform rotate-45" />
+            <div className="w-0.5 h-4 bg-neutral-300 group-hover/btn:bg-white absolute top-[12px] left-[23px] origin-bottom transform -rotate-12" />
+          </div>
+          <span className="text-[10px] text-neutral-300 font-light group-hover/btn:text-white">传统</span>
         </button>
 
         {/* Digital style */}
@@ -472,23 +489,25 @@ export default function App() {
           }}
         />
 
-        {/* Clocks Rendering */}
-        {(isEditMode ? tempClocks : clocks).map((clock) => (
-          <ClockWidget
-            key={clock.id}
-            id={clock.id}
-            style={clock.style}
-            x={clock.x}
-            y={clock.y}
-            isEditMode={isEditMode}
-            onStartDrag={(id, style, ox, oy) => {
-              activeDraggingStyleRef.current = style;
-              setActiveDraggingId(id);
-              setDragOffset({ x: ox, y: oy });
-            }}
-            onDelete={removeClock}
-          />
-        ))}
+        {/* Widgets Rendering */}
+        {(isEditMode ? tempWidgets : widgets)
+          .filter((w) => w.type === 'clock')
+          .map((widget) => (
+            <ClockWidget
+              key={widget.id}
+              id={widget.id}
+              style={widget.style as 'analog' | 'digital' | 'flip' | 'traditional'}
+              x={widget.x}
+              y={widget.y}
+              isEditMode={isEditMode}
+              onStartDrag={(id, style, ox, oy) => {
+                activeDraggingStyleRef.current = style;
+                setActiveDraggingId(id);
+                setDragOffset({ x: ox, y: oy });
+              }}
+              onDelete={removeWidget}
+            />
+          ))}
 
         {menuDraggingStyle && menuDragHasMoved && (
           <div
@@ -499,6 +518,7 @@ export default function App() {
             }}
           >
             {menuDraggingStyle === 'analog' && <AnalogClock />}
+            {menuDraggingStyle === 'traditional' && <TraditionalClock />}
             {menuDraggingStyle === 'digital' && <DigitalClock />}
             {menuDraggingStyle === 'flip' && <FlipClock />}
           </div>

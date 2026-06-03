@@ -3,14 +3,15 @@ import { useRef } from 'react';
 import AnalogClock from './AnalogClock';
 import DigitalClock from './DigitalClock';
 import FlipClock from './FlipClock';
+import TraditionalClock from './TraditionalClock';
 
 interface ClockWidgetProps {
   id: string;
-  style: 'analog' | 'digital' | 'flip';
+  style: 'analog' | 'digital' | 'flip' | 'traditional';
   x: number; // percentage from left
   y: number; // percentage from top
   isEditMode: boolean;
-  onStartDrag: (id: string, style: 'analog' | 'digital' | 'flip', offsetX: number, offsetY: number) => void;
+  onStartDrag: (id: string, style: 'analog' | 'digital' | 'flip' | 'traditional', offsetX: number, offsetY: number) => void;
   onDelete: (id: string) => void;
 }
 
@@ -59,6 +60,8 @@ export default function ClockWidget({
         return <DigitalClock />;
       case 'flip':
         return <FlipClock />;
+      case 'traditional':
+        return <TraditionalClock />;
       default:
         return null;
     }
