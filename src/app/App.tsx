@@ -57,6 +57,32 @@ export default function App() {
 
   // 2. 调用自定义业务逻辑 Hooks
   const shortcutsData = useShortcuts(authState);
+  // 3. 解构解耦业务逻辑
+  const {
+    shortcuts,
+    setShortcuts,
+    tempShortcuts,
+    setTempShortcuts,
+    isEditMode,
+    setIsEditMode,
+    editingShortcut,
+    setEditingShortcut,
+    isAddShortcutOpen,
+    setIsAddShortcutOpen,
+    isLoginOpen,
+    setIsLoginOpen,
+    isLogoutConfirmOpen,
+    setIsLogoutConfirmOpen,
+    moveShortcut,
+    handleAddShortcuts,
+    handleStartEdit,
+    handleSaveEdits: saveShortcutsEdits,
+    handleCancelEdits: cancelShortcutsEdits,
+    handleDeleteShortcut,
+    handleEditShortcut,
+    handleSaveEdit,
+  } = shortcutsData;
+
   const settingsData = useSettings(authState, theme || 'light', setTheme, searchEngine, setSearchEngine);
   const brightnessData = useBrightness(theme || 'light', setTheme, authState);
   const clocksData = useClocks(isEditMode);
@@ -89,32 +115,6 @@ export default function App() {
   const [activeDraggingId, setActiveDraggingId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const activeDraggingStyleRef = useRef<'analog' | 'digital' | 'flip' | null>(null);
-
-  // 3. 解构解耦业务逻辑
-  const {
-    shortcuts,
-    setShortcuts,
-    tempShortcuts,
-    setTempShortcuts,
-    isEditMode,
-    setIsEditMode,
-    editingShortcut,
-    setEditingShortcut,
-    isAddShortcutOpen,
-    setIsAddShortcutOpen,
-    isLoginOpen,
-    setIsLoginOpen,
-    isLogoutConfirmOpen,
-    setIsLogoutConfirmOpen,
-    moveShortcut,
-    handleAddShortcuts,
-    handleStartEdit,
-    handleSaveEdits: saveShortcutsEdits,
-    handleCancelEdits: cancelShortcutsEdits,
-    handleDeleteShortcut,
-    handleEditShortcut,
-    handleSaveEdit,
-  } = shortcutsData;
 
   const {
     backgroundImage,
