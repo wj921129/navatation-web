@@ -166,7 +166,7 @@ export default function App() {
         />
 
         {/* Top Left Todo Widget */}
-        <div className="absolute top-0 left-6 z-30">
+        <div className="absolute top-0 right-6 z-30">
           <TodoListWidget onOpenTodoPanel={() => setIsTodoOpen(true)} />
         </div>
 
