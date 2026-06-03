@@ -90,7 +90,7 @@ export default function App() {
 
   const settingsData = useSettings(authState, theme || 'light', setTheme, searchEngine, setSearchEngine);
   const brightnessData = useBrightness(theme || 'light', setTheme, authState);
-  const widgetsData = useWidgets(isEditMode);
+  const widgetsData = useWidgets(isEditMode, authState);
   const clockMenuData = useClockMenu();
 
   const {
