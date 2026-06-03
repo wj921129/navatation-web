@@ -196,6 +196,8 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
   const handleIconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    // 重置 input 的 value，确保同名文件可再次上传触发 onChange
+    e.target.value = '';
     setFaviconStatus('uploading');
     setUploadError(null);
     try {
