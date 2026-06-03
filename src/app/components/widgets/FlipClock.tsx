@@ -18,7 +18,7 @@ export default function FlipClock() {
   const minutes = time.getMinutes().toString().padStart(2, '0');
 
   return (
-    <div className="w-[200px] h-[100px] flex items-center justify-center gap-3 rounded-2xl bg-white/10 dark:bg-black/30 border border-white/20 dark:border-white/10 shadow-xl backdrop-blur-md px-3 py-2 select-none">
+    <div className="w-[200px] h-[100px] flex items-center justify-center gap-3 rounded-2xl glass-widget-xl px-3 py-2 select-none">
       {/* 小时卡片 */}
       <div className="relative w-16 h-20 rounded-xl bg-neutral-900 border border-neutral-800 shadow-md flex items-center justify-center overflow-hidden">
         {/* 卡片上半部分阴影 */}

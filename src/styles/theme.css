@@ -182,6 +182,14 @@
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+@utility glass-widget-xl {
+  @apply bg-white/35 dark:bg-black/60 border border-white/30 dark:border-white/20 shadow-xl backdrop-blur-2xl;
+}
+
+@utility glass-widget-opaque {
+  @apply bg-white/90 dark:bg-neutral-900/95 border border-neutral-300 dark:border-neutral-700 shadow-xl backdrop-blur-2xl;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

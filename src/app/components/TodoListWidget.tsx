@@ -77,7 +77,7 @@ export function TodoListWidget({ onOpenTodoPanel }: TodoListWidgetProps) {
               </div>
 
               {/* 任务简短文字 */}
-              <span className="text-[11px] font-light text-text-secondary line-clamp-3 whitespace-normal break-all flex-1 group-hover/item:text-text-primary transition-colors">
+              <span className="text-xs font-light text-text-secondary line-clamp-3 whitespace-normal break-all flex-1 group-hover/item:text-text-primary transition-colors">
                 {todo.content}
               </span>
             </div>
