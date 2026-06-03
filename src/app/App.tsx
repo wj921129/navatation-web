@@ -13,6 +13,10 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useTheme } from 'next-themes';
 import { authStore } from './stores/auth-store';
+import { useClocks } from './hooks/useClocks';
+import { useClockMenu } from './hooks/useClockMenu';
+import ClockWidget from './components/widgets/ClockWidget';
+import { useRef } from 'react';
 
 import { SearchBox } from './components/SearchBox';
 import { DraggableShortcut } from './components/DraggableShortcut';
@@ -55,6 +59,36 @@ export default function App() {
   const shortcutsData = useShortcuts(authState);
   const settingsData = useSettings(authState, theme || 'light', setTheme, searchEngine, setSearchEngine);
   const brightnessData = useBrightness(theme || 'light', setTheme, authState);
+  const clocksData = useClocks(isEditMode);
+  const clockMenuData = useClockMenu();
+
+  const {
+    clocks,
+    tempClocks,
+    addClock,
+    removeClock,
+    updateClockPosition,
+    saveClocks,
+    cancelClocks,
+  } = clocksData;
+
+  const {
+    isClockOpen,
+    setIsClockOpen,
+    isClockClosing,
+    isHoveringClock,
+    setIsHoveringClock,
+    clockTimerRef,
+    clearClockTimer,
+    triggerCloseClock,
+    handleMouseEnterClock,
+    handleMouseLeaveClock,
+    resetClockState,
+  } = clockMenuData;
+
+  const [activeDraggingId, setActiveDraggingId] = useState<string | null>(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const activeDraggingStyleRef = useRef<'analog' | 'digital' | 'flip' | null>(null);
 
   // 3. 解构解耦业务逻辑
   const {
@@ -75,8 +109,8 @@ export default function App() {
     moveShortcut,
     handleAddShortcuts,
     handleStartEdit,
-    handleSaveEdits,
-    handleCancelEdits,
+    handleSaveEdits: saveShortcutsEdits,
+    handleCancelEdits: cancelShortcutsEdits,
     handleDeleteShortcut,
     handleEditShortcut,
     handleSaveEdit,
@@ -110,6 +144,178 @@ export default function App() {
     handleMouseLeaveTheme,
     handleMouseEnterOtherWidget,
   } = brightnessData;
+
+  // 统一保存与取消逻辑
+  const handleSaveEdits = useCallback(async () => {
+    await saveShortcutsEdits();
+    saveClocks();
+  }, [saveShortcutsEdits, saveClocks]);
+
+  const handleCancelEdits = useCallback(() => {
+    cancelShortcutsEdits();
+    cancelClocks();
+  }, [cancelShortcutsEdits, cancelClocks]);
+
+  // 悬停交互事件融合防重叠
+  const handleMouseEnterOtherWidgetCombined = useCallback(() => {
+    handleMouseEnterOtherWidget();
+    resetClockState();
+  }, [handleMouseEnterOtherWidget, resetClockState]);
+
+  const handleMouseEnterThemeCombined = useCallback(() => {
+    handleMouseEnterTheme();
+    resetClockState();
+  }, [handleMouseEnterTheme, resetClockState]);
+
+  const handleMouseEnterClockCombined = useCallback(() => {
+    handleMouseEnterClock();
+    brightnessData.resetBrightnessState();
+  }, [handleMouseEnterClock, brightnessData]);
+
+  // 从样式菜单直接拖拽出时钟组件事件
+  const handleDragStartFromMenu = useCallback((e: React.PointerEvent<HTMLButtonElement>, style: 'analog' | 'digital' | 'flip') => {
+    e.preventDefault();
+    const clientX = e.clientX;
+    const clientY = e.clientY;
+
+    let ox = 110;
+    let oy = 50;
+    if (style === 'analog') {
+      ox = 80;
+      oy = 80;
+    }
+
+    const spawnX = ((clientX - ox) / window.innerWidth) * 100;
+    const spawnY = ((clientY - oy) / window.innerHeight) * 100;
+
+    const newId = addClock(style, spawnX, spawnY);
+
+    activeDraggingStyleRef.current = style;
+    setActiveDraggingId(newId);
+    setDragOffset({ x: ox, y: oy });
+    triggerCloseClock();
+  }, [addClock, triggerCloseClock]);
+
+  // 全局指针移动与松开事件（处理边界限制）
+  const handlePointerMoveGlobal = useCallback((e: PointerEvent) => {
+    if (!activeDraggingId || !activeDraggingStyleRef.current) return;
+
+    let newX = e.clientX - dragOffset.x;
+    let newY = e.clientY - dragOffset.y;
+
+    let clockWidth = 220;
+    let clockHeight = 100;
+    if (activeDraggingStyleRef.current === 'analog') {
+      clockWidth = 160;
+      clockHeight = 160;
+    } else if (activeDraggingStyleRef.current === 'flip') {
+      clockWidth = 200;
+      clockHeight = 100;
+    }
+
+    const maxX = window.innerWidth - clockWidth;
+    const maxY = window.innerHeight - clockHeight;
+
+    newX = Math.max(0, Math.min(newX, maxX));
+    newY = Math.max(0, Math.min(newY, maxY));
+
+    const xPercent = (newX / window.innerWidth) * 100;
+    const yPercent = (newY / window.innerHeight) * 100;
+
+    updateClockPosition(activeDraggingId, xPercent, yPercent);
+  }, [activeDraggingId, dragOffset, updateClockPosition]);
+
+  const handlePointerUpGlobal = useCallback(() => {
+    setActiveDraggingId(null);
+    activeDraggingStyleRef.current = null;
+  }, []);
+
+  useEffect(() => {
+    if (activeDraggingId) {
+      window.addEventListener('pointermove', handlePointerMoveGlobal);
+      window.addEventListener('pointerup', handlePointerUpGlobal);
+    }
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMoveGlobal);
+      window.removeEventListener('pointerup', handlePointerUpGlobal);
+    };
+  }, [activeDraggingId, handlePointerMoveGlobal, handlePointerUpGlobal]);
+
+  const clockMenuPanel = isClockOpen && (
+    <div
+      onMouseEnter={() => {
+        setIsHoveringClock(true);
+        setIsClockClosing(false);
+        clearClockTimer();
+      }}
+      onMouseLeave={() => {
+        setIsHoveringClock(false);
+        clearClockTimer();
+        clockTimerRef.current = setTimeout(() => {
+          triggerCloseClock();
+        }, 1000);
+      }}
+      className={`absolute top-[71px] left-1/2 -translate-x-1/2 z-40 flex items-center gap-4 px-4 py-3 rounded-2xl bg-black/65 border border-white/10 shadow-2xl backdrop-blur-md text-white select-none cursor-default whitespace-nowrap ${
+        isClockClosing ? 'brightness-panel-exit' : 'brightness-panel-enter'
+      }`}
+    >
+      <span className="text-[11px] font-medium tracking-wide text-neutral-300 mr-1">选择样式</span>
+      <div className="flex items-center gap-3">
+        {/* Analog style */}
+        <button
+          onClick={() => {
+            addClock('analog');
+            triggerCloseClock();
+          }}
+          onPointerDown={(e) => handleDragStartFromMenu(e, 'analog')}
+          className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-white/10 transition-colors cursor-grab active:cursor-grabbing group/btn"
+        >
+          <div className="w-12 h-12 rounded-full border-2 border-white/40 group-hover/btn:border-white flex items-center justify-center relative">
+            <div className="w-0.5 h-4 bg-white absolute top-2 rounded-full" />
+            <div className="w-3 h-0.5 bg-white absolute top-6 left-6 rounded-full" />
+            <div className="w-1 h-1 rounded-full bg-red-500 absolute top-[23px] left-[23px]" />
+          </div>
+          <span className="text-[10px] text-neutral-300 font-light group-hover/btn:text-white">模拟</span>
+        </button>
+
+        {/* Digital style */}
+        <button
+          onClick={() => {
+            addClock('digital');
+            triggerCloseClock();
+          }}
+          onPointerDown={(e) => handleDragStartFromMenu(e, 'digital')}
+          className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-white/10 transition-colors cursor-grab active:cursor-grabbing group/btn"
+        >
+          <div className="w-16 h-12 rounded-xl border border-white/20 group-hover/btn:border-white/50 flex flex-col items-center justify-center bg-white/5">
+            <span className="text-[10px] font-mono tracking-tight">12:00:00</span>
+            <span className="text-[6px] text-neutral-400 scale-90">6月3日</span>
+          </div>
+          <span className="text-[10px] text-neutral-300 font-light group-hover/btn:text-white">数字</span>
+        </button>
+
+        {/* Flip style */}
+        <button
+          onClick={() => {
+            addClock('flip');
+            triggerCloseClock();
+          }}
+          onPointerDown={(e) => handleDragStartFromMenu(e, 'flip')}
+          className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-white/10 transition-colors cursor-grab active:cursor-grabbing group/btn"
+        >
+          <div className="w-16 h-12 flex items-center justify-center gap-1 bg-white/5 border border-white/20 group-hover/btn:border-white/50 rounded-xl px-1">
+            <div className="w-6 h-8 rounded bg-neutral-900 border border-neutral-800 flex items-center justify-center">
+              <span className="text-[10px] font-mono font-bold">12</span>
+            </div>
+            <div className="w-6 h-8 rounded bg-neutral-900 border border-neutral-800 flex items-center justify-center">
+              <span className="text-[10px] font-mono font-bold">00</span>
+            </div>
+          </div>
+          <span className="text-[10px] text-neutral-300 font-light group-hover/btn:text-white">翻页</span>
+        </button>
+      </div>
+    </div>
+  );
 
   // 当用户登出（未登录）时，强制退出编辑模式，清空临时状态与壁纸缓存，回归游客初始数据
   useEffect(() => {
@@ -165,6 +371,24 @@ export default function App() {
           }}
         />
 
+        {/* Clocks Rendering */}
+        {(isEditMode ? tempClocks : clocks).map((clock) => (
+          <ClockWidget
+            key={clock.id}
+            id={clock.id}
+            style={clock.style}
+            x={clock.x}
+            y={clock.y}
+            isEditMode={isEditMode}
+            onStartDrag={(id, style, ox, oy) => {
+              activeDraggingStyleRef.current = style;
+              setActiveDraggingId(id);
+              setDragOffset({ x: ox, y: oy });
+            }}
+            onDelete={removeClock}
+          />
+        ))}
+
         {/* Top Left Todo Widget */}
         <div className="absolute top-0 right-6 z-30">
           <TodoListWidget onOpenTodoPanel={() => setIsTodoOpen(true)} />
@@ -177,10 +401,15 @@ export default function App() {
             onToggleTodo={() => setIsTodoOpen((prev) => !prev)}
             onRandomWallpaper={handleRandomWallpaper}
             onToggleTheme={handleToggleTheme}
-            onMouseEnterTheme={handleMouseEnterTheme}
+            onMouseEnterTheme={handleMouseEnterThemeCombined}
             onMouseLeaveTheme={handleMouseLeaveTheme}
-            onMouseEnterOtherWidget={handleMouseEnterOtherWidget}
+            onMouseEnterOtherWidget={handleMouseEnterOtherWidgetCombined}
             isHoveringBrightness={isHoveringBrightness}
+            isEditMode={isEditMode}
+            onMouseEnterClock={handleMouseEnterClockCombined}
+            onMouseLeaveClock={handleMouseLeaveClock}
+            isHoveringClockMenu={isHoveringClock}
+            clockMenuPanel={clockMenuPanel}
             brightnessPanel={
               isBrightnessOpen && theme === 'dark' && (
                 <div

@@ -1,4 +1,4 @@
-import { CheckSquare, Shuffle, Sun, Moon, Timer, Square, Loader2 } from 'lucide-react';
+import { CheckSquare, Shuffle, Sun, Moon, Timer, Square, Loader2, Clock } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 
 interface TopDockProps {
@@ -11,6 +11,11 @@ interface TopDockProps {
   brightnessPanel?: React.ReactNode;
   onMouseEnterOtherWidget?: () => void;
   isHoveringBrightness?: boolean;
+  isEditMode?: boolean;
+  onMouseEnterClock?: () => void;
+  onMouseLeaveClock?: () => void;
+  isHoveringClockMenu?: boolean;
+  clockMenuPanel?: React.ReactNode;
 }
 
 /**
@@ -26,7 +31,12 @@ export function TopDock({
   onMouseLeaveTheme,
   brightnessPanel,
   onMouseEnterOtherWidget,
-  isHoveringBrightness = false
+  isHoveringBrightness = false,
+  isEditMode = false,
+  onMouseEnterClock,
+  onMouseLeaveClock,
+  isHoveringClockMenu = false,
+  clockMenuPanel
 }: TopDockProps) {
   const [shuffling, setShuffling] = useState(false);
   
@@ -41,13 +51,20 @@ export function TopDock({
   const item2Ref = useRef<HTMLDivElement>(null);
   const item3Ref = useRef<HTMLDivElement>(null);
   const item4Ref = useRef<HTMLDivElement>(null);
+  const item5Ref = useRef<HTMLDivElement>(null);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const container = containerRef.current;
     if (!container) return;
 
     const mouseX = e.clientX;
-    const items = [item1Ref.current, item2Ref.current, item3Ref.current, item4Ref.current];
+    const items = [
+      item1Ref.current,
+      item2Ref.current,
+      item3Ref.current,
+      item4Ref.current,
+      item5Ref.current
+    ].filter(Boolean);
 
     items.forEach((item) => {
       if (!item) return;
@@ -74,7 +91,13 @@ export function TopDock({
   };
 
   const handleMouseLeave = () => {
-    const items = [item1Ref.current, item2Ref.current, item3Ref.current, item4Ref.current];
+    const items = [
+      item1Ref.current,
+      item2Ref.current,
+      item3Ref.current,
+      item4Ref.current,
+      item5Ref.current
+    ].filter(Boolean);
     items.forEach((item) => {
       if (!item) return;
       const iconWrapper = item.querySelector('.dock-icon-wrapper') as HTMLElement;
@@ -247,6 +270,34 @@ export function TopDock({
           {isTimerActive ? '结束专注' : '开启 25 分钟专注'}
         </span>
       </div>
+
+      {isEditMode && (
+        <>
+          <div className="w-[1px] h-4 bg-widget-border animate-fade-in" />
+          {/* 时钟小组件添加/配置按钮 */}
+          <div
+            ref={item5Ref}
+            className="relative group"
+            onMouseEnter={onMouseEnterClock}
+            onMouseLeave={onMouseLeaveClock}
+          >
+            <button
+              className="p-2 rounded-full text-text-secondary hover:text-text-primary hover:bg-input-bg transition-all duration-200 active:scale-95 flex items-center justify-center cursor-pointer"
+              aria-label="添加时钟小组件"
+            >
+              <span className="dock-icon-wrapper transition-transform duration-150 ease-out flex items-center justify-center" style={{ willChange: 'transform' }}>
+                <Clock className="w-4 h-4" />
+              </span>
+            </button>
+            <span className={`pointer-events-none absolute top-[42px] left-1/2 -translate-x-1/2 px-2 py-1 bg-widget-bg/95 border border-widget-border text-text-primary shadow-md text-[10px] rounded opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap z-50 backdrop-blur-md ${
+              isHoveringClockMenu ? '!opacity-0 !scale-95' : ''
+            }`}>
+              添加时钟
+            </span>
+            {clockMenuPanel}
+          </div>
+        </>
+      )}
     </div>
   );
 }
