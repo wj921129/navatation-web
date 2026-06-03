@@ -44,11 +44,22 @@ export default function App() {
   const [isAiSearchOpen, setIsAiSearchOpen] = useState(false);
   const [aiSearchQuery, setAiSearchQuery] = useState('');
   const [aiSearchEngine, setAiSearchEngine] = useState('');
+  const [clocksVisible, setClocksVisible] = useState<boolean>(() => {
+    return localStorage.getItem('navatation_clocks_visible') !== '0';
+  });
 
   const handleAiSearch = useCallback((query: string, engine: string) => {
     setAiSearchQuery(query);
     setAiSearchEngine(engine);
     setIsAiSearchOpen(true);
+  }, []);
+
+  const handleToggleClockVisibility = useCallback(() => {
+    setClocksVisible(prev => {
+      const next = !prev;
+      localStorage.setItem('navatation_clocks_visible', next ? '1' : '0');
+      return next;
+    });
   }, []);
 
   // 1. 订阅登录状态
@@ -491,7 +502,7 @@ export default function App() {
         />
 
         {/* Widgets Rendering */}
-        {(isEditMode ? tempWidgets : widgets)
+        {(isEditMode ? tempWidgets : (clocksVisible ? widgets : []))
           .filter((w) => w.type === 'clock')
           .map((widget) => (
             <ClockWidget
@@ -546,6 +557,8 @@ export default function App() {
             onMouseLeaveClock={handleMouseLeaveClock}
             isHoveringClockMenu={isHoveringClock}
             clockMenuPanel={clockMenuPanel}
+            clocksVisible={clocksVisible}
+            onToggleClockVisibility={handleToggleClockVisibility}
             brightnessPanel={
               isBrightnessOpen && theme === 'dark' && (
                 <div

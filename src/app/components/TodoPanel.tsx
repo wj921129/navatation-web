@@ -321,7 +321,7 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
                             if (e.key === 'Enter') handleSaveEdit(todo);
                             if (e.key === 'Escape') setEditingId(null);
                           }}
-                          className="w-full px-2 py-1 bg-input-bg border border-input-border rounded text-base text-text-primary outline-none focus:border-blue-500 dark:focus:border-blue-400"
+                          className="w-full px-2 py-1 bg-input-bg border border-input-border rounded text-sm text-text-primary outline-none focus:border-blue-500 dark:focus:border-blue-400"
                           style={{
                             cursor: customCursor
                           }}
@@ -335,7 +335,7 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
                           </span>
                         ) : null}
                         <span
-                          className={`text-base transition-all duration-200 select-none line-clamp-5 break-all ${
+                          className={`text-sm transition-all duration-200 select-none line-clamp-5 break-all ${
                             todo.completed ? 'text-text-secondary line-through' : 'text-text-primary'
                           }`}
                           onDoubleClick={() => handleStartEdit(todo)}

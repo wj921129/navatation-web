@@ -16,6 +16,8 @@ interface TopDockProps {
   onMouseLeaveClock?: () => void;
   isHoveringClockMenu?: boolean;
   clockMenuPanel?: React.ReactNode;
+  clocksVisible?: boolean;
+  onToggleClockVisibility?: () => void;
 }
 
 /**
@@ -36,7 +38,9 @@ export function TopDock({
   onMouseEnterClock,
   onMouseLeaveClock,
   isHoveringClockMenu = false,
-  clockMenuPanel
+  clockMenuPanel,
+  clocksVisible = true,
+  onToggleClockVisibility
 }: TopDockProps) {
   const [shuffling, setShuffling] = useState(false);
 
@@ -182,33 +186,38 @@ export function TopDock({
         {brightnessPanel}
       </div>
 
-      {isEditMode && (
-        <>
-          <div className="w-[1px] h-4 bg-widget-border animate-fade-in" />
-          {/* 时钟小组件添加/配置按钮 */}
-          <div
-            ref={item4Ref}
-            className="relative group"
-            onMouseEnter={onMouseEnterClock}
-            onMouseLeave={onMouseLeaveClock}
+      <>
+        <div className="w-[1px] h-4 bg-widget-border" />
+        {/* 时钟小组件按钮 - 编辑模式下悬停弹出样式选单，非编辑模式下点击切换显示/隐藏 */}
+        <div
+          ref={item4Ref}
+          className="relative group"
+          onMouseEnter={isEditMode ? onMouseEnterClock : undefined}
+          onMouseLeave={isEditMode ? onMouseLeaveClock : undefined}
+        >
+          <button
+            onClick={isEditMode ? undefined : onToggleClockVisibility}
+            className={`p-2 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center ${
+              isEditMode
+                ? 'text-text-secondary hover:text-text-primary hover:bg-input-bg cursor-pointer'
+                : clocksVisible
+                  ? 'text-text-secondary hover:text-text-primary hover:bg-input-bg cursor-pointer'
+                  : 'text-text-secondary/40 hover:text-text-secondary hover:bg-input-bg cursor-pointer'
+            }`}
+            aria-label={isEditMode ? '添加时钟小组件' : clocksVisible ? '隐藏时钟' : '显示时钟'}
           >
-            <button
-              className="p-2 rounded-full text-text-secondary hover:text-text-primary hover:bg-input-bg transition-all duration-200 active:scale-95 flex items-center justify-center cursor-pointer"
-              aria-label="添加时钟小组件"
-            >
-              <span className="dock-icon-wrapper transition-transform duration-150 ease-out flex items-center justify-center" style={{ willChange: 'transform' }}>
-                <Clock className="w-4 h-4" />
-              </span>
-            </button>
-            <span className={`pointer-events-none absolute top-[42px] left-1/2 -translate-x-1/2 px-2 py-1 bg-widget-bg/95 border border-widget-border text-text-primary shadow-md text-[10px] rounded opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap z-50 backdrop-blur-md ${
-              isHoveringClockMenu ? '!opacity-0 !scale-95' : ''
-            }`}>
-              添加时钟
+            <span className="dock-icon-wrapper transition-transform duration-150 ease-out flex items-center justify-center" style={{ willChange: 'transform' }}>
+              <Clock className="w-4 h-4" />
             </span>
-            {clockMenuPanel}
-          </div>
-        </>
-      )}
+          </button>
+          <span className={`pointer-events-none absolute top-[42px] left-1/2 -translate-x-1/2 px-2 py-1 bg-widget-bg/95 border border-widget-border text-text-primary shadow-md text-[10px] rounded opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap z-50 backdrop-blur-md ${
+            isEditMode && isHoveringClockMenu ? '!opacity-0 !scale-95' : ''
+          }`}>
+            {isEditMode ? '添加时钟' : clocksVisible ? '隐藏时钟' : '显示时钟'}
+          </span>
+          {isEditMode && clockMenuPanel}
+        </div>
+      </>
     </div>
   );
 }
