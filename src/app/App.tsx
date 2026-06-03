@@ -17,6 +17,10 @@ import { useClocks } from './hooks/useClocks';
 import { useClockMenu } from './hooks/useClockMenu';
 import ClockWidget from './components/widgets/ClockWidget';
 import { useRef } from 'react';
+import AnalogClock from './components/widgets/AnalogClock';
+import DigitalClock from './components/widgets/DigitalClock';
+import FlipClock from './components/widgets/FlipClock';
+
 
 import { SearchBox } from './components/SearchBox';
 import { DraggableShortcut } from './components/DraggableShortcut';
@@ -116,6 +120,15 @@ export default function App() {
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const activeDraggingStyleRef = useRef<'analog' | 'digital' | 'flip' | null>(null);
 
+  // Menu drag-and-drop state & refs
+  const [menuDraggingStyle, setMenuDraggingStyle] = useState<'analog' | 'digital' | 'flip' | null>(null);
+  const [menuDragPos, setMenuDragPos] = useState({ x: 0, y: 0 });
+  const [menuDragHasMoved, setMenuDragHasMoved] = useState(false);
+  const menuDragStartPosRef = useRef({ x: 0, y: 0 });
+  const menuDragHasMovedRef = useRef(false);
+  const menuDraggingStyleRef = useRef<'analog' | 'digital' | 'flip' | null>(null);
+
+
   const {
     backgroundImage,
     setBackgroundImage,
@@ -172,29 +185,129 @@ export default function App() {
     brightnessData.resetBrightnessState();
   }, [handleMouseEnterClock, brightnessData]);
 
-  // 从样式菜单直接拖拽出时钟组件事件
-  const handleDragStartFromMenu = useCallback((e: React.PointerEvent<HTMLButtonElement>, style: 'analog' | 'digital' | 'flip') => {
-    e.preventDefault();
-    const clientX = e.clientX;
-    const clientY = e.clientY;
+  const handleMenuDragMove = useCallback((e: PointerEvent) => {
+    const style = menuDraggingStyleRef.current;
+    if (!style) return;
 
-    let ox = 110;
-    let oy = 50;
-    if (style === 'analog') {
-      ox = 80;
-      oy = 80;
+    const dx = e.clientX - menuDragStartPosRef.current.x;
+    const dy = e.clientY - menuDragStartPosRef.current.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance > 5) {
+      menuDragHasMovedRef.current = true;
+      setMenuDragHasMoved(true);
     }
 
-    const spawnX = ((clientX - ox) / window.innerWidth) * 100;
-    const spawnY = ((clientY - oy) / window.innerHeight) * 100;
+    let clockWidth = 220;
+    let clockHeight = 100;
+    if (style === 'analog') {
+      clockWidth = 160;
+      clockHeight = 160;
+    } else if (style === 'flip') {
+      clockWidth = 200;
+      clockHeight = 100;
+    }
 
-    const newId = addClock(style, spawnX, spawnY);
+    const ox = clockWidth / 2;
+    const oy = clockHeight / 2;
 
-    activeDraggingStyleRef.current = style;
-    setActiveDraggingId(newId);
-    setDragOffset({ x: ox, y: oy });
+    let newX = e.clientX - ox;
+    let newY = e.clientY - oy;
+
+    const maxX = window.innerWidth - clockWidth;
+    const maxY = window.innerHeight - clockHeight;
+
+    newX = Math.max(0, Math.min(newX, maxX));
+    newY = Math.max(0, Math.min(newY, maxY));
+
+    setMenuDragPos({ x: newX, y: newY });
+  }, []);
+
+  const handleMenuDragUp = useCallback((e: PointerEvent) => {
+    const style = menuDraggingStyleRef.current;
+    if (style) {
+      const dx = e.clientX - menuDragStartPosRef.current.x;
+      const dy = e.clientY - menuDragStartPosRef.current.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance > 5 || menuDragHasMovedRef.current) {
+        let clockWidth = 220;
+        let clockHeight = 100;
+        if (style === 'analog') {
+          clockWidth = 160;
+          clockHeight = 160;
+        } else if (style === 'flip') {
+          clockWidth = 200;
+          clockHeight = 100;
+        }
+        const ox = clockWidth / 2;
+        const oy = clockHeight / 2;
+
+        let newX = e.clientX - ox;
+        let newY = e.clientY - oy;
+        const maxX = window.innerWidth - clockWidth;
+        const maxY = window.innerHeight - clockHeight;
+        newX = Math.max(0, Math.min(newX, maxX));
+        newY = Math.max(0, Math.min(newY, maxY));
+
+        const xPercent = (newX / window.innerWidth) * 100;
+        const yPercent = (newY / window.innerHeight) * 100;
+        addClock(style, xPercent, yPercent);
+      } else {
+        addClock(style, 40, 30);
+      }
+    }
+
+    menuDraggingStyleRef.current = null;
+    setMenuDraggingStyle(null);
+    menuDragHasMovedRef.current = false;
+    setMenuDragHasMoved(false);
     triggerCloseClock();
-  }, [addClock, triggerCloseClock]);
+
+    window.removeEventListener('pointermove', handleMenuDragMove);
+    window.removeEventListener('pointerup', handleMenuDragUp);
+  }, [addClock, triggerCloseClock, handleMenuDragMove]);
+
+  const handleDragStartFromMenu = useCallback((e: React.PointerEvent<HTMLButtonElement>, style: 'analog' | 'digital' | 'flip') => {
+    e.preventDefault();
+    menuDragStartPosRef.current = { x: e.clientX, y: e.clientY };
+    menuDraggingStyleRef.current = style;
+    setMenuDraggingStyle(style);
+    menuDragHasMovedRef.current = false;
+    setMenuDragHasMoved(false);
+
+    let clockWidth = 220;
+    let clockHeight = 100;
+    if (style === 'analog') {
+      clockWidth = 160;
+      clockHeight = 160;
+    } else if (style === 'flip') {
+      clockWidth = 200;
+      clockHeight = 100;
+    }
+    const ox = clockWidth / 2;
+    const oy = clockHeight / 2;
+
+    let newX = e.clientX - ox;
+    let newY = e.clientY - oy;
+    const maxX = window.innerWidth - clockWidth;
+    const maxY = window.innerHeight - clockHeight;
+    newX = Math.max(0, Math.min(newX, maxX));
+    newY = Math.max(0, Math.min(newY, maxY));
+
+    setMenuDragPos({ x: newX, y: newY });
+
+    window.addEventListener('pointermove', handleMenuDragMove);
+    window.addEventListener('pointerup', handleMenuDragUp);
+  }, [handleMenuDragMove, handleMenuDragUp]);
+
+  useEffect(() => {
+    return () => {
+      window.removeEventListener('pointermove', handleMenuDragMove);
+      window.removeEventListener('pointerup', handleMenuDragUp);
+    };
+  }, [handleMenuDragMove, handleMenuDragUp]);
+
 
   // 全局指针移动与松开事件（处理边界限制）
   const handlePointerMoveGlobal = useCallback((e: PointerEvent) => {
@@ -376,6 +489,20 @@ export default function App() {
             onDelete={removeClock}
           />
         ))}
+
+        {menuDraggingStyle && menuDragHasMoved && (
+          <div
+            className="absolute pointer-events-none opacity-60 z-50 select-none border border-dashed border-blue-500/60 p-1 rounded-3xl bg-blue-500/5 shadow-xl"
+            style={{
+              left: `${menuDragPos.x}px`,
+              top: `${menuDragPos.y}px`,
+            }}
+          >
+            {menuDraggingStyle === 'analog' && <AnalogClock />}
+            {menuDraggingStyle === 'digital' && <DigitalClock />}
+            {menuDraggingStyle === 'flip' && <FlipClock />}
+          </div>
+        )}
 
         {/* Top Left Todo Widget */}
         <div className="absolute top-0 right-6 z-30">
