@@ -69,15 +69,18 @@ export default function ClockWidget({
       ref={containerRef}
       onPointerDown={handlePointerDown}
       className={`absolute select-none z-20 group touch-none ${
-        isEditMode
-          ? 'cursor-grab active:cursor-grabbing border-2 border-dashed border-blue-500/60 hover:border-blue-500 hover:bg-blue-500/5 p-1 rounded-3xl transition-colors duration-150'
-          : ''
+        isEditMode ? 'cursor-grab active:cursor-grabbing' : ''
       }`}
       style={{
         left: `${x}%`,
         top: `${y}%`,
       }}
     >
+      {/* 编辑模式下的虚线外框遮罩，防止由于边框和内边距引起容器尺寸变化与布局抖动 */}
+      {isEditMode && (
+        <div className="absolute -inset-1.5 border-2 border-dashed border-blue-500/60 group-hover:border-blue-500 group-hover:bg-blue-500/5 rounded-3xl transition-all duration-150 pointer-events-none z-10" />
+      )}
+
       {/* 编辑模式下的删除按钮 */}
       {isEditMode && (
         <button
