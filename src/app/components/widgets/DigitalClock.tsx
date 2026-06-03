@@ -30,7 +30,7 @@ export default function DigitalClock() {
   const weekdayString = time.toLocaleDateString('zh-CN', { weekday: 'long' });
 
   return (
-    <div className="w-[220px] h-[100px] flex flex-col items-center justify-center rounded-2xl bg-white/10 dark:bg-black/30 border border-white/20 dark:border-white/10 shadow-xl backdrop-blur-md px-4 py-3 select-none text-text-primary">
+    <div className="w-[220px] h-[100px] flex flex-col items-center justify-center rounded-2xl bg-white/10 dark:bg-black/30 border border-white/20 dark:border-white/10 shadow-xl backdrop-blur-sm px-4 py-3 select-none text-text-primary">
       {/* 24小时制时间显示，带有毛玻璃发光投影 */}
       <span className="text-3xl font-light font-mono tracking-wider text-neutral-800 dark:text-neutral-100 drop-shadow-[0_0_8px_rgba(255,255,255,0.15)] tabular-nums">
         {timeString}

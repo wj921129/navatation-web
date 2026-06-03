@@ -24,7 +24,7 @@ export default function AnalogClock() {
   const secondDeg = seconds * 6;
 
   return (
-    <div className="w-[160px] h-[160px] flex items-center justify-center rounded-full bg-white/10 dark:bg-black/30 border border-white/20 dark:border-white/10 shadow-xl backdrop-blur-md relative select-none">
+    <div className="w-[160px] h-[160px] flex items-center justify-center rounded-full bg-white/10 dark:bg-black/30 border border-white/20 dark:border-white/10 shadow-xl backdrop-blur-sm relative select-none">
       {/* 表盘刻度 */}
       <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
         {/* 12个点 */}
