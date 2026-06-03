@@ -620,8 +620,16 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
 
                           <button
                             type="button"
-                            onClick={() => triggerSearch(customUrl)}
-                            disabled={!isValidDomainOrUrl(customUrl) || faviconStatus === 'loading' || faviconStatus === 'uploading' || iconFromUpload}
+                            onClick={() => {
+                              if (iconFromUpload) {
+                                setCustomIconUrl('');
+                                setDetectedIcons([]);
+                                setIconFromUpload(false);
+                                setCustomIconFile(null);
+                              }
+                              triggerSearch(customUrl);
+                            }}
+                            disabled={!isValidDomainOrUrl(customUrl) || faviconStatus === 'loading' || faviconStatus === 'uploading'}
                             className="p-3 bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-700 dark:text-gray-300 rounded-xl flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer h-[46px] w-[46px] flex-shrink-0"
                             title="重新检测网址图标"
                           >
