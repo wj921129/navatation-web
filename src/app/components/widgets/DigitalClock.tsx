@@ -30,13 +30,13 @@ export default function DigitalClock() {
   const weekdayString = time.toLocaleDateString('zh-CN', { weekday: 'long' });
 
   return (
-    <div className="w-[220px] h-[100px] flex flex-col items-center justify-center rounded-2xl bg-white/25 dark:bg-black/50 border border-white/20 dark:border-white/10 shadow-xl backdrop-blur-xl px-4 py-3 select-none text-text-primary">
+    <div className="w-[220px] h-[100px] flex flex-col items-center justify-center rounded-2xl bg-white/35 dark:bg-black/60 border border-white/30 dark:border-white/20 shadow-xl backdrop-blur-2xl px-4 py-3 select-none text-text-primary">
       {/* 24小时制时间显示，带有毛玻璃发光投影 */}
       <span className="text-3xl font-light font-mono tracking-wider text-neutral-800 dark:text-neutral-100 drop-shadow-[0_0_8px_rgba(255,255,255,0.15)] tabular-nums">
         {timeString}
       </span>
       {/* 日期与星期显示 */}
-      <span className="text-[10px] text-neutral-500 dark:text-neutral-400 font-light mt-1 flex gap-1.5">
+      <span className="text-xs text-neutral-600 dark:text-neutral-300 font-normal mt-1 flex gap-1.5">
         <span>{dateString}</span>
         <span className="opacity-80">|</span>
         <span>{weekdayString}</span>

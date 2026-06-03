@@ -40,7 +40,7 @@ export default function TraditionalClock() {
   });
 
   return (
-    <div className="w-[160px] h-[160px] flex items-center justify-center rounded-full bg-white/85 dark:bg-neutral-900/90 border border-neutral-200 dark:border-neutral-800 shadow-xl backdrop-blur-xl relative select-none">
+    <div className="w-[160px] h-[160px] flex items-center justify-center rounded-full bg-white/90 dark:bg-neutral-900/95 border border-neutral-300 dark:border-neutral-700 shadow-xl backdrop-blur-2xl relative select-none">
       {/* 表盘 SVG，逆时针旋转 90 度以使 0 弧度对应 12 点方向 */}
       <svg className="w-full h-full transform -rotate-90 animate-fade-in" viewBox="0 0 100 100">
         {/* 60 个分/秒刻度 */}
