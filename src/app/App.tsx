@@ -381,67 +381,67 @@ export default function App() {
           triggerCloseClock();
         }, 1000);
       }}
-      className={`absolute top-[71px] left-1/2 -translate-x-1/2 z-40 flex items-center gap-4 px-4 py-3 rounded-2xl bg-black/65 border border-white/10 shadow-2xl backdrop-blur-md text-white select-none cursor-default whitespace-nowrap ${
+      className={`absolute top-[71px] left-1/2 -translate-x-1/2 z-40 flex items-center gap-4 px-4 py-3 rounded-2xl bg-widget-bg/95 border border-widget-border shadow-2xl backdrop-blur-xl text-text-primary select-none cursor-default whitespace-nowrap ${
         isClockClosing ? 'brightness-panel-exit' : 'brightness-panel-enter'
       }`}
     >
-      <span className="text-[11px] font-medium tracking-wide text-neutral-300 mr-1">选择样式</span>
+      <span className="text-[11px] font-medium tracking-wide text-text-secondary mr-1">选择样式</span>
       <div className="flex items-center gap-3">
         {/* Analog style */}
         <button
           onPointerDown={(e) => handleDragStartFromMenu(e, 'analog')}
-          className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-white/10 transition-colors cursor-grab active:cursor-grabbing group/btn"
+          className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg transition-colors cursor-grab active:cursor-grabbing group/btn"
         >
-          <div className="w-12 h-12 rounded-full border-2 border-white/40 group-hover/btn:border-white flex items-center justify-center relative">
-            <div className="w-0.5 h-4 bg-white absolute top-2 rounded-full" />
-            <div className="w-3 h-0.5 bg-white absolute top-6 left-6 rounded-full" />
+          <div className="w-12 h-12 rounded-full border-2 border-widget-border group-hover/btn:border-text-primary flex items-center justify-center relative">
+            <div className="w-0.5 h-4 bg-text-primary absolute top-2 rounded-full" />
+            <div className="w-3 h-0.5 bg-text-primary absolute top-6 left-6 rounded-full" />
             <div className="w-1 h-1 rounded-full bg-red-500 absolute top-[23px] left-[23px]" />
           </div>
-          <span className="text-[10px] text-neutral-300 font-light group-hover/btn:text-white">模拟</span>
+          <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">模拟</span>
         </button>
 
         {/* Traditional style */}
         <button
           onPointerDown={(e) => handleDragStartFromMenu(e, 'traditional')}
-          className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-white/10 transition-colors cursor-grab active:cursor-grabbing group/btn"
+          className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg transition-colors cursor-grab active:cursor-grabbing group/btn"
         >
-          <div className="w-12 h-12 rounded-full border-2 border-white/40 group-hover/btn:border-white flex items-center justify-center relative">
-            <span className="text-[8px] font-bold text-neutral-300 group-hover/btn:text-white absolute top-0.5">12</span>
-            <span className="text-[8px] font-bold text-neutral-300 group-hover/btn:text-white absolute bottom-0.5">6</span>
-            <span className="text-[8px] font-bold text-neutral-300 group-hover/btn:text-white absolute left-0.5">9</span>
-            <span className="text-[8px] font-bold text-neutral-300 group-hover/btn:text-white absolute right-0.5">3</span>
-            <div className="w-0.5 h-3 bg-neutral-300 group-hover/btn:bg-white absolute top-[16px] left-[23px] origin-bottom transform rotate-45" />
-            <div className="w-0.5 h-4 bg-neutral-300 group-hover/btn:bg-white absolute top-[12px] left-[23px] origin-bottom transform -rotate-12" />
+          <div className="w-12 h-12 rounded-full border-2 border-widget-border group-hover/btn:border-text-primary flex items-center justify-center relative">
+            <span className="text-[8px] font-bold text-text-secondary group-hover/btn:text-text-primary absolute top-0.5">12</span>
+            <span className="text-[8px] font-bold text-text-secondary group-hover/btn:text-text-primary absolute bottom-0.5">6</span>
+            <span className="text-[8px] font-bold text-text-secondary group-hover/btn:text-text-primary absolute left-0.5">9</span>
+            <span className="text-[8px] font-bold text-text-secondary group-hover/btn:text-text-primary absolute right-0.5">3</span>
+            <div className="w-0.5 h-3 bg-text-secondary group-hover/btn:bg-text-primary absolute top-[16px] left-[23px] origin-bottom transform rotate-45" />
+            <div className="w-0.5 h-4 bg-text-secondary group-hover/btn:bg-text-primary absolute top-[12px] left-[23px] origin-bottom transform -rotate-12" />
           </div>
-          <span className="text-[10px] text-neutral-300 font-light group-hover/btn:text-white">传统</span>
+          <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">传统</span>
         </button>
 
         {/* Digital style */}
         <button
           onPointerDown={(e) => handleDragStartFromMenu(e, 'digital')}
-          className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-white/10 transition-colors cursor-grab active:cursor-grabbing group/btn"
+          className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg transition-colors cursor-grab active:cursor-grabbing group/btn"
         >
-          <div className="w-16 h-12 rounded-xl border border-white/20 group-hover/btn:border-white/50 flex flex-col items-center justify-center bg-white/5">
+          <div className="w-16 h-12 rounded-xl border border-widget-border group-hover/btn:border-text-secondary flex flex-col items-center justify-center bg-input-bg">
             <span className="text-[10px] font-mono tracking-tight">12:00:00</span>
-            <span className="text-[6px] text-neutral-400 scale-90">6月3日</span>
+            <span className="text-[6px] text-text-secondary scale-90">6月3日</span>
           </div>
-          <span className="text-[10px] text-neutral-300 font-light group-hover/btn:text-white">数字</span>
+          <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">数字</span>
         </button>
 
         {/* Flip style */}
         <button
           onPointerDown={(e) => handleDragStartFromMenu(e, 'flip')}
-          className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-white/10 transition-colors cursor-grab active:cursor-grabbing group/btn"
+          className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg transition-colors cursor-grab active:cursor-grabbing group/btn"
         >
-          <div className="w-16 h-12 flex items-center justify-center gap-1 bg-white/5 border border-white/20 group-hover/btn:border-white/50 rounded-xl px-1">
-            <div className="w-6 h-8 rounded bg-neutral-900 border border-neutral-800 flex items-center justify-center">
+          <div className="w-16 h-12 flex items-center justify-center gap-1 bg-input-bg border border-widget-border group-hover/btn:border-text-secondary rounded-xl px-1">
+            <div className="w-6 h-8 rounded bg-widget-bg border border-widget-border flex items-center justify-center">
               <span className="text-[10px] font-mono font-bold">12</span>
             </div>
-            <div className="w-6 h-8 rounded bg-neutral-900 border border-neutral-800 flex items-center justify-center">
+            <div className="w-6 h-8 rounded bg-widget-bg border border-widget-border flex items-center justify-center">
               <span className="text-[10px] font-mono font-bold">00</span>
             </div>
           </div>
-          <span className="text-[10px] text-neutral-300 font-light group-hover/btn:text-white">翻页</span>
+          <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">翻页</span>
         </button>
       </div>
     </div>

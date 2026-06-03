@@ -120,7 +120,7 @@ export function TopDock({
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="flex items-center gap-1.5 px-4 py-1 rounded-b-2xl border-t-0 border border-widget-border bg-widget-bg backdrop-blur-md shadow-md opacity-70 hover:opacity-100 hover:bg-widget-bg/90 hover:backdrop-blur-xl transition-all duration-300 cursor-default text-text-primary"
+      className="flex items-center gap-1.5 px-4 py-1 rounded-b-2xl border-t-0 border border-widget-border bg-widget-bg backdrop-blur-xl shadow-md opacity-80 hover:opacity-100 transition-opacity duration-300 cursor-default text-text-primary"
     >
       {/* 待办事项小组件 */}
       <div ref={item1Ref} className="relative group" onMouseEnter={onMouseEnterOtherWidget}>
