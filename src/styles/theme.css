@@ -250,3 +250,8 @@
     line-height: 1.5;
   }
 }
+
+@keyframes flip-colon-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.15; }
+}

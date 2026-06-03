@@ -71,12 +71,14 @@ export default function ClockWidget({
     <div
       ref={containerRef}
       onPointerDown={handlePointerDown}
-      className={`absolute select-none z-20 group touch-none ${
+      className={`absolute select-none z-20 group touch-none isolate ${
         isEditMode ? 'cursor-grab active:cursor-grabbing' : ''
       }`}
       style={{
         left: `${x}%`,
         top: `${y}%`,
+        isolation: 'isolate',
+        willChange: 'transform',
       }}
     >
       {/* 编辑模式下的虚线外框遮罩，防止由于边框和内边距引起容器尺寸变化与布局抖动 */}
