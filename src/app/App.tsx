@@ -263,10 +263,6 @@ export default function App() {
       <div className="flex items-center gap-3">
         {/* Analog style */}
         <button
-          onClick={() => {
-            addClock('analog');
-            triggerCloseClock();
-          }}
           onPointerDown={(e) => handleDragStartFromMenu(e, 'analog')}
           className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-white/10 transition-colors cursor-grab active:cursor-grabbing group/btn"
         >
@@ -280,10 +276,6 @@ export default function App() {
 
         {/* Digital style */}
         <button
-          onClick={() => {
-            addClock('digital');
-            triggerCloseClock();
-          }}
           onPointerDown={(e) => handleDragStartFromMenu(e, 'digital')}
           className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-white/10 transition-colors cursor-grab active:cursor-grabbing group/btn"
         >
@@ -296,10 +288,6 @@ export default function App() {
 
         {/* Flip style */}
         <button
-          onClick={() => {
-            addClock('flip');
-            triggerCloseClock();
-          }}
           onPointerDown={(e) => handleDragStartFromMenu(e, 'flip')}
           className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-white/10 transition-colors cursor-grab active:cursor-grabbing group/btn"
         >
