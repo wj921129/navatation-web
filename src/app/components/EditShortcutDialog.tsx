@@ -161,6 +161,10 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
     }
+    // 如果是本地上传的图标，停用通过网址搜索图标功能
+    if (iconType === 'CUSTOM_UPLOAD') {
+      return;
+    }
     const currentUrl = url.trim();
     if (!currentUrl || currentUrl === shortcut.url) {
       setFaviconStatus('idle');
@@ -184,7 +188,7 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
     };
-  }, [url, shortcut.url]);
+  }, [url, shortcut.url, iconType]);
 
   if (!isOpen) return null;
 
@@ -200,7 +204,8 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
         const url = res.data.iconUrl;
         setIconValue(url);
         setIconType('CUSTOM_UPLOAD');
-        setDetectedIcons(prev => [url, ...prev.filter(u => u !== url)]);
+        // 清空所有通过网址搜索的图标，只保留本地上传的图标
+        setDetectedIcons([url]);
         setFaviconStatus('detected');
       } else {
         setUploadError(res.message || '上传失败');
@@ -253,7 +258,7 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
                 type="text"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                onBlur={() => triggerSearch(url)}
+                onBlur={() => iconType !== 'CUSTOM_UPLOAD' && triggerSearch(url)}
                 placeholder="https://example.com"
                 className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground outline-none focus:border-blue-500 focus:bg-card transition-all placeholder-gray-400 dark:placeholder-gray-500"
               />
@@ -305,7 +310,7 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
                 <button
                   type="button"
                   onClick={() => triggerSearch(url, true)}
-                  disabled={!isValidDomainOrUrl(url) || faviconStatus === 'loading' || faviconStatus === 'uploading'}
+                  disabled={!isValidDomainOrUrl(url) || faviconStatus === 'loading' || faviconStatus === 'uploading' || iconType === 'CUSTOM_UPLOAD'}
                   className="p-3 bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-700 dark:text-gray-300 rounded-xl flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer h-[46px] w-[46px] flex-shrink-0"
                   title="重新检测网址图标"
                 >

@@ -257,6 +257,10 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
     }
+    // 如果已经本地上传了图标，则停用通过网址搜索图标功能
+    if (iconFromUpload) {
+      return;
+    }
     const url = customUrl.trim();
     if (!url) {
       setFaviconStatus('idle');
@@ -282,7 +286,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
     };
-  }, [customUrl]);
+  }, [customUrl, iconFromUpload]);
 
   // 监听对话框打开状态，自动拉取后端推荐网站分类数据并清空上一次的输入和识别内容
   useEffect(() => {
@@ -336,7 +340,8 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
       if (res.code === 200 && res.data?.iconUrl) {
         const url = res.data.iconUrl;
         setCustomIconUrl(url);
-        setDetectedIcons(prev => [url, ...prev.filter(u => u !== url)]);
+        // 清空所有通过网址搜索的图标，只保留本地上传的图标
+        setDetectedIcons([url]);
         setIconFromUpload(true);
         setFaviconStatus('detected');
       } else {
@@ -565,7 +570,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                           type="text"
                           value={customUrl}
                           onChange={(e) => setCustomUrl(e.target.value)}
-                          onBlur={() => triggerSearch(customUrl)}
+                          onBlur={() => !iconFromUpload && triggerSearch(customUrl)}
                           placeholder="https://example.com"
                           className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground outline-none focus:border-blue-500 focus:bg-card transition-all placeholder-gray-400 dark:placeholder-gray-500"
                         />
@@ -616,7 +621,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                           <button
                             type="button"
                             onClick={() => triggerSearch(customUrl)}
-                            disabled={!isValidDomainOrUrl(customUrl) || faviconStatus === 'loading' || faviconStatus === 'uploading'}
+                            disabled={!isValidDomainOrUrl(customUrl) || faviconStatus === 'loading' || faviconStatus === 'uploading' || iconFromUpload}
                             className="p-3 bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-700 dark:text-gray-300 rounded-xl flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer h-[46px] w-[46px] flex-shrink-0"
                             title="重新检测网址图标"
                           >
