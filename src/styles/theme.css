@@ -184,10 +184,16 @@
 
 @utility glass-widget-xl {
   @apply bg-white/35 dark:bg-black/60 border border-white/30 dark:border-white/20 shadow-xl backdrop-blur-2xl;
+  /* 强制启用 3D 合成层并隐藏背面，预防 backdrop-filter 在 GPU 重绘时与 filter 冲突导致的闪烁 */
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
 }
 
 @utility glass-widget-opaque {
   @apply bg-white/90 dark:bg-neutral-900/95 border border-neutral-300 dark:border-neutral-700 shadow-xl backdrop-blur-2xl;
+  /* 强制启用 3D 合成层并隐藏背面，预防 backdrop-filter 在 GPU 重绘时与 filter 冲突导致的闪烁 */
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
 }
 
 @layer base {

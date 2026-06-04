@@ -512,6 +512,8 @@ export default function App() {
               x={widget.x}
               y={widget.y}
               isEditMode={isEditMode}
+              // 传入 isDragging 属性，当 activeDraggingId 与当前组件 id 一致时为 true，借此动态控制 will-change 以避免毛玻璃背景闪烁
+              isDragging={activeDraggingId === widget.id}
               onStartDrag={(id, style, ox, oy) => {
                 activeDraggingStyleRef.current = style;
                 setActiveDraggingId(id);
