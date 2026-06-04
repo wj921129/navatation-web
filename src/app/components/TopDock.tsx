@@ -1,4 +1,4 @@
-import { CheckSquare, Shuffle, Sun, Moon, Loader2, Clock } from 'lucide-react';
+import { CheckSquare, Shuffle, Sun, Moon, Loader2, LayoutGrid } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 
 interface TopDockProps {
@@ -204,16 +204,16 @@ export function TopDock({
                   ? 'text-text-secondary hover:text-text-primary hover:bg-input-bg cursor-pointer'
                   : 'text-text-secondary/40 hover:text-text-secondary hover:bg-input-bg cursor-pointer'
             }`}
-            aria-label={isEditMode ? '添加时钟小组件' : clocksVisible ? '隐藏时钟' : '显示时钟'}
+            aria-label={isEditMode ? '添加小组件' : clocksVisible ? '隐藏小组件' : '显示小组件'}
           >
             <span className="dock-icon-wrapper transition-transform duration-150 ease-out flex items-center justify-center" style={{ willChange: 'transform' }}>
-              <Clock className="w-4 h-4" />
+              <LayoutGrid className="w-4 h-4" />
             </span>
           </button>
           <span className={`pointer-events-none absolute top-[42px] left-1/2 -translate-x-1/2 px-2 py-1 bg-widget-bg/95 border border-widget-border text-text-primary shadow-md text-[10px] rounded opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap z-50 backdrop-blur-md ${
             isEditMode && isHoveringClockMenu ? '!opacity-0 !scale-95' : ''
           }`}>
-            {isEditMode ? '添加时钟' : clocksVisible ? '隐藏时钟' : '显示时钟'}
+            {isEditMode ? '添加小组件' : clocksVisible ? '隐藏小组件' : '显示小组件'}
           </span>
           {isEditMode && clockMenuPanel}
         </div>

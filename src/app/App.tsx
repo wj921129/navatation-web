@@ -16,6 +16,8 @@ import { authStore } from './stores/auth-store';
 import { useWidgets } from './hooks/useWidgets';
 import { useClockMenu } from './hooks/useClockMenu';
 import ClockWidget from './components/widgets/ClockWidget';
+import PomodoroWidget from './components/widgets/PomodoroWidget';
+import BreatheWidget from './components/widgets/BreatheWidget';
 import { useRef } from 'react';
 import AnalogClock from './components/widgets/AnalogClock';
 import DigitalClock from './components/widgets/DigitalClock';
@@ -131,15 +133,15 @@ export default function App() {
 
   const [activeDraggingId, setActiveDraggingId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const activeDraggingStyleRef = useRef<'analog' | 'digital' | 'flip' | 'traditional' | null>(null);
+  const activeDraggingStyleRef = useRef<'analog' | 'digital' | 'flip' | 'traditional' | 'pomodoro' | 'breathe' | null>(null);
 
   // Menu drag-and-drop state & refs
-  const [menuDraggingStyle, setMenuDraggingStyle] = useState<'analog' | 'digital' | 'flip' | 'traditional' | null>(null);
+  const [menuDraggingStyle, setMenuDraggingStyle] = useState<'analog' | 'digital' | 'flip' | 'traditional' | 'pomodoro' | 'breathe' | null>(null);
   const [menuDragPos, setMenuDragPos] = useState({ x: 0, y: 0 });
   const [menuDragHasMoved, setMenuDragHasMoved] = useState(false);
   const menuDragStartPosRef = useRef({ x: 0, y: 0 });
   const menuDragHasMovedRef = useRef(false);
-  const menuDraggingStyleRef = useRef<'analog' | 'digital' | 'flip' | 'traditional' | null>(null);
+  const menuDraggingStyleRef = useRef<'analog' | 'digital' | 'flip' | 'traditional' | 'pomodoro' | 'breathe' | null>(null);
 
 
   const {
@@ -219,6 +221,12 @@ export default function App() {
     } else if (style === 'flip') {
       clockWidth = 200;
       clockHeight = 100;
+    } else if (style === 'pomodoro') {
+      clockWidth = 180;
+      clockHeight = 220;
+    } else if (style === 'breathe') {
+      clockWidth = 160;
+      clockHeight = 160;
     }
 
     const ox = clockWidth / 2;
@@ -252,6 +260,12 @@ export default function App() {
         } else if (style === 'flip') {
           clockWidth = 200;
           clockHeight = 100;
+        } else if (style === 'pomodoro') {
+          clockWidth = 180;
+          clockHeight = 220;
+        } else if (style === 'breathe') {
+          clockWidth = 160;
+          clockHeight = 160;
         }
         const ox = clockWidth / 2;
         const oy = clockHeight / 2;
@@ -265,9 +279,15 @@ export default function App() {
 
         const xPercent = (newX / window.innerWidth) * 100;
         const yPercent = (newY / window.innerHeight) * 100;
-        addWidget('clock', style, xPercent, yPercent);
+        let type = 'clock';
+        if (style === 'pomodoro') type = 'pomodoro';
+        if (style === 'breathe') type = 'breathe';
+        addWidget(type, style, xPercent, yPercent);
       } else {
-        addWidget('clock', style, 40, 30);
+        let type = 'clock';
+        if (style === 'pomodoro') type = 'pomodoro';
+        if (style === 'breathe') type = 'breathe';
+        addWidget(type, style, 40, 30);
       }
     }
 
@@ -281,7 +301,7 @@ export default function App() {
     window.removeEventListener('pointerup', handleMenuDragUp);
   }, [addWidget, triggerCloseClock, handleMenuDragMove]);
 
-  const handleDragStartFromMenu = useCallback((e: React.PointerEvent<HTMLButtonElement>, style: 'analog' | 'digital' | 'flip' | 'traditional') => {
+  const handleDragStartFromMenu = useCallback((e: React.PointerEvent<HTMLButtonElement>, style: 'analog' | 'digital' | 'flip' | 'traditional' | 'pomodoro' | 'breathe') => {
     e.preventDefault();
     menuDragStartPosRef.current = { x: e.clientX, y: e.clientY };
     menuDraggingStyleRef.current = style;
@@ -297,6 +317,12 @@ export default function App() {
     } else if (style === 'flip') {
       clockWidth = 200;
       clockHeight = 100;
+    } else if (style === 'pomodoro') {
+      clockWidth = 180;
+      clockHeight = 220;
+    } else if (style === 'breathe') {
+      clockWidth = 160;
+      clockHeight = 160;
     }
     const ox = clockWidth / 2;
     const oy = clockHeight / 2;
@@ -337,6 +363,12 @@ export default function App() {
     } else if (activeDraggingStyleRef.current === 'flip') {
       clockWidth = 200;
       clockHeight = 100;
+    } else if (activeDraggingStyleRef.current === 'pomodoro') {
+      clockWidth = 180;
+      clockHeight = 220;
+    } else if (activeDraggingStyleRef.current === 'breathe') {
+      clockWidth = 160;
+      clockHeight = 160;
     }
 
     const maxX = window.innerWidth - clockWidth;
@@ -443,6 +475,32 @@ export default function App() {
           </div>
           <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">翻页</span>
         </button>
+
+        {/* Pomodoro style */}
+        <button
+          onPointerDown={(e) => handleDragStartFromMenu(e, 'pomodoro' as any)}
+          className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg transition-colors cursor-grab active:cursor-grabbing group/btn"
+        >
+          <div className="w-12 h-12 flex items-center justify-center relative">
+            <div className="w-8 h-8 rounded-full border-2 border-blue-500/60 group-hover/btn:border-blue-500 flex items-center justify-center">
+              <div className="w-1 h-3 bg-blue-500/60 group-hover/btn:bg-blue-500 absolute top-2" />
+            </div>
+          </div>
+          <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">番茄钟</span>
+        </button>
+
+        {/* Breathe style */}
+        <button
+          onPointerDown={(e) => handleDragStartFromMenu(e, 'breathe' as any)}
+          className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg transition-colors cursor-grab active:cursor-grabbing group/btn"
+        >
+          <div className="w-12 h-12 flex items-center justify-center relative">
+            <div className="w-8 h-8 rounded-full border border-teal-500/30 group-hover/btn:border-teal-500 flex items-center justify-center bg-teal-500/10">
+              <div className="w-4 h-4 rounded-full bg-teal-500/40 group-hover/btn:bg-teal-500/80" />
+            </div>
+          </div>
+          <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">冥想</span>
+        </button>
       </div>
     </div>
   );
@@ -523,6 +581,44 @@ export default function App() {
             />
           ))}
 
+        {(isEditMode ? tempWidgets : (clocksVisible ? widgets : []))
+          .filter((w) => w.type === 'pomodoro')
+          .map((widget) => (
+            <PomodoroWidget
+              key={widget.id}
+              id={widget.id}
+              x={widget.x}
+              y={widget.y}
+              isEditMode={isEditMode}
+              isDragging={activeDraggingId === widget.id}
+              onStartDrag={(id, type, ox, oy) => {
+                activeDraggingStyleRef.current = type as any;
+                setActiveDraggingId(id);
+                setDragOffset({ x: ox, y: oy });
+              }}
+              onDelete={removeWidget}
+            />
+          ))}
+
+        {(isEditMode ? tempWidgets : (clocksVisible ? widgets : []))
+          .filter((w) => w.type === 'breathe')
+          .map((widget) => (
+            <BreatheWidget
+              key={widget.id}
+              id={widget.id}
+              x={widget.x}
+              y={widget.y}
+              isEditMode={isEditMode}
+              isDragging={activeDraggingId === widget.id}
+              onStartDrag={(id, type, ox, oy) => {
+                activeDraggingStyleRef.current = type as any;
+                setActiveDraggingId(id);
+                setDragOffset({ x: ox, y: oy });
+              }}
+              onDelete={removeWidget}
+            />
+          ))}
+
         {menuDraggingStyle && menuDragHasMoved && (
           <div
             className="absolute pointer-events-none opacity-60 z-50 select-none border border-dashed border-blue-500/60 p-1 rounded-3xl bg-blue-500/5 shadow-xl"
@@ -535,6 +631,12 @@ export default function App() {
             {menuDraggingStyle === 'traditional' && <TraditionalClock />}
             {menuDraggingStyle === 'digital' && <DigitalClock />}
             {menuDraggingStyle === 'flip' && <FlipClock />}
+            {menuDraggingStyle === 'pomodoro' && (
+              <div className="w-[180px] h-[220px] rounded-3xl border-2 border-widget-border bg-widget-bg backdrop-blur-md" />
+            )}
+            {menuDraggingStyle === 'breathe' && (
+              <div className="w-[160px] h-[160px] rounded-[2rem] border-2 border-widget-border bg-widget-bg backdrop-blur-md" />
+            )}
           </div>
         )}
 
