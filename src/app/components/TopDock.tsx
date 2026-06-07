@@ -192,8 +192,8 @@ export function TopDock({
         <div
           ref={item4Ref}
           className="relative group"
-          onMouseEnter={isEditMode ? onMouseEnterClock : undefined}
-          onMouseLeave={isEditMode ? onMouseLeaveClock : undefined}
+          onMouseEnter={onMouseEnterClock}
+          onMouseLeave={onMouseLeaveClock}
         >
           <button
             onClick={isEditMode ? undefined : onToggleClockVisibility}
@@ -211,11 +211,11 @@ export function TopDock({
             </span>
           </button>
           <span className={`pointer-events-none absolute top-[42px] left-1/2 -translate-x-1/2 px-2 py-1 bg-widget-bg/95 border border-widget-border text-text-primary shadow-md text-[10px] rounded opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap z-50 backdrop-blur-md ${
-            isEditMode && isHoveringClockMenu ? '!opacity-0 !scale-95' : ''
+            isHoveringClockMenu ? '!opacity-0 !scale-95' : ''
           }`}>
             {isEditMode ? '添加小组件' : clocksVisible ? '隐藏小组件' : '显示小组件'}
           </span>
-          {isEditMode && clockMenuPanel}
+          {clockMenuPanel}
         </div>
       </>
     </div>

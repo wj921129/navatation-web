@@ -430,7 +430,7 @@ export default function App() {
         <div className="flex items-center gap-1.5 p-1 rounded-xl bg-input-bg/40 border border-widget-border/40 w-fit justify-between">
           <button
             onMouseEnter={() => setActiveCategory('clock')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200 cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-300 ease-out cursor-pointer ${
               activeCategory === 'clock'
                 ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 scale-105'
                 : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20 border border-transparent'
@@ -442,7 +442,7 @@ export default function App() {
 
           <button
             onMouseEnter={() => setActiveCategory('calendar')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200 cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-300 ease-out cursor-pointer ${
               activeCategory === 'calendar'
                 ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 scale-105'
                 : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20 border border-transparent'
@@ -454,7 +454,7 @@ export default function App() {
 
           <button
             onMouseEnter={() => setActiveCategory('timer')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200 cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-300 ease-out cursor-pointer ${
               activeCategory === 'timer'
                 ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 scale-105'
                 : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20 border border-transparent'
@@ -466,7 +466,7 @@ export default function App() {
 
           <button
             onMouseEnter={() => setActiveCategory('breathe')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200 cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-300 ease-out cursor-pointer ${
               activeCategory === 'breathe'
                 ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 scale-105'
                 : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20 border border-transparent'
@@ -479,7 +479,16 @@ export default function App() {
       </div>
 
       {/* 级联菜单：第三级具体功能栏 */}
-      <div className="w-fit bg-widget-bg/95 border border-widget-border shadow-xl backdrop-blur-xl rounded-2xl p-3 flex items-center justify-center min-h-[82px]">
+      <div className={`relative w-fit bg-widget-bg/95 border border-widget-border shadow-xl backdrop-blur-xl rounded-2xl p-3 flex items-center justify-center min-h-[82px] transition-all duration-300 ${
+        !isEditMode ? 'opacity-60 grayscale cursor-not-allowed' : ''
+      }`}>
+        {!isEditMode && (
+          <div 
+            className="absolute inset-0 z-50 rounded-2xl" 
+            title="请先开启编辑模式，再添加小组件到桌面"
+            onPointerDown={(e) => e.stopPropagation()} 
+          />
+        )}
         {activeCategory === 'clock' && (
           <div className="flex items-center gap-3 animate-fade-in">
             {/* Analog style */}
