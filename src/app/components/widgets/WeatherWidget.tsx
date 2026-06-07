@@ -1,0 +1,74 @@
+import { X } from 'lucide-react';
+import { useRef } from 'react';
+import SimpleWeather from './SimpleWeather';
+
+interface WeatherWidgetProps {
+  id: string;
+  style: 'simple' | string;
+  x: number;
+  y: number;
+  isEditMode: boolean;
+  onStartDrag: (id: string, type: 'weather', style: string, offsetX: number, offsetY: number) => void;
+  onDelete: (id: string) => void;
+  isDragging?: boolean;
+}
+
+export default function WeatherWidget({ id, style, x, y, isEditMode, onStartDrag, onDelete, isDragging = false }: WeatherWidgetProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isEditMode) return;
+    const target = e.target as HTMLElement;
+    if (target.closest('.delete-btn')) return;
+
+    e.preventDefault();
+    const container = containerRef.current;
+    if (!container) return;
+
+    const rect = container.getBoundingClientRect();
+    const offsetX = e.clientX - rect.left;
+    const offsetY = e.clientY - rect.top;
+
+    onStartDrag(id, 'weather', style, offsetX, offsetY);
+  };
+
+  const renderStyle = () => {
+    switch (style) {
+      case 'simple':
+      default:
+        return <SimpleWeather />;
+    }
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      onPointerDown={handlePointerDown}
+      className={`absolute select-none z-20 group touch-none isolate ${
+        isEditMode ? 'cursor-grab active:cursor-grabbing' : ''
+      }`}
+      style={{
+        left: `${x}%`,
+        top: `${y}%`,
+        isolation: 'isolate',
+        willChange: isDragging ? 'transform' : 'auto',
+        transform: 'translate3d(0, 0, 0)',
+        backfaceVisibility: 'hidden',
+      }}
+    >
+      {isEditMode && (
+        <div className="absolute -inset-1.5 border-2 border-dashed border-blue-500/60 group-hover:border-blue-500 group-hover:bg-blue-500/5 rounded-3xl transition-all duration-150 pointer-events-none z-10" />
+      )}
+      {isEditMode && (
+        <button
+          onClick={() => onDelete(id)}
+          className="delete-btn absolute -top-2.5 -right-2.5 w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg flex items-center justify-center cursor-pointer scale-0 group-hover:scale-100 transition-all duration-200 z-30"
+          aria-label="删除天气"
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
+      )}
+      {renderStyle()}
+    </div>
+  );
+}

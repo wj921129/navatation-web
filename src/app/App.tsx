@@ -1,4 +1,4 @@
-import { Plus, Edit3, Save, Settings, User, Clock, Calendar, Timer, Flower2 } from 'lucide-react';
+import { Plus, Edit3, Save, Settings, User, Clock, Calendar, Timer, Flower2, CloudSun } from 'lucide-react';
 import { IconMap } from './components/ui/IconMap';
 import { useState, useEffect, useCallback } from 'react';
 import { SettingsDialog } from './components/SettingsDialog';
@@ -23,6 +23,10 @@ import AnalogClock from './components/widgets/AnalogClock';
 import DigitalClock from './components/widgets/DigitalClock';
 import FlipClock from './components/widgets/FlipClock';
 import TraditionalClock from './components/widgets/TraditionalClock';
+import CalendarWidget from './components/widgets/CalendarWidget';
+import WeatherWidget from './components/widgets/WeatherWidget';
+import MonthCalendar from './components/widgets/MonthCalendar';
+import SimpleWeather from './components/widgets/SimpleWeather';
 
 
 import { SearchBox } from './components/SearchBox';
@@ -52,7 +56,8 @@ export default function App() {
   const [calendarVisible, setCalendarVisible] = useState<boolean>(() => localStorage.getItem('navatation_calendar_visible') !== '0');
   const [timerVisible, setTimerVisible] = useState<boolean>(() => localStorage.getItem('navatation_timer_visible') !== '0');
   const [breatheVisible, setBreatheVisible] = useState<boolean>(() => localStorage.getItem('navatation_breathe_visible') !== '0');
-  const [activeCategory, setActiveCategory] = useState<'clock' | 'calendar' | 'timer' | 'breathe'>('clock');
+  const [weatherVisible, setWeatherVisible] = useState<boolean>(() => localStorage.getItem('navatation_weather_visible') !== '0');
+  const [activeCategory, setActiveCategory] = useState<'clock' | 'calendar' | 'timer' | 'breathe' | 'weather'>('clock');
 
   const handleAiSearch = useCallback((query: string, engine: string) => {
     setAiSearchQuery(query);
@@ -70,6 +75,7 @@ export default function App() {
   const handleToggleCalendarVisibility = useCallback(() => setCalendarVisible(prev => { localStorage.setItem('navatation_calendar_visible', !prev ? '1' : '0'); return !prev; }), []);
   const handleToggleTimerVisibility = useCallback(() => setTimerVisible(prev => { localStorage.setItem('navatation_timer_visible', !prev ? '1' : '0'); return !prev; }), []);
   const handleToggleBreatheVisibility = useCallback(() => setBreatheVisible(prev => { localStorage.setItem('navatation_breathe_visible', !prev ? '1' : '0'); return !prev; }), []);
+  const handleToggleWeatherVisibility = useCallback(() => setWeatherVisible(prev => { localStorage.setItem('navatation_weather_visible', !prev ? '1' : '0'); return !prev; }), []);
 
   // 1. 订阅登录状态
   const [authState, setAuthState] = useState(authStore.getState());
@@ -146,15 +152,15 @@ export default function App() {
 
   const [activeDraggingId, setActiveDraggingId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const activeDraggingStyleRef = useRef<'analog' | 'digital' | 'flip' | 'traditional' | 'pomodoro' | 'breathe' | null>(null);
+  const activeDraggingStyleRef = useRef<'analog' | 'digital' | 'flip' | 'traditional' | 'pomodoro' | 'breathe' | 'month' | 'simple' | null>(null);
 
   // Menu drag-and-drop state & refs
-  const [menuDraggingStyle, setMenuDraggingStyle] = useState<'analog' | 'digital' | 'flip' | 'traditional' | 'pomodoro' | 'breathe' | null>(null);
+  const [menuDraggingStyle, setMenuDraggingStyle] = useState<'analog' | 'digital' | 'flip' | 'traditional' | 'pomodoro' | 'breathe' | 'month' | 'simple' | null>(null);
   const [menuDragPos, setMenuDragPos] = useState({ x: 0, y: 0 });
   const [menuDragHasMoved, setMenuDragHasMoved] = useState(false);
   const menuDragStartPosRef = useRef({ x: 0, y: 0 });
   const menuDragHasMovedRef = useRef(false);
-  const menuDraggingStyleRef = useRef<'analog' | 'digital' | 'flip' | 'traditional' | 'pomodoro' | 'breathe' | null>(null);
+  const menuDraggingStyleRef = useRef<'analog' | 'digital' | 'flip' | 'traditional' | 'pomodoro' | 'breathe' | 'month' | 'simple' | null>(null);
 
 
   const {
@@ -240,6 +246,12 @@ export default function App() {
     } else if (style === 'breathe') {
       clockWidth = 160;
       clockHeight = 160;
+    } else if (style === 'month') {
+      clockWidth = 200;
+      clockHeight = 220;
+    } else if (style === 'simple') {
+      clockWidth = 140;
+      clockHeight = 140;
     }
 
     const ox = clockWidth / 2;
@@ -279,6 +291,12 @@ export default function App() {
         } else if (style === 'breathe') {
           clockWidth = 160;
           clockHeight = 160;
+        } else if (style === 'month') {
+          clockWidth = 200;
+          clockHeight = 220;
+        } else if (style === 'simple') {
+          clockWidth = 140;
+          clockHeight = 140;
         }
         const ox = clockWidth / 2;
         const oy = clockHeight / 2;
@@ -295,11 +313,15 @@ export default function App() {
         let type = 'clock';
         if (style === 'pomodoro') type = 'pomodoro';
         if (style === 'breathe') type = 'breathe';
+        if (style === 'month') type = 'calendar';
+        if (style === 'simple') type = 'weather';
         addWidget(type, style, xPercent, yPercent);
       } else {
         let type = 'clock';
         if (style === 'pomodoro') type = 'pomodoro';
         if (style === 'breathe') type = 'breathe';
+        if (style === 'month') type = 'calendar';
+        if (style === 'simple') type = 'weather';
         addWidget(type, style, 40, 30);
       }
     }
@@ -314,7 +336,7 @@ export default function App() {
     window.removeEventListener('pointerup', handleMenuDragUp);
   }, [addWidget, triggerCloseClock, handleMenuDragMove]);
 
-  const handleDragStartFromMenu = useCallback((e: React.PointerEvent<HTMLButtonElement>, style: 'analog' | 'digital' | 'flip' | 'traditional' | 'pomodoro' | 'breathe') => {
+  const handleDragStartFromMenu = useCallback((e: React.PointerEvent<HTMLButtonElement>, style: 'analog' | 'digital' | 'flip' | 'traditional' | 'pomodoro' | 'breathe' | 'month' | 'simple') => {
     e.preventDefault();
     menuDragStartPosRef.current = { x: e.clientX, y: e.clientY };
     menuDraggingStyleRef.current = style;
@@ -336,6 +358,12 @@ export default function App() {
     } else if (style === 'breathe') {
       clockWidth = 160;
       clockHeight = 160;
+    } else if (style === 'month') {
+      clockWidth = 200;
+      clockHeight = 220;
+    } else if (style === 'simple') {
+      clockWidth = 140;
+      clockHeight = 140;
     }
     const ox = clockWidth / 2;
     const oy = clockHeight / 2;
@@ -382,6 +410,12 @@ export default function App() {
     } else if (activeDraggingStyleRef.current === 'breathe') {
       clockWidth = 160;
       clockHeight = 160;
+    } else if (activeDraggingStyleRef.current === 'month') {
+      clockWidth = 200;
+      clockHeight = 220;
+    } else if (activeDraggingStyleRef.current === 'simple') {
+      clockWidth = 140;
+      clockHeight = 140;
     }
 
     const maxX = window.innerWidth - clockWidth;
@@ -477,6 +511,15 @@ export default function App() {
             <Flower2 className="w-3.5 h-3.5" />
             <span>冥想</span>
           </button>
+
+          <button
+            onMouseEnter={() => isEditMode && setActiveCategory('weather')}
+            onClick={() => !isEditMode && handleToggleWeatherVisibility()}
+            className={getCategoryBtnClass(isEditMode ? activeCategory === 'weather' : weatherVisible)}
+          >
+            <CloudSun className="w-3.5 h-3.5" />
+            <span>天气</span>
+          </button>
         </div>
       </div>
 
@@ -545,9 +588,21 @@ export default function App() {
         )}
 
         {activeCategory === 'calendar' && (
-          <div className="flex flex-col items-center justify-center py-3 px-6 text-text-secondary animate-fade-in select-none">
-            <Calendar className="w-5 h-5 opacity-40 mb-1 text-text-secondary" />
-            <span className="text-[10px] font-light tracking-wide">日历组件正在开发中，敬请期待...</span>
+          <div className="flex items-center gap-3 animate-fade-in">
+            {/* Month Calendar style */}
+            <button
+              onPointerDown={(e) => handleDragStartFromMenu(e, 'month')}
+              className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/50 transition-colors cursor-grab active:cursor-grabbing group/btn"
+            >
+              <div className="w-16 h-16 flex items-center justify-center relative bg-input-bg/20 border border-widget-border rounded-xl shadow-sm transition-all overflow-hidden p-1">
+                <div className="w-full h-full flex flex-col gap-0.5">
+                  <div className="w-full h-2 bg-blue-500/20 rounded-sm mb-1" />
+                  <div className="flex justify-between w-full"><div className="w-2 h-2 rounded-sm bg-widget-border" /><div className="w-2 h-2 rounded-sm bg-widget-border" /><div className="w-2 h-2 rounded-sm bg-widget-border" /></div>
+                  <div className="flex justify-between w-full"><div className="w-2 h-2 rounded-sm bg-widget-border" /><div className="w-2 h-2 rounded-sm bg-blue-500" /><div className="w-2 h-2 rounded-sm bg-widget-border" /></div>
+                </div>
+              </div>
+              <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">月历</span>
+            </button>
           </div>
         )}
 
@@ -581,6 +636,21 @@ export default function App() {
                 </div>
               </div>
               <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">冥想</span>
+            </button>
+          </div>
+        )}
+
+        {activeCategory === 'weather' && (
+          <div className="flex items-center gap-3 animate-fade-in">
+            {/* Simple Weather style */}
+            <button
+              onPointerDown={(e) => handleDragStartFromMenu(e, 'simple')}
+              className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/50 transition-colors cursor-grab active:cursor-grabbing group/btn"
+            >
+              <div className="w-16 h-16 flex items-center justify-center relative bg-input-bg/20 border border-widget-border rounded-xl shadow-sm transition-all">
+                <CloudSun className="w-6 h-6 text-text-secondary group-hover/btn:text-yellow-400 transition-colors" />
+              </div>
+              <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">天气</span>
             </button>
           </div>
         )}
@@ -703,6 +773,46 @@ export default function App() {
             />
           ))}
 
+        {(isEditMode ? tempWidgets : (calendarVisible ? widgets : []))
+          .filter((w) => w.type === 'calendar')
+          .map((widget) => (
+            <CalendarWidget
+              key={widget.id}
+              id={widget.id}
+              style={widget.style}
+              x={widget.x}
+              y={widget.y}
+              isEditMode={isEditMode}
+              isDragging={activeDraggingId === widget.id}
+              onStartDrag={(id, type, style, ox, oy) => {
+                activeDraggingStyleRef.current = style as any;
+                setActiveDraggingId(id);
+                setDragOffset({ x: ox, y: oy });
+              }}
+              onDelete={removeWidget}
+            />
+          ))}
+
+        {(isEditMode ? tempWidgets : (weatherVisible ? widgets : []))
+          .filter((w) => w.type === 'weather')
+          .map((widget) => (
+            <WeatherWidget
+              key={widget.id}
+              id={widget.id}
+              style={widget.style}
+              x={widget.x}
+              y={widget.y}
+              isEditMode={isEditMode}
+              isDragging={activeDraggingId === widget.id}
+              onStartDrag={(id, type, style, ox, oy) => {
+                activeDraggingStyleRef.current = style as any;
+                setActiveDraggingId(id);
+                setDragOffset({ x: ox, y: oy });
+              }}
+              onDelete={removeWidget}
+            />
+          ))}
+
         {menuDraggingStyle && menuDragHasMoved && (
           <div
             className="absolute pointer-events-none opacity-60 z-50 select-none border border-dashed border-blue-500/60 p-1 rounded-3xl bg-blue-500/5 shadow-xl"
@@ -720,6 +830,12 @@ export default function App() {
             )}
             {menuDraggingStyle === 'breathe' && (
               <div className="w-[160px] h-[160px] rounded-[2rem] border-2 border-widget-border bg-widget-bg backdrop-blur-md" />
+            )}
+            {menuDraggingStyle === 'month' && (
+              <div className="w-[200px] h-[220px] rounded-3xl border-2 border-widget-border bg-widget-bg backdrop-blur-md" />
+            )}
+            {menuDraggingStyle === 'simple' && (
+              <div className="w-[140px] h-[140px] rounded-3xl border-2 border-widget-border bg-widget-bg backdrop-blur-md" />
             )}
           </div>
         )}
