@@ -412,6 +412,14 @@ export default function App() {
     };
   }, [activeDraggingId, handlePointerMoveGlobal, handlePointerUpGlobal]);
 
+  const getCategoryBtnClass = (isActive: boolean) => `flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-300 ease-out cursor-pointer ${
+    isActive
+      ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 opacity-100 scale-100'
+      : isEditMode
+        ? 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20 border border-transparent scale-100'
+        : 'text-text-secondary/60 opacity-40 border border-transparent bg-input-bg/30 shadow-inner scale-[0.96] hover:scale-[0.98] hover:opacity-60'
+  }`;
+
   const clockMenuPanel = isClockOpen && (
     <div
       onMouseEnter={() => {
@@ -437,11 +445,7 @@ export default function App() {
           <button
             onMouseEnter={() => isEditMode && setActiveCategory('clock')}
             onClick={() => !isEditMode && handleToggleClockVisibility()}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-300 ease-out cursor-pointer ${
-              (isEditMode ? activeCategory === 'clock' : clocksVisible)
-                ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30'
-                : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20 border border-transparent'
-            }`}
+            className={getCategoryBtnClass(isEditMode ? activeCategory === 'clock' : clocksVisible)}
           >
             <Clock className="w-3.5 h-3.5" />
             <span>时钟</span>
@@ -450,11 +454,7 @@ export default function App() {
           <button
             onMouseEnter={() => isEditMode && setActiveCategory('calendar')}
             onClick={() => !isEditMode && handleToggleCalendarVisibility()}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-300 ease-out cursor-pointer ${
-              (isEditMode ? activeCategory === 'calendar' : calendarVisible)
-                ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30'
-                : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20 border border-transparent'
-            }`}
+            className={getCategoryBtnClass(isEditMode ? activeCategory === 'calendar' : calendarVisible)}
           >
             <Calendar className="w-3.5 h-3.5" />
             <span>日历</span>
@@ -463,11 +463,7 @@ export default function App() {
           <button
             onMouseEnter={() => isEditMode && setActiveCategory('timer')}
             onClick={() => !isEditMode && handleToggleTimerVisibility()}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-300 ease-out cursor-pointer ${
-              (isEditMode ? activeCategory === 'timer' : timerVisible)
-                ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30'
-                : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20 border border-transparent'
-            }`}
+            className={getCategoryBtnClass(isEditMode ? activeCategory === 'timer' : timerVisible)}
           >
             <Timer className="w-3.5 h-3.5" />
             <span>计时器</span>
@@ -476,11 +472,7 @@ export default function App() {
           <button
             onMouseEnter={() => isEditMode && setActiveCategory('breathe')}
             onClick={() => !isEditMode && handleToggleBreatheVisibility()}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-300 ease-out cursor-pointer ${
-              (isEditMode ? activeCategory === 'breathe' : breatheVisible)
-                ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30'
-                : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20 border border-transparent'
-            }`}
+            className={getCategoryBtnClass(isEditMode ? activeCategory === 'breathe' : breatheVisible)}
           >
             <Flower2 className="w-3.5 h-3.5" />
             <span>冥想</span>
