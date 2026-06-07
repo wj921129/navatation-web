@@ -432,7 +432,7 @@ export default function App() {
             onMouseEnter={() => setActiveCategory('clock')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-300 ease-out cursor-pointer ${
               activeCategory === 'clock'
-                ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 scale-105'
+                ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30'
                 : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20 border border-transparent'
             }`}
           >
@@ -444,7 +444,7 @@ export default function App() {
             onMouseEnter={() => setActiveCategory('calendar')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-300 ease-out cursor-pointer ${
               activeCategory === 'calendar'
-                ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 scale-105'
+                ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30'
                 : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20 border border-transparent'
             }`}
           >
@@ -456,7 +456,7 @@ export default function App() {
             onMouseEnter={() => setActiveCategory('timer')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-300 ease-out cursor-pointer ${
               activeCategory === 'timer'
-                ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 scale-105'
+                ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30'
                 : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20 border border-transparent'
             }`}
           >
@@ -468,7 +468,7 @@ export default function App() {
             onMouseEnter={() => setActiveCategory('breathe')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-300 ease-out cursor-pointer ${
               activeCategory === 'breathe'
-                ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 scale-105'
+                ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30'
                 : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20 border border-transparent'
             }`}
           >
