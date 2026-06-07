@@ -420,63 +420,65 @@ export default function App() {
           triggerCloseClock();
         }, 1000);
       }}
-      className={`absolute top-[71px] left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-2.5 p-3.5 rounded-3xl bg-widget-bg/95 border border-widget-border shadow-2xl backdrop-blur-xl text-text-primary select-none cursor-default whitespace-nowrap min-w-[320px] transition-all duration-300 ${
+      className={`absolute top-[71px] left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-[30px] text-text-primary select-none cursor-default whitespace-nowrap min-w-[320px] transition-all duration-300 pointer-events-auto ${
         isClockClosing ? 'brightness-panel-exit' : 'brightness-panel-enter'
       }`}
     >
-      {/* 级联菜单：第一级分类栏 */}
-      <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-input-bg/40 border border-widget-border/40 w-full justify-between">
-        <button
-          onMouseEnter={() => setActiveCategory('clock')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200 cursor-pointer ${
-            activeCategory === 'clock'
-              ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 scale-105'
-              : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20'
-          }`}
-        >
-          <Clock className="w-3.5 h-3.5" />
-          <span>时钟</span>
-        </button>
+      {/* 级联菜单：第二级分类栏 */}
+      <div className="w-full bg-widget-bg/95 border border-widget-border shadow-xl backdrop-blur-xl rounded-2xl p-1.5 flex items-center justify-center">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-input-bg/40 border border-widget-border/40 w-full justify-between">
+          <button
+            onMouseEnter={() => setActiveCategory('clock')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200 cursor-pointer ${
+              activeCategory === 'clock'
+                ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 scale-105'
+                : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20'
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5" />
+            <span>时钟</span>
+          </button>
 
-        <button
-          onMouseEnter={() => setActiveCategory('calendar')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200 cursor-pointer ${
-            activeCategory === 'calendar'
-              ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 scale-105'
-              : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20'
-          }`}
-        >
-          <Calendar className="w-3.5 h-3.5" />
-          <span>日历</span>
-        </button>
+          <button
+            onMouseEnter={() => setActiveCategory('calendar')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200 cursor-pointer ${
+              activeCategory === 'calendar'
+                ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 scale-105'
+                : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20'
+            }`}
+          >
+            <Calendar className="w-3.5 h-3.5" />
+            <span>日历</span>
+          </button>
 
-        <button
-          onMouseEnter={() => setActiveCategory('timer')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200 cursor-pointer ${
-            activeCategory === 'timer'
-              ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 scale-105'
-              : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20'
-          }`}
-        >
-          <Timer className="w-3.5 h-3.5" />
-          <span>计时器</span>
-        </button>
+          <button
+            onMouseEnter={() => setActiveCategory('timer')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200 cursor-pointer ${
+              activeCategory === 'timer'
+                ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 scale-105'
+                : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20'
+            }`}
+          >
+            <Timer className="w-3.5 h-3.5" />
+            <span>计时器</span>
+          </button>
 
-        <button
-          onMouseEnter={() => setActiveCategory('breathe')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200 cursor-pointer ${
-            activeCategory === 'breathe'
-              ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 scale-105'
-              : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20'
-          }`}
-        >
-          <Flower2 className="w-3.5 h-3.5" />
-          <span>冥想</span>
-        </button>
+          <button
+            onMouseEnter={() => setActiveCategory('breathe')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200 cursor-pointer ${
+              activeCategory === 'breathe'
+                ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 scale-105'
+                : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20'
+            }`}
+          >
+            <Flower2 className="w-3.5 h-3.5" />
+            <span>冥想</span>
+          </button>
+        </div>
       </div>
 
-      {/* 级联菜单：第二级详细样式栏 */}
-      <div className="w-full mt-1.5 pt-2.5 border-t border-widget-border/30 flex items-center justify-center min-h-[76px]">
+      {/* 级联菜单：第三级具体功能栏 */}
+      <div className="w-full bg-widget-bg/95 border border-widget-border shadow-xl backdrop-blur-xl rounded-2xl p-3 flex items-center justify-center min-h-[82px]">
         {activeCategory === 'clock' && (
           <div className="flex items-center gap-3 animate-fade-in">
             {/* Analog style */}
