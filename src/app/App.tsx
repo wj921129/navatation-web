@@ -51,12 +51,6 @@ export default function App() {
   });
   const [activeCategory, setActiveCategory] = useState<'clock' | 'calendar' | 'timer' | 'breathe'>('clock');
 
-  useEffect(() => {
-    if (!isClockOpen) {
-      setActiveCategory('clock');
-    }
-  }, [isClockOpen]);
-
   const handleAiSearch = useCallback((query: string, engine: string) => {
     setAiSearchQuery(query);
     setAiSearchEngine(engine);
@@ -137,6 +131,12 @@ export default function App() {
     handleMouseLeaveClock,
     resetClockState,
   } = clockMenuData;
+
+  useEffect(() => {
+    if (!isClockOpen) {
+      setActiveCategory('clock');
+    }
+  }, [isClockOpen]);
 
   const [activeDraggingId, setActiveDraggingId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
