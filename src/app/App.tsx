@@ -49,6 +49,9 @@ export default function App() {
   const [clocksVisible, setClocksVisible] = useState<boolean>(() => {
     return localStorage.getItem('navatation_clocks_visible') !== '0';
   });
+  const [calendarVisible, setCalendarVisible] = useState<boolean>(() => localStorage.getItem('navatation_calendar_visible') !== '0');
+  const [timerVisible, setTimerVisible] = useState<boolean>(() => localStorage.getItem('navatation_timer_visible') !== '0');
+  const [breatheVisible, setBreatheVisible] = useState<boolean>(() => localStorage.getItem('navatation_breathe_visible') !== '0');
   const [activeCategory, setActiveCategory] = useState<'clock' | 'calendar' | 'timer' | 'breathe'>('clock');
 
   const handleAiSearch = useCallback((query: string, engine: string) => {
@@ -64,6 +67,9 @@ export default function App() {
       return next;
     });
   }, []);
+  const handleToggleCalendarVisibility = useCallback(() => setCalendarVisible(prev => { localStorage.setItem('navatation_calendar_visible', !prev ? '1' : '0'); return !prev; }), []);
+  const handleToggleTimerVisibility = useCallback(() => setTimerVisible(prev => { localStorage.setItem('navatation_timer_visible', !prev ? '1' : '0'); return !prev; }), []);
+  const handleToggleBreatheVisibility = useCallback(() => setBreatheVisible(prev => { localStorage.setItem('navatation_breathe_visible', !prev ? '1' : '0'); return !prev; }), []);
 
   // 1. 订阅登录状态
   const [authState, setAuthState] = useState(authStore.getState());
@@ -429,9 +435,10 @@ export default function App() {
       <div className="w-fit bg-widget-bg/95 border border-widget-border shadow-xl backdrop-blur-xl rounded-2xl p-1.5 flex items-center justify-center">
         <div className="flex items-center gap-1.5 p-1 rounded-xl bg-input-bg/40 border border-widget-border/40 w-fit justify-between">
           <button
-            onMouseEnter={() => setActiveCategory('clock')}
+            onMouseEnter={() => isEditMode && setActiveCategory('clock')}
+            onClick={() => !isEditMode && handleToggleClockVisibility()}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-300 ease-out cursor-pointer ${
-              activeCategory === 'clock'
+              (isEditMode ? activeCategory === 'clock' : clocksVisible)
                 ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30'
                 : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20 border border-transparent'
             }`}
@@ -441,9 +448,10 @@ export default function App() {
           </button>
 
           <button
-            onMouseEnter={() => setActiveCategory('calendar')}
+            onMouseEnter={() => isEditMode && setActiveCategory('calendar')}
+            onClick={() => !isEditMode && handleToggleCalendarVisibility()}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-300 ease-out cursor-pointer ${
-              activeCategory === 'calendar'
+              (isEditMode ? activeCategory === 'calendar' : calendarVisible)
                 ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30'
                 : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20 border border-transparent'
             }`}
@@ -453,9 +461,10 @@ export default function App() {
           </button>
 
           <button
-            onMouseEnter={() => setActiveCategory('timer')}
+            onMouseEnter={() => isEditMode && setActiveCategory('timer')}
+            onClick={() => !isEditMode && handleToggleTimerVisibility()}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-300 ease-out cursor-pointer ${
-              activeCategory === 'timer'
+              (isEditMode ? activeCategory === 'timer' : timerVisible)
                 ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30'
                 : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20 border border-transparent'
             }`}
@@ -465,9 +474,10 @@ export default function App() {
           </button>
 
           <button
-            onMouseEnter={() => setActiveCategory('breathe')}
+            onMouseEnter={() => isEditMode && setActiveCategory('breathe')}
+            onClick={() => !isEditMode && handleToggleBreatheVisibility()}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-300 ease-out cursor-pointer ${
-              activeCategory === 'breathe'
+              (isEditMode ? activeCategory === 'breathe' : breatheVisible)
                 ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30'
                 : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20 border border-transparent'
             }`}
@@ -478,17 +488,9 @@ export default function App() {
         </div>
       </div>
 
-      {/* 级联菜单：第三级具体功能栏 */}
-      <div className={`relative w-fit bg-widget-bg/95 border border-widget-border shadow-xl backdrop-blur-xl rounded-2xl p-3 flex items-center justify-center min-h-[82px] transition-all duration-300 ${
-        !isEditMode ? 'opacity-60 grayscale cursor-not-allowed' : ''
-      }`}>
-        {!isEditMode && (
-          <div 
-            className="absolute inset-0 z-50 rounded-2xl" 
-            title="请先开启编辑模式，再添加小组件到桌面"
-            onPointerDown={(e) => e.stopPropagation()} 
-          />
-        )}
+      {/* 级联菜单：第三级具体功能栏 - 仅编辑模式下显示 */}
+      {isEditMode && (
+        <div className="relative w-fit bg-widget-bg/95 border border-widget-border shadow-xl backdrop-blur-xl rounded-2xl p-3 flex items-center justify-center min-h-[82px] transition-all duration-300">
         {activeCategory === 'clock' && (
           <div className="flex items-center gap-3 animate-fade-in">
             {/* Analog style */}
@@ -591,6 +593,7 @@ export default function App() {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 
