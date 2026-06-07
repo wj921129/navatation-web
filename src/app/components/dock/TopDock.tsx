@@ -121,6 +121,10 @@ export function TopDock({
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       className="flex items-center gap-1.5 px-4 py-1 rounded-b-2xl border-t-0 border border-widget-border bg-widget-bg backdrop-blur-xl shadow-md opacity-80 hover:opacity-100 transition-opacity duration-300 cursor-default text-text-primary"
+      style={{
+        transform: 'translate3d(0, 0, 0)',
+        willChange: 'opacity, transform',
+      }}
     >
       {/* 待办事项小组件 */}
       <div ref={item1Ref} className="relative group" onMouseEnter={onMouseEnterOtherWidget}>

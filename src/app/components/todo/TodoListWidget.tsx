@@ -46,6 +46,10 @@ export function TodoListWidget({ onOpenTodoPanel }: TodoListWidgetProps) {
     <div 
       onClick={onOpenTodoPanel}
       className="flex flex-col gap-2 px-4 py-2.5 rounded-b-2xl border-t-0 border border-widget-border bg-widget-bg backdrop-blur-md shadow-md opacity-70 hover:opacity-100 hover:backdrop-blur-xl transition-all duration-300 cursor-pointer w-64 max-h-[220px] overflow-hidden group select-none"
+      style={{
+        transform: 'translate3d(0, 0, 0)',
+        willChange: 'opacity, transform',
+      }}
     >
       {/* 头部标题与统计 */}
       <div className="flex items-center justify-between text-text-primary border-b border-widget-border pb-1">
