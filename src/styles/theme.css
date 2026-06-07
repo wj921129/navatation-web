@@ -55,6 +55,13 @@
   --input-bg: rgba(0, 0, 0, 0.03);
   --input-border: rgba(0, 0, 0, 0.1);
   --icon-bg: #ffffff;
+
+  /* Private Widget Variables to avoid any reuse with main page */
+  --private-widget-bg-clock: rgba(255, 255, 255, 0.35);
+  --private-widget-bg-card: rgba(255, 255, 255, 0.80);
+  --private-widget-bg-control: rgba(255, 255, 255, 0.95);
+  --private-widget-bg-opaque: rgba(255, 255, 255, 0.90);
+  --private-widget-border: rgba(0, 0, 0, 0.08);
 }
 
 .dark {
@@ -108,6 +115,13 @@
   --input-bg: rgba(255, 255, 255, 0.06);
   --input-border: rgba(255, 255, 255, 0.1);
   --icon-bg: #262626;
+
+  /* Private Widget Variables to avoid any reuse with main page */
+  --private-widget-bg-clock: rgba(0, 0, 0, 0.6);
+  --private-widget-bg-card: rgba(20, 20, 20, 0.80);
+  --private-widget-bg-control: rgba(20, 20, 20, 0.65);
+  --private-widget-bg-opaque: rgba(23, 23, 23, 0.95);
+  --private-widget-border: rgba(255, 255, 255, 0.08);
 }
 
 @theme inline {
@@ -182,18 +196,42 @@
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@utility glass-widget-xl {
-  @apply bg-white/35 dark:bg-black/60 border border-white/30 dark:border-white/20 shadow-xl backdrop-blur-2xl;
-  /* 强制启用 3D 合成层并隐藏背面，预防 backdrop-filter 在 GPU 重绘时与 filter 冲突导致的闪烁 */
-  transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
+@utility widget-private-clock {
+  background-color: var(--private-widget-bg-clock);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+}
+.dark .widget-private-clock {
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
-@utility glass-widget-opaque {
-  @apply bg-white/90 dark:bg-neutral-900/95 border border-neutral-300 dark:border-neutral-700 shadow-xl backdrop-blur-2xl;
-  /* 强制启用 3D 合成层并隐藏背面，预防 backdrop-filter 在 GPU 重绘时与 filter 冲突导致的闪烁 */
-  transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
+@utility widget-private-card {
+  background-color: var(--private-widget-bg-card);
+  border: 1px solid var(--private-widget-border);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+@utility widget-private-control {
+  background-color: var(--private-widget-bg-control);
+  border: 1px solid var(--private-widget-border);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+}
+
+@utility widget-private-opaque {
+  background-color: var(--private-widget-bg-opaque);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+}
+.dark .widget-private-opaque {
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 @layer base {

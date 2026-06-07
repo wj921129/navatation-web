@@ -42,7 +42,7 @@ export default function TraditionalClock() {
   // 将 animate-fade-in 移至最外层包裹 div 上，以确保整个时钟组件（包含毛玻璃背景）同步淡入，
   // 防止外层容器与内部 SVG 因渲染时机/淡入动画不一致引发的背景闪烁问题。
   return (
-    <div className="w-[160px] h-[160px] flex items-center justify-center rounded-full glass-widget-opaque relative select-none animate-fade-in">
+    <div className="w-[160px] h-[160px] flex items-center justify-center rounded-full widget-private-opaque relative select-none animate-fade-in">
       {/* 表盘 SVG，逆时针旋转 90 度以使 0 弧度对应 12 点方向（移除了 animate-fade-in 以免与外层动画冲突导致背景色闪烁） */}
       <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
         {/* 60 个分/秒刻度 */}

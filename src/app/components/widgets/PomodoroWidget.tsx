@@ -100,8 +100,8 @@ export default function PomodoroWidget({
         top: `${y}%`,
         isolation: 'isolate',
         willChange: isDragging ? 'transform' : 'auto',
-        transform: 'translate3d(0, 0, 0)',
-        backfaceVisibility: 'hidden',
+        transform: isDragging ? 'translate3d(0, 0, 0)' : 'none',
+        backfaceVisibility: isDragging ? 'hidden' : 'visible',
       }}
     >
       {isEditMode && (
@@ -118,7 +118,7 @@ export default function PomodoroWidget({
         </button>
       )}
 
-      <div className="w-[180px] p-4 rounded-3xl bg-widget-bg/95 border border-widget-border shadow-xl backdrop-blur-2xl flex flex-col items-center gap-3">
+      <div className="w-[180px] p-4 rounded-3xl widget-private-control flex flex-col items-center gap-3">
         <div className="flex items-center justify-between w-full px-2">
           <span className="text-[10px] font-medium tracking-wider text-text-secondary uppercase">
             {mode === 'work' ? '专注时间' : '休息时间'}

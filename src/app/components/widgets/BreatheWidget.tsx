@@ -85,8 +85,8 @@ export default function BreatheWidget({
         top: `${y}%`,
         isolation: 'isolate',
         willChange: isDragging ? 'transform' : 'auto',
-        transform: 'translate3d(0, 0, 0)',
-        backfaceVisibility: 'hidden',
+        transform: isDragging ? 'translate3d(0, 0, 0)' : 'none',
+        backfaceVisibility: isDragging ? 'hidden' : 'visible',
       }}
     >
       {isEditMode && (
@@ -104,7 +104,7 @@ export default function BreatheWidget({
       )}
 
       <div 
-        className="w-[160px] h-[160px] rounded-[2rem] bg-widget-bg/95 border border-widget-border shadow-xl backdrop-blur-2xl flex flex-col items-center justify-center gap-2 cursor-pointer no-drag"
+        className="w-[160px] h-[160px] rounded-[2rem] widget-private-control flex flex-col items-center justify-center gap-2 cursor-pointer no-drag"
         onClick={toggleBreathe}
       >
         <div className="relative w-24 h-24 flex items-center justify-center">

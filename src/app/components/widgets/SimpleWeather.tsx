@@ -62,7 +62,7 @@ export default function SimpleWeather() {
   }, []);
 
   return (
-    <div className="w-[140px] h-[140px] rounded-3xl bg-widget-bg/80 backdrop-blur-xl border border-widget-border p-4 shadow-xl flex flex-col justify-between overflow-hidden relative">
+    <div className="w-[140px] h-[140px] rounded-3xl widget-private-card p-4 flex flex-col justify-between overflow-hidden relative">
       <div className="flex justify-between items-start">
         <div className="flex items-center gap-1 text-text-secondary">
           <MapPin className="w-3 h-3" />

@@ -82,9 +82,9 @@ export default function ClockWidget({
         isolation: 'isolate',
         // 1. 动态 will-change：仅在拖拽时设为 transform，平时设为 auto，防止 backdrop-filter 和 GPU 硬件加速的合成层冲突导致背景毛玻璃闪烁
         willChange: isDragging ? 'transform' : 'auto',
-        // 2. 强制开启 3D 加速渲染并触发 GPU 合成层，同时隐藏背面以消除因重绘引起的背景毛玻璃抖动和闪烁
-        transform: 'translate3d(0, 0, 0)',
-        backfaceVisibility: 'hidden',
+        // 2. 仅在拖拽时开启 3D 加速并触发 GPU 合成层，静止时设为 none 以消除背景毛玻璃闪烁
+        transform: isDragging ? 'translate3d(0, 0, 0)' : 'none',
+        backfaceVisibility: isDragging ? 'hidden' : 'visible',
       }}
     >
       {/* 编辑模式下的虚线外框遮罩，防止由于边框和内边距引起容器尺寸变化与布局抖动 */}

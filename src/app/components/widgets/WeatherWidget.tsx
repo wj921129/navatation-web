@@ -52,8 +52,8 @@ export default function WeatherWidget({ id, style, x, y, isEditMode, onStartDrag
         top: `${y}%`,
         isolation: 'isolate',
         willChange: isDragging ? 'transform' : 'auto',
-        transform: 'translate3d(0, 0, 0)',
-        backfaceVisibility: 'hidden',
+        transform: isDragging ? 'translate3d(0, 0, 0)' : 'none',
+        backfaceVisibility: isDragging ? 'hidden' : 'visible',
       }}
     >
       {isEditMode && (

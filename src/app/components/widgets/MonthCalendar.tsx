@@ -31,7 +31,7 @@ export default function MonthCalendar() {
   }
 
   return (
-    <div className="w-[200px] h-fit rounded-3xl bg-widget-bg/80 backdrop-blur-xl border border-widget-border p-3 shadow-xl flex flex-col gap-2">
+    <div className="w-[200px] h-fit rounded-3xl widget-private-card p-3 flex flex-col gap-2">
       <div className="flex items-center justify-between px-1">
         <span className="text-[12px] font-bold text-text-primary tracking-wider">
           {currentDate.getFullYear()}年 {monthNames[currentDate.getMonth()]}
