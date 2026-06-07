@@ -1,4 +1,4 @@
-import { Plus, Edit3, Save, Settings, User } from 'lucide-react';
+import { Plus, Edit3, Save, Settings, User, Clock, Calendar, Timer, Flower2 } from 'lucide-react';
 import { IconMap } from './components/ui/IconMap';
 import { useState, useEffect, useCallback } from 'react';
 import { SettingsDialog } from './components/SettingsDialog';
@@ -49,6 +49,13 @@ export default function App() {
   const [clocksVisible, setClocksVisible] = useState<boolean>(() => {
     return localStorage.getItem('navatation_clocks_visible') !== '0';
   });
+  const [activeCategory, setActiveCategory] = useState<'clock' | 'calendar' | 'timer' | 'breathe'>('clock');
+
+  useEffect(() => {
+    if (!isClockOpen) {
+      setActiveCategory('clock');
+    }
+  }, [isClockOpen]);
 
   const handleAiSearch = useCallback((query: string, engine: string) => {
     setAiSearchQuery(query);
@@ -413,94 +420,164 @@ export default function App() {
           triggerCloseClock();
         }, 1000);
       }}
-      className={`absolute top-[71px] left-1/2 -translate-x-1/2 z-40 flex items-center gap-4 px-4 py-3 rounded-2xl bg-widget-bg/95 border border-widget-border shadow-2xl backdrop-blur-xl text-text-primary select-none cursor-default whitespace-nowrap ${
+      className={`absolute top-[71px] left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-2.5 p-3.5 rounded-3xl bg-widget-bg/95 border border-widget-border shadow-2xl backdrop-blur-xl text-text-primary select-none cursor-default whitespace-nowrap min-w-[320px] transition-all duration-300 ${
         isClockClosing ? 'brightness-panel-exit' : 'brightness-panel-enter'
       }`}
     >
-      <span className="text-[11px] font-medium tracking-wide text-text-secondary mr-1">选择样式</span>
-      <div className="flex items-center gap-3">
-        {/* Analog style */}
+      {/* 级联菜单：第一级分类栏 */}
+      <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-input-bg/40 border border-widget-border/40 w-full justify-between">
         <button
-          onPointerDown={(e) => handleDragStartFromMenu(e, 'analog')}
-          className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg transition-colors cursor-grab active:cursor-grabbing group/btn"
+          onMouseEnter={() => setActiveCategory('clock')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200 cursor-pointer ${
+            activeCategory === 'clock'
+              ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 scale-105'
+              : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20'
+          }`}
         >
-          <div className="w-12 h-12 rounded-full border-2 border-widget-border group-hover/btn:border-text-primary flex items-center justify-center relative">
-            <div className="w-0.5 h-4 bg-text-primary absolute top-2 rounded-full" />
-            <div className="w-3 h-0.5 bg-text-primary absolute top-6 left-6 rounded-full" />
-            <div className="w-1 h-1 rounded-full bg-red-500 absolute top-[23px] left-[23px]" />
-          </div>
-          <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">模拟</span>
+          <Clock className="w-3.5 h-3.5" />
+          <span>时钟</span>
         </button>
 
-        {/* Traditional style */}
         <button
-          onPointerDown={(e) => handleDragStartFromMenu(e, 'traditional')}
-          className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg transition-colors cursor-grab active:cursor-grabbing group/btn"
+          onMouseEnter={() => setActiveCategory('calendar')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200 cursor-pointer ${
+            activeCategory === 'calendar'
+              ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 scale-105'
+              : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20'
+          }`}
         >
-          <div className="w-12 h-12 rounded-full border-2 border-widget-border group-hover/btn:border-text-primary flex items-center justify-center relative">
-            <span className="text-[8px] font-bold text-text-secondary group-hover/btn:text-text-primary absolute top-0.5">12</span>
-            <span className="text-[8px] font-bold text-text-secondary group-hover/btn:text-text-primary absolute bottom-0.5">6</span>
-            <span className="text-[8px] font-bold text-text-secondary group-hover/btn:text-text-primary absolute left-0.5">9</span>
-            <span className="text-[8px] font-bold text-text-secondary group-hover/btn:text-text-primary absolute right-0.5">3</span>
-            <div className="w-0.5 h-3 bg-text-secondary group-hover/btn:bg-text-primary absolute top-[16px] left-[23px] origin-bottom transform rotate-45" />
-            <div className="w-0.5 h-4 bg-text-secondary group-hover/btn:bg-text-primary absolute top-[12px] left-[23px] origin-bottom transform -rotate-12" />
-          </div>
-          <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">传统</span>
+          <Calendar className="w-3.5 h-3.5" />
+          <span>日历</span>
         </button>
 
-        {/* Digital style */}
         <button
-          onPointerDown={(e) => handleDragStartFromMenu(e, 'digital')}
-          className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg transition-colors cursor-grab active:cursor-grabbing group/btn"
+          onMouseEnter={() => setActiveCategory('timer')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200 cursor-pointer ${
+            activeCategory === 'timer'
+              ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 scale-105'
+              : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20'
+          }`}
         >
-          <div className="w-16 h-12 rounded-xl border border-widget-border group-hover/btn:border-text-secondary flex flex-col items-center justify-center bg-input-bg">
-            <span className="text-[10px] font-mono tracking-tight">12:00:00</span>
-            <span className="text-[6px] text-text-secondary scale-90">6月3日</span>
-          </div>
-          <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">数字</span>
+          <Timer className="w-3.5 h-3.5" />
+          <span>计时器</span>
         </button>
 
-        {/* Flip style */}
         <button
-          onPointerDown={(e) => handleDragStartFromMenu(e, 'flip')}
-          className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg transition-colors cursor-grab active:cursor-grabbing group/btn"
+          onMouseEnter={() => setActiveCategory('breathe')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200 cursor-pointer ${
+            activeCategory === 'breathe'
+              ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 scale-105'
+              : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20'
+          }`}
         >
-          <div className="w-16 h-12 flex items-center justify-center gap-1 bg-input-bg border border-widget-border group-hover/btn:border-text-secondary rounded-xl px-1">
-            <div className="w-6 h-8 rounded bg-widget-bg border border-widget-border flex items-center justify-center">
-              <span className="text-[10px] font-mono font-bold">12</span>
-            </div>
-            <div className="w-6 h-8 rounded bg-widget-bg border border-widget-border flex items-center justify-center">
-              <span className="text-[10px] font-mono font-bold">00</span>
-            </div>
-          </div>
-          <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">翻页</span>
+          <Flower2 className="w-3.5 h-3.5" />
+          <span>冥想</span>
         </button>
+      </div>
 
-        {/* Pomodoro style */}
-        <button
-          onPointerDown={(e) => handleDragStartFromMenu(e, 'pomodoro' as any)}
-          className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg transition-colors cursor-grab active:cursor-grabbing group/btn"
-        >
-          <div className="w-12 h-12 flex items-center justify-center relative">
-            <div className="w-8 h-8 rounded-full border-2 border-blue-500/60 group-hover/btn:border-blue-500 flex items-center justify-center">
-              <div className="w-1 h-3 bg-blue-500/60 group-hover/btn:bg-blue-500 absolute top-2" />
-            </div>
-          </div>
-          <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">番茄钟</span>
-        </button>
+      {/* 级联菜单：第二级详细样式栏 */}
+      <div className="w-full mt-1.5 pt-2.5 border-t border-widget-border/30 flex items-center justify-center min-h-[76px]">
+        {activeCategory === 'clock' && (
+          <div className="flex items-center gap-3 animate-fade-in">
+            {/* Analog style */}
+            <button
+              onPointerDown={(e) => handleDragStartFromMenu(e, 'analog')}
+              className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/50 transition-colors cursor-grab active:cursor-grabbing group/btn"
+            >
+              <div className="w-12 h-12 rounded-full border border-widget-border group-hover/btn:border-text-primary flex items-center justify-center relative bg-input-bg/20 shadow-sm transition-all">
+                <div className="w-0.5 h-4 bg-text-primary absolute top-2 rounded-full" />
+                <div className="w-3 h-0.5 bg-text-primary absolute top-6 left-6 rounded-full" />
+                <div className="w-1 h-1 rounded-full bg-red-500 absolute top-[23px] left-[23px]" />
+              </div>
+              <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">模拟</span>
+            </button>
 
-        {/* Breathe style */}
-        <button
-          onPointerDown={(e) => handleDragStartFromMenu(e, 'breathe' as any)}
-          className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg transition-colors cursor-grab active:cursor-grabbing group/btn"
-        >
-          <div className="w-12 h-12 flex items-center justify-center relative">
-            <div className="w-8 h-8 rounded-full border border-teal-500/30 group-hover/btn:border-teal-500 flex items-center justify-center bg-teal-500/10">
-              <div className="w-4 h-4 rounded-full bg-teal-500/40 group-hover/btn:bg-teal-500/80" />
-            </div>
+            {/* Traditional style */}
+            <button
+              onPointerDown={(e) => handleDragStartFromMenu(e, 'traditional')}
+              className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/50 transition-colors cursor-grab active:cursor-grabbing group/btn"
+            >
+              <div className="w-12 h-12 rounded-full border border-widget-border group-hover/btn:border-text-primary flex items-center justify-center relative bg-input-bg/20 shadow-sm transition-all">
+                <span className="text-[8px] font-bold text-text-secondary group-hover/btn:text-text-primary absolute top-0.5">12</span>
+                <span className="text-[8px] font-bold text-text-secondary group-hover/btn:text-text-primary absolute bottom-0.5">6</span>
+                <span className="text-[8px] font-bold text-text-secondary group-hover/btn:text-text-primary absolute left-0.5">9</span>
+                <span className="text-[8px] font-bold text-text-secondary group-hover/btn:text-text-primary absolute right-0.5">3</span>
+                <div className="w-0.5 h-3 bg-text-secondary group-hover/btn:bg-text-primary absolute top-[16px] left-[23px] origin-bottom transform rotate-45" />
+                <div className="w-0.5 h-4 bg-text-secondary group-hover/btn:bg-text-primary absolute top-[12px] left-[23px] origin-bottom transform -rotate-12" />
+              </div>
+              <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">传统</span>
+            </button>
+
+            {/* Digital style */}
+            <button
+              onPointerDown={(e) => handleDragStartFromMenu(e, 'digital')}
+              className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/50 transition-colors cursor-grab active:cursor-grabbing group/btn"
+            >
+              <div className="w-16 h-12 rounded-xl border border-widget-border group-hover/btn:border-text-secondary flex flex-col items-center justify-center bg-input-bg">
+                <span className="text-[10px] font-mono tracking-tight">12:00:00</span>
+                <span className="text-[6px] text-text-secondary scale-90">6月3日</span>
+              </div>
+              <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">数字</span>
+            </button>
+
+            {/* Flip style */}
+            <button
+              onPointerDown={(e) => handleDragStartFromMenu(e, 'flip')}
+              className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/50 transition-colors cursor-grab active:cursor-grabbing group/btn"
+            >
+              <div className="w-16 h-12 flex items-center justify-center gap-1 bg-input-bg border border-widget-border group-hover/btn:border-text-secondary rounded-xl px-1">
+                <div className="w-6 h-8 rounded bg-widget-bg border border-widget-border flex items-center justify-center">
+                  <span className="text-[10px] font-mono font-bold">12</span>
+                </div>
+                <div className="w-6 h-8 rounded bg-widget-bg border border-widget-border flex items-center justify-center">
+                  <span className="text-[10px] font-mono font-bold">00</span>
+                </div>
+              </div>
+              <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">翻页</span>
+            </button>
           </div>
-          <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">冥想</span>
-        </button>
+        )}
+
+        {activeCategory === 'calendar' && (
+          <div className="flex flex-col items-center justify-center py-3 px-6 text-text-secondary animate-fade-in select-none">
+            <Calendar className="w-5 h-5 opacity-40 mb-1 text-text-secondary" />
+            <span className="text-[10px] font-light tracking-wide">日历组件正在开发中，敬请期待...</span>
+          </div>
+        )}
+
+        {activeCategory === 'timer' && (
+          <div className="flex items-center gap-3 animate-fade-in">
+            {/* Pomodoro style */}
+            <button
+              onPointerDown={(e) => handleDragStartFromMenu(e, 'pomodoro' as any)}
+              className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/50 transition-colors cursor-grab active:cursor-grabbing group/btn"
+            >
+              <div className="w-12 h-12 flex items-center justify-center relative bg-input-bg/20 border border-widget-border rounded-xl shadow-sm transition-all">
+                <div className="w-8 h-8 rounded-full border-2 border-blue-500/60 group-hover/btn:border-blue-500 flex items-center justify-center">
+                  <div className="w-1 h-3 bg-blue-500/60 group-hover/btn:bg-blue-500 absolute top-2" />
+                </div>
+              </div>
+              <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">番茄钟</span>
+            </button>
+          </div>
+        )}
+
+        {activeCategory === 'breathe' && (
+          <div className="flex items-center gap-3 animate-fade-in">
+            {/* Breathe style */}
+            <button
+              onPointerDown={(e) => handleDragStartFromMenu(e, 'breathe' as any)}
+              className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/50 transition-colors cursor-grab active:cursor-grabbing group/btn"
+            >
+              <div className="w-12 h-12 flex items-center justify-center relative bg-input-bg/20 border border-widget-border rounded-xl shadow-sm transition-all">
+                <div className="w-8 h-8 rounded-full border border-teal-500/30 group-hover/btn:border-teal-500 flex items-center justify-center bg-teal-500/10">
+                  <div className="w-4 h-4 rounded-full bg-teal-500/40 group-hover/btn:bg-teal-500/80" />
+                </div>
+              </div>
+              <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">冥想</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
