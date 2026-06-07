@@ -433,7 +433,7 @@ export default function App() {
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200 cursor-pointer ${
               activeCategory === 'clock'
                 ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 scale-105'
-                : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20'
+                : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20 border border-transparent'
             }`}
           >
             <Clock className="w-3.5 h-3.5" />
@@ -445,7 +445,7 @@ export default function App() {
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200 cursor-pointer ${
               activeCategory === 'calendar'
                 ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 scale-105'
-                : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20'
+                : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20 border border-transparent'
             }`}
           >
             <Calendar className="w-3.5 h-3.5" />
@@ -457,7 +457,7 @@ export default function App() {
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200 cursor-pointer ${
               activeCategory === 'timer'
                 ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 scale-105'
-                : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20'
+                : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20 border border-transparent'
             }`}
           >
             <Timer className="w-3.5 h-3.5" />
@@ -469,7 +469,7 @@ export default function App() {
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200 cursor-pointer ${
               activeCategory === 'breathe'
                 ? 'bg-widget-bg text-text-primary shadow-sm border border-widget-border/30 scale-105'
-                : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20'
+                : 'text-text-secondary hover:text-text-primary hover:bg-input-bg/20 border border-transparent'
             }`}
           >
             <Flower2 className="w-3.5 h-3.5" />
