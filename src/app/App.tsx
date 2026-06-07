@@ -420,13 +420,14 @@ export default function App() {
           triggerCloseClock();
         }, 1000);
       }}
-      className={`absolute top-[71px] left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-[30px] text-text-primary select-none cursor-default whitespace-nowrap min-w-[320px] transition-all duration-300 pointer-events-auto ${
+      onMouseMove={(e) => e.stopPropagation()}
+      className={`absolute top-[71px] left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-[30px] text-text-primary select-none cursor-default whitespace-nowrap transition-all duration-300 pointer-events-auto ${
         isClockClosing ? 'brightness-panel-exit' : 'brightness-panel-enter'
       }`}
     >
       {/* 级联菜单：第二级分类栏 */}
-      <div className="w-full bg-widget-bg/95 border border-widget-border shadow-xl backdrop-blur-xl rounded-2xl p-1.5 flex items-center justify-center">
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-input-bg/40 border border-widget-border/40 w-full justify-between">
+      <div className="w-fit bg-widget-bg/95 border border-widget-border shadow-xl backdrop-blur-xl rounded-2xl p-1.5 flex items-center justify-center">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-input-bg/40 border border-widget-border/40 w-fit justify-between">
           <button
             onMouseEnter={() => setActiveCategory('clock')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200 cursor-pointer ${
@@ -478,7 +479,7 @@ export default function App() {
       </div>
 
       {/* 级联菜单：第三级具体功能栏 */}
-      <div className="w-full bg-widget-bg/95 border border-widget-border shadow-xl backdrop-blur-xl rounded-2xl p-3 flex items-center justify-center min-h-[82px]">
+      <div className="w-fit bg-widget-bg/95 border border-widget-border shadow-xl backdrop-blur-xl rounded-2xl p-3 flex items-center justify-center min-h-[82px]">
         {activeCategory === 'clock' && (
           <div className="flex items-center gap-3 animate-fade-in">
             {/* Analog style */}
