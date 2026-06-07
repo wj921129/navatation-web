@@ -1,6 +1,6 @@
 import { X, Link, Upload, Shuffle, Sun, Moon, Monitor } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { settingsService } from '../services/settings-service';
+import { settingsService } from '../../services/settings-service';
 
 interface SettingsDialogProps {
   isOpen: boolean;

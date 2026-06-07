@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { X as XIcon } from 'lucide-react';
-import { IconMap } from './ui/IconMap';
+import { IconMap } from '../ui/IconMap';
 
 const SHORTCUT_DRAG_TYPE = 'SHORTCUT';
 

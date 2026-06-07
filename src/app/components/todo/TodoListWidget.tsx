@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { TodoItem } from '../services/todo-service';
-import { todoStore } from '../stores/todo-store';
-import { authStore } from '../stores/auth-store';
+import { TodoItem } from '../../services/todo-service';
+import { todoStore } from '../../stores/todo-store';
+import { authStore } from '../../stores/auth-store';
 import { CheckCircle2, Circle, ListTodo } from 'lucide-react';
 
 interface TodoListWidgetProps {

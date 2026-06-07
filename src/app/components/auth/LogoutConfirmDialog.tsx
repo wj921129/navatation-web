@@ -1,6 +1,6 @@
 import { LogOut, X, Key } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { authStore } from '../stores/auth-store';
+import { authStore } from '../../stores/auth-store';
 
 interface LogoutConfirmDialogProps {
   isOpen: boolean;

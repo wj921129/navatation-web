@@ -1,6 +1,6 @@
 import { X } from 'lucide-react';
 import { useState } from 'react';
-import { authStore } from '../stores/auth-store';
+import { authStore } from '../../stores/auth-store';
 
 interface LoginDialogProps {
   isOpen: boolean;

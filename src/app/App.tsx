@@ -1,14 +1,14 @@
 import { Plus, Edit3, Save, Settings, User, Clock, Calendar, Timer, Flower2, CloudSun } from 'lucide-react';
 import { IconMap } from './components/ui/IconMap';
 import { useState, useEffect, useCallback } from 'react';
-import { SettingsDialog } from './components/SettingsDialog';
-import { LoginDialog } from './components/LoginDialog';
-import { AddShortcutDialog } from './components/AddShortcutDialog';
-import { EditShortcutDialog } from './components/EditShortcutDialog';
-import { LogoutConfirmDialog } from './components/LogoutConfirmDialog';
-import { TodoPanel } from './components/TodoPanel';
-import { TopDock } from './components/TopDock';
-import { TodoListWidget } from './components/TodoListWidget';
+import { SettingsDialog } from './components/settings/SettingsDialog';
+import { LoginDialog } from './components/auth/LoginDialog';
+import { AddShortcutDialog } from './components/shortcut/AddShortcutDialog';
+import { EditShortcutDialog } from './components/shortcut/EditShortcutDialog';
+import { LogoutConfirmDialog } from './components/auth/LogoutConfirmDialog';
+import { TodoPanel } from './components/todo/TodoPanel';
+import { TopDock } from './components/dock/TopDock';
+import { TodoListWidget } from './components/todo/TodoListWidget';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useTheme } from 'next-themes';
@@ -29,9 +29,9 @@ import MonthCalendar from './components/widgets/MonthCalendar';
 import SimpleWeather from './components/widgets/SimpleWeather';
 
 
-import { SearchBox } from './components/SearchBox';
-import { DraggableShortcut } from './components/DraggableShortcut';
-import { AiSearchOverlay } from './components/AiSearchOverlay';
+import { SearchBox } from './components/search/SearchBox';
+import { DraggableShortcut } from './components/shortcut/DraggableShortcut';
+import { AiSearchOverlay } from './components/search/AiSearchOverlay';
 
 import { useBrightness } from './hooks/useBrightness';
 import { useSettings } from './hooks/useSettings';

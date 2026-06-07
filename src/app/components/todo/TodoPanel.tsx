@@ -1,8 +1,8 @@
 import { X, CheckSquare, Trash2, Loader2, CheckCircle2, Circle, Copy, RotateCcw, ArrowLeft, FileText } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
-import { TodoItem } from '../services/todo-service';
-import { authStore } from '../stores/auth-store';
-import { todoStore } from '../stores/todo-store';
+import { TodoItem } from '../../services/todo-service';
+import { authStore } from '../../stores/auth-store';
+import { todoStore } from '../../stores/todo-store';
 
 interface TodoPanelProps {
   isOpen: boolean;

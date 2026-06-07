@@ -1,6 +1,6 @@
 import { X, Upload, Loader2, Check, Link, RotateCw } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
-import { navService } from '../services/nav-service';
+import { navService } from '../../services/nav-service';
 
 interface EditShortcutDialogProps {
   isOpen: boolean;
