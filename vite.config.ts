@@ -31,6 +31,8 @@ export default defineConfig({
     },
   },
   server: {
+    // 开启局域网访问权限
+    host: true,
     proxy: {
       '/uploads': {
         target: 'http://localhost:8080',
