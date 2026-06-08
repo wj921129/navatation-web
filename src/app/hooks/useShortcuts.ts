@@ -212,16 +212,14 @@ export function useShortcuts(authState: any) {
       if (added.length > 0) {
         const catRes = await navService.getCategories();
         const categoryId = catRes.code === 200 && catRes.data.length > 0 ? catRes.data[0].categoryId : undefined;
-        if (categoryId) {
-          const addedPayload = added.map(s => ({
-            name: s.name,
-            url: s.url,
-            iconType: s.iconType,
-            iconValue: s.iconValue,
-            iconColor: s.color
-          }));
-          await navService.batchCreateShortcuts({ categoryId, shortcuts: addedPayload });
-        }
+        const addedPayload = added.map(s => ({
+          name: s.name,
+          url: s.url,
+          iconType: s.iconType,
+          iconValue: s.iconValue,
+          iconColor: s.color
+        }));
+        await navService.batchCreateShortcuts({ categoryId: categoryId as any, shortcuts: addedPayload });
       }
 
       // 6. 重新拉取最新的云端捷径数据（获取带有真实数据库 id 的全量数据）
