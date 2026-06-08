@@ -286,6 +286,7 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut, showSort
                 <label className="block text-sm text-gray-600 dark:text-gray-400 mb-2">排序序号</label>
                 <input
                   type="number"
+                  step="0.01"
                   value={sortOrder}
                   onChange={(e) => setSortOrder(Number(e.target.value))}
                   placeholder="0"

@@ -900,7 +900,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
               </div>
               <div>
                 <label className="text-sm text-gray-500 mb-1 block">排序</label>
-                <input type="number" className="w-full px-3 py-2 border rounded-lg bg-background" value={editingCategory.sortOrder} onChange={e => setEditingCategory({...editingCategory, sortOrder: Number(e.target.value)})} />
+                <input type="number" step="0.01" className="w-full px-3 py-2 border rounded-lg bg-background" value={editingCategory.sortOrder} onChange={e => setEditingCategory({...editingCategory, sortOrder: Number(e.target.value)})} />
               </div>
             </div>
             <div className="mt-6 flex justify-end gap-3">
