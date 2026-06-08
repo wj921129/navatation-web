@@ -1089,7 +1089,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                     
                                     return (
                                       <div key={site.siteId || siteIdx} className="bg-background border border-border/60 hover:border-border/100 rounded-xl p-3 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all">
-                                        <div className="flex items-center gap-3 w-full">
+                                        <div className="flex items-center gap-2 w-full">
                                           {/* 图标展示区 */}
                                           <div className="flex-shrink-0 flex items-center justify-center bg-card shadow-inner border border-border overflow-hidden w-10 h-10 rounded-full relative">
                                             {isLoading ? (
@@ -1097,7 +1097,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                             ) : (
                                               (() => {
                                                 if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
-                                                  return <img src={site.iconValue} alt={site.name} className="w-[20px] h-[20px] object-contain" onError={(e) => {
+                                                  return <img src={site.iconValue} alt={site.name} className="w-[24px] h-[24px] object-contain" onError={(e) => {
                                                     (e.target as any).style.display = 'none';
                                                   }} />;
                                                 }
@@ -1106,8 +1106,8 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                                   <IconComponent
                                                     style={{
                                                       color: site.color || '#333',
-                                                      width: `20px`,
-                                                      height: `20px`,
+                                                      width: `24px`,
+                                                      height: `24px`,
                                                     }}
                                                     strokeWidth={2}
                                                   />
@@ -1118,33 +1118,33 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                           
                                           {/* 输入区域 - 单行紧凑排列 */}
                                           <div className="flex items-center gap-2">
-                                            <div className="w-48 flex-shrink-0">
+                                            <div className="w-56 flex-shrink-0">
                                               <input
                                                 type="text"
                                                 value={site.name}
                                                 onChange={(e) => updateBatchEditSite(catIdx, siteIdx, { name: e.target.value })}
-                                                className="w-full px-2 py-1.5 text-xs bg-card border border-border rounded-lg outline-none focus:border-blue-500 focus:bg-background transition-colors"
+                                                className="w-full px-2 py-2 text-sm bg-card border border-border rounded-lg outline-none focus:border-blue-500 focus:bg-background transition-colors"
                                                 placeholder="名称"
                                                 title="网站名称"
                                               />
                                             </div>
-                                            <div className="w-80 flex-shrink-0">
+                                            <div className="w-96 flex-shrink-0">
                                               <input
                                                 type="text"
                                                 value={site.url}
                                                 onChange={(e) => updateBatchEditSite(catIdx, siteIdx, { url: e.target.value })}
-                                                className="w-full px-2 py-1.5 text-xs bg-card border border-border rounded-lg outline-none focus:border-blue-500 focus:bg-background transition-colors"
+                                                className="w-full px-2 py-2 text-sm bg-card border border-border rounded-lg outline-none focus:border-blue-500 focus:bg-background transition-colors"
                                                 placeholder="https://..."
                                                 title="网址链接"
                                               />
                                             </div>
-                                            <div className="w-16 flex-shrink-0">
+                                            <div className="w-20 flex-shrink-0">
                                               <input
                                                 type="number"
                                                 step="0.01"
                                                 value={site.sortOrder}
                                                 onChange={(e) => updateBatchEditSite(catIdx, siteIdx, { sortOrder: Number(e.target.value) })}
-                                                className="w-full px-2 py-1.5 text-xs bg-card border border-border rounded-lg outline-none focus:border-blue-500 focus:bg-background transition-colors text-center"
+                                                className="w-full px-2 py-2 text-sm bg-card border border-border rounded-lg outline-none focus:border-blue-500 focus:bg-background transition-colors text-center"
                                                 placeholder="0"
                                                 title="排序序号"
                                               />
@@ -1153,7 +1153,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
 
                                           {/* 多图标选择区域 - 直接放在同一行 */}
                                           {detectedIcons.length > 0 && (
-                                            <div className="flex items-center gap-1 border-l border-border/50 pl-3 flex-1 overflow-x-auto scrollbar-none">
+                                            <div className="flex items-center gap-1.5 border-l border-border/50 pl-2 flex-1 overflow-x-auto scrollbar-none">
                                               {detectedIcons.map((url, idx) => (
                                                 <button
                                                   key={idx}
@@ -1164,7 +1164,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                                       iconValue: url
                                                     });
                                                   }}
-                                                  className={`w-8 h-8 flex-shrink-0 bg-card shadow-sm border rounded-lg flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
+                                                  className={`w-9 h-9 flex-shrink-0 bg-card shadow-sm border rounded-lg flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
                                                     site.iconValue === url ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-border hover:border-gray-400 dark:hover:border-gray-500'
                                                   }`}
                                                   title="点击使用此图标"
@@ -1172,7 +1172,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                                   <img
                                                     src={url}
                                                     alt="Icon"
-                                                    className="w-4 h-4 object-contain"
+                                                    className="w-5 h-5 object-contain"
                                                   />
                                                 </button>
                                               ))}
@@ -1181,10 +1181,10 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                                   e.preventDefault();
                                                   setRowDetectedIcons(prev => ({ ...prev, [rowKey]: [] }));
                                                 }}
-                                                className="w-8 h-8 flex-shrink-0 text-gray-400 hover:text-red-500 rounded-lg flex items-center justify-center transition-colors cursor-pointer ml-1"
+                                                className="w-9 h-9 flex-shrink-0 text-gray-400 hover:text-red-500 rounded-lg flex items-center justify-center transition-colors cursor-pointer ml-1"
                                                 title="清除多余图标选项"
                                               >
-                                                <Trash2 className="w-3.5 h-3.5" />
+                                                <Trash2 className="w-4 h-4" />
                                               </button>
                                             </div>
                                           )}
