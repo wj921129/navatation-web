@@ -198,6 +198,12 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
   const [batchEditData, setBatchEditData] = useState<CategoryGroup[]>([]);
   const [rowLoadingStatus, setRowLoadingStatus] = useState<Record<string, boolean>>({});
   const [rowDetectedIcons, setRowDetectedIcons] = useState<Record<string, string[]>>({});
+  const rowDetectedIconsRef = useRef<Record<string, string[]>>({});
+  
+  useEffect(() => {
+    rowDetectedIconsRef.current = rowDetectedIcons;
+  }, [rowDetectedIcons]);
+
   const [isAllRefreshing, setIsAllRefreshing] = useState(false);
   const rowFileInputRef = useRef<HTMLInputElement>(null);
   const activeUploadRow = useRef<{ catIdx: number; siteIdx: number } | null>(null);
@@ -262,15 +268,19 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
 
     // 1. 瞬时响应：Google CDN 打底
     const googleCdn = `https://www.google.com/s2/favicons?sz=64&domain=${host}`;
-    updateIcon(googleCdn);
 
-    let pendingTasks = 2;
+    let pendingTasks = 3;
     const checkDone = () => {
       pendingTasks--;
       if (pendingTasks <= 0) {
         setRowLoadingStatus(prev => ({ ...prev, [rowKey]: false }));
       }
     };
+
+    const imgGoogle = new Image();
+    imgGoogle.onload = () => { updateIcon(googleCdn); checkDone(); };
+    imgGoogle.onerror = checkDone;
+    imgGoogle.src = googleCdn;
 
     // 2. 备用 CDN：DuckDuckGo 竞速
     const ddgCdn = `https://icons.duckduckgo.com/ip3/${host}.ico`;
@@ -321,24 +331,57 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
         const googleCdn = `https://www.google.com/s2/favicons?sz=64&domain=${host}`;
         const ddgCdn = `https://icons.duckduckgo.com/ip3/${host}.ico`;
 
-        setRowDetectedIcons(prev => {
-          const current = prev[rowKey] || [];
-          const newIcons = [...current];
-          if (!newIcons.includes(googleCdn)) newIcons.push(googleCdn);
-          if (!newIcons.includes(ddgCdn)) newIcons.push(ddgCdn);
-          // 默认选中第一个
-          if (newIcons.length > 0 && !site.iconValue) {
-            updateBatchEditSite(catIdx, siteIdx, {
-              iconType: 'FAVICON',
-              iconValue: newIcons[0]
-            });
-          }
-          return { ...prev, [rowKey]: newIcons };
-        });
+        const updateIcon = (iconUrl: string) => {
+          setRowDetectedIcons(prev => {
+            const current = prev[rowKey] || [];
+            if (current.includes(iconUrl)) return prev;
+            const newIcons = [...current, iconUrl];
+            if (newIcons.length === 1 && !site.iconValue) {
+              updateBatchEditSite(catIdx, siteIdx, {
+                iconType: 'FAVICON',
+                iconValue: iconUrl
+              });
+            }
+            return { ...prev, [rowKey]: newIcons };
+          });
+        };
+
+        const imgGoogle = new Image();
+        imgGoogle.onload = () => updateIcon(googleCdn);
+        imgGoogle.src = googleCdn;
+
+        const imgDdg = new Image();
+        imgDdg.onload = () => updateIcon(ddgCdn);
+        imgDdg.src = ddgCdn;
       } catch (e) {
         // 忽略
       }
     });
+
+    setTimeout(() => {
+      setBatchEditData(prev => {
+        const copy = [...prev];
+        let changed = false;
+        const cat = copy[catIdx];
+        if (!cat) return prev;
+        cat.sites.forEach((site, siteIdx) => {
+          const rowKey = `${catIdx}-${siteIdx}`;
+          const detectedIcons = rowDetectedIconsRef.current[rowKey] || [];
+          if (detectedIcons.length > 0) {
+            if (site.iconValue && !detectedIcons.includes(site.iconValue)) {
+              site.iconType = 'FAVICON';
+              site.iconValue = detectedIcons[0];
+              changed = true;
+            } else if (!site.iconValue) {
+              site.iconType = 'FAVICON';
+              site.iconValue = detectedIcons[0];
+              changed = true;
+            }
+          }
+        });
+        return changed ? copy : prev;
+      });
+    }, 5000);
 
     try {
       // 2. 后端异步批量嗅探
@@ -410,24 +453,57 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
         const googleCdn = `https://www.google.com/s2/favicons?sz=64&domain=${host}`;
         const ddgCdn = `https://icons.duckduckgo.com/ip3/${host}.ico`;
 
-        setRowDetectedIcons(prev => {
-          const current = prev[rowKey] || [];
-          const newIcons = [...current];
-          if (!newIcons.includes(googleCdn)) newIcons.push(googleCdn);
-          if (!newIcons.includes(ddgCdn)) newIcons.push(ddgCdn);
-          // 默认选中第一个
-          if (newIcons.length > 0 && !site.iconValue) {
-            updateBatchEditSite(catIdx, siteIdx, {
-              iconType: 'FAVICON',
-              iconValue: newIcons[0]
-            });
-          }
-          return { ...prev, [rowKey]: newIcons };
-        });
+        const updateIcon = (iconUrl: string) => {
+          setRowDetectedIcons(prev => {
+            const current = prev[rowKey] || [];
+            if (current.includes(iconUrl)) return prev;
+            const newIcons = [...current, iconUrl];
+            if (newIcons.length === 1 && !site.iconValue) {
+              updateBatchEditSite(catIdx, siteIdx, {
+                iconType: 'FAVICON',
+                iconValue: iconUrl
+              });
+            }
+            return { ...prev, [rowKey]: newIcons };
+          });
+        };
+
+        const imgGoogle = new Image();
+        imgGoogle.onload = () => updateIcon(googleCdn);
+        imgGoogle.src = googleCdn;
+
+        const imgDdg = new Image();
+        imgDdg.onload = () => updateIcon(ddgCdn);
+        imgDdg.src = ddgCdn;
       } catch (e) {
         // 忽略
       }
     });
+
+    setTimeout(() => {
+      setBatchEditData(prev => {
+        const copy = [...prev];
+        let changed = false;
+        tasks.forEach(({ catIdx, siteIdx }) => {
+          const rowKey = `${catIdx}-${siteIdx}`;
+          const site = copy[catIdx]?.sites[siteIdx];
+          if (!site) return;
+          const detectedIcons = rowDetectedIconsRef.current[rowKey] || [];
+          if (detectedIcons.length > 0) {
+            if (site.iconValue && !detectedIcons.includes(site.iconValue)) {
+              site.iconType = 'FAVICON';
+              site.iconValue = detectedIcons[0];
+              changed = true;
+            } else if (!site.iconValue) {
+              site.iconType = 'FAVICON';
+              site.iconValue = detectedIcons[0];
+              changed = true;
+            }
+          }
+        });
+        return changed ? copy : prev;
+      });
+    }, 5000);
 
     try {
       const urls = tasks.map(t => t.url);
