@@ -817,16 +817,16 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                     const detectedIcons = rowDetectedIcons[rowKey] || [];
                                     
                                     return (
-                                      <div key={site.siteId || siteIdx} className="bg-background border border-border/60 hover:border-border/100 rounded-2xl p-4 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all">
-                                        <div className="flex items-center gap-4">
+                                      <div key={site.siteId || siteIdx} className="bg-background border border-border/60 hover:border-border/100 rounded-xl p-3 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all">
+                                        <div className="flex items-center gap-3 w-full">
                                           {/* 图标展示区 */}
-                                          <div className="flex-shrink-0 flex items-center justify-center bg-card shadow-inner border border-border overflow-hidden w-12 h-12 rounded-full relative">
+                                          <div className="flex-shrink-0 flex items-center justify-center bg-card shadow-inner border border-border overflow-hidden w-10 h-10 rounded-full relative">
                                             {isLoading ? (
-                                              <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />
+                                              <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
                                             ) : (
                                               (() => {
                                                 if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
-                                                  return <img src={site.iconValue} alt={site.name} className="w-[24px] h-[24px] object-contain" onError={(e) => {
+                                                  return <img src={site.iconValue} alt={site.name} className="w-[20px] h-[20px] object-contain" onError={(e) => {
                                                     (e.target as any).style.display = 'none';
                                                   }} />;
                                                 }
@@ -835,8 +835,8 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                                   <IconComponent
                                                     style={{
                                                       color: site.color || '#333',
-                                                      width: `24px`,
-                                                      height: `24px`,
+                                                      width: `20px`,
+                                                      height: `20px`,
                                                     }}
                                                     strokeWidth={2}
                                                   />
@@ -845,78 +845,44 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                             )}
                                           </div>
                                           
-                                          {/* 输入区域 */}
-                                          <div className="flex-1 grid grid-cols-12 gap-3 items-end">
-                                            <div className="col-span-3">
-                                              <label className="text-[10px] uppercase text-gray-500 font-semibold mb-1 block">网站名称</label>
+                                          {/* 输入区域 - 单行紧凑排列 */}
+                                          <div className="flex items-center gap-2">
+                                            <div className="w-32 flex-shrink-0">
                                               <input
                                                 type="text"
                                                 value={site.name}
                                                 onChange={(e) => updateBatchEditSite(catIdx, siteIdx, { name: e.target.value })}
-                                                className="w-full px-3 py-2 text-sm bg-card border border-border rounded-lg outline-none focus:border-blue-500 focus:bg-background transition-colors"
-                                                placeholder="网站名称"
+                                                className="w-full px-2 py-1.5 text-xs bg-card border border-border rounded-lg outline-none focus:border-blue-500 focus:bg-background transition-colors"
+                                                placeholder="名称"
+                                                title="网站名称"
                                               />
                                             </div>
-                                            <div className="col-span-6">
-                                              <label className="text-[10px] uppercase text-gray-500 font-semibold mb-1 block">网址链接</label>
+                                            <div className="w-48 flex-shrink-0">
                                               <input
                                                 type="text"
                                                 value={site.url}
                                                 onChange={(e) => updateBatchEditSite(catIdx, siteIdx, { url: e.target.value })}
-                                                className="w-full px-3 py-2 text-sm bg-card border border-border rounded-lg outline-none focus:border-blue-500 focus:bg-background transition-colors"
+                                                className="w-full px-2 py-1.5 text-xs bg-card border border-border rounded-lg outline-none focus:border-blue-500 focus:bg-background transition-colors"
                                                 placeholder="https://..."
+                                                title="网址链接"
                                               />
                                             </div>
-                                            <div className="col-span-3">
-                                              <label className="text-[10px] uppercase text-gray-500 font-semibold mb-1 block">排序序号</label>
+                                            <div className="w-16 flex-shrink-0">
                                               <input
                                                 type="number"
                                                 step="0.01"
                                                 value={site.sortOrder}
                                                 onChange={(e) => updateBatchEditSite(catIdx, siteIdx, { sortOrder: Number(e.target.value) })}
-                                                className="w-full px-3 py-2 text-sm bg-card border border-border rounded-lg outline-none focus:border-blue-500 focus:bg-background transition-colors"
+                                                className="w-full px-2 py-1.5 text-xs bg-card border border-border rounded-lg outline-none focus:border-blue-500 focus:bg-background transition-colors text-center"
                                                 placeholder="0"
+                                                title="排序序号"
                                               />
                                             </div>
                                           </div>
 
-                                          {/* 操作按钮区 */}
-                                          <div className="flex-shrink-0 flex items-center gap-2 mt-4 self-end">
-                                            <button
-                                              onClick={() => handleDetectRowIcon(catIdx, siteIdx)}
-                                              disabled={isLoading}
-                                              className="px-3 py-2 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg text-sm flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-50"
-                                              title="自动刷新并检测网站图标"
-                                            >
-                                              <RotateCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-                                              <span>刷新图标</span>
-                                            </button>
-                                            <button
-                                              onClick={() => handleTriggerRowUpload(catIdx, siteIdx)}
-                                              disabled={isLoading}
-                                              className="px-3 py-2 bg-card border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-50"
-                                              title="上传本地图片作为图标"
-                                            >
-                                              <Upload className="w-3.5 h-3.5" />
-                                              <span>本地上传</span>
-                                            </button>
-                                            <button
-                                              onClick={() => handleDeleteRow(catIdx, siteIdx)}
-                                              className="p-2 ml-1 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors cursor-pointer"
-                                              title="移除此行"
-                                            >
-                                              <Trash2 className="w-4 h-4" />
-                                            </button>
-                                          </div>
-                                        </div>
-                                        
-                                        {/* 多图标选择区域 */}
-                                        {detectedIcons.length > 0 && (
-                                          <div className="pt-3 border-t border-border/50 flex flex-col gap-2">
-                                            <p className="text-xs text-green-600 dark:text-green-500 font-medium flex items-center gap-1">
-                                              <Check className="w-3.5 h-3.5" /> 探测到多个图标，请选择最佳版本:
-                                            </p>
-                                            <div className="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-neutral-800">
+                                          {/* 多图标选择区域 - 直接放在同一行 */}
+                                          {detectedIcons.length > 0 && (
+                                            <div className="flex items-center gap-1 border-l border-border/50 pl-3 flex-1 overflow-x-auto scrollbar-none">
                                               {detectedIcons.map((url, idx) => (
                                                 <button
                                                   key={idx}
@@ -927,14 +893,15 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                                       iconValue: url
                                                     });
                                                   }}
-                                                  className={`w-10 h-10 flex-shrink-0 bg-card shadow-sm border rounded-xl flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
+                                                  className={`w-8 h-8 flex-shrink-0 bg-card shadow-sm border rounded-lg flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
                                                     site.iconValue === url ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-border hover:border-gray-400 dark:hover:border-gray-500'
                                                   }`}
+                                                  title="点击使用此图标"
                                                 >
                                                   <img
                                                     src={url}
-                                                    alt="Detected Icon"
-                                                    className="w-5 h-5 object-contain"
+                                                    alt="Icon"
+                                                    className="w-4 h-4 object-contain"
                                                   />
                                                 </button>
                                               ))}
@@ -943,17 +910,56 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                                   e.preventDefault();
                                                   setRowDetectedIcons(prev => ({ ...prev, [rowKey]: [] }));
                                                 }}
-                                                className="w-10 h-10 flex-shrink-0 bg-red-50/50 dark:bg-red-950/20 text-red-500 rounded-xl flex items-center justify-center hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors cursor-pointer"
+                                                className="w-8 h-8 flex-shrink-0 text-gray-400 hover:text-red-500 rounded-lg flex items-center justify-center transition-colors cursor-pointer ml-1"
                                                 title="清除多余图标选项"
                                               >
                                                 <Trash2 className="w-3.5 h-3.5" />
                                               </button>
                                             </div>
+                                          )}
+                                          {!detectedIcons.length && <div className="flex-1"></div>}
+
+                                          {/* 操作按钮区 */}
+                                          <div className="flex-shrink-0 flex items-center gap-1">
+                                            <button
+                                              onClick={() => handleDetectRowIcon(catIdx, siteIdx)}
+                                              disabled={isLoading}
+                                              className="p-2 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                                              title="自动刷新并检测网站图标"
+                                            >
+                                              <RotateCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+                                            </button>
+                                            <button
+                                              onClick={() => handleTriggerRowUpload(catIdx, siteIdx)}
+                                              disabled={isLoading}
+                                              className="p-2 bg-card border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-700 dark:text-gray-300 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                                              title="上传本地图片"
+                                            >
+                                              <Upload className="w-3.5 h-3.5" />
+                                            </button>
+                                            <button
+                                              onClick={() => handleDeleteRow(catIdx, siteIdx)}
+                                              className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors cursor-pointer"
+                                              title="移除此行"
+                                            >
+                                              <Trash2 className="w-3.5 h-3.5" />
+                                            </button>
                                           </div>
-                                        )}
+                                        </div>
                                       </div>
                                     );
                                   })}
+                                  
+                                  {/* Beautiful + button to add new site */}
+                                  <button
+                                    onClick={() => handleAddEmptyRow(catIdx)}
+                                    className="w-full mt-2 py-3 border-2 border-dashed border-border hover:border-blue-400 hover:bg-blue-50/50 dark:hover:border-blue-500/50 dark:hover:bg-blue-900/10 rounded-xl flex items-center justify-center gap-2 text-gray-400 hover:text-blue-500 transition-all cursor-pointer group"
+                                  >
+                                    <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-neutral-800 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 flex items-center justify-center transition-colors">
+                                      <Plus className="w-4 h-4" />
+                                    </div>
+                                    <span className="text-xs font-medium">添加新网址</span>
+                                  </button>
                                 </div>
                               )}
                             </div>
