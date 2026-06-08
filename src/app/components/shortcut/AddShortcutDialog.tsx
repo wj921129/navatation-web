@@ -232,32 +232,54 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
     setRowLoadingStatus(prev => ({ ...prev, [rowKey]: true }));
     const fullUrl = url.startsWith('http') ? url : `https://${url}`;
     
+    let host = '';
     try {
-      const res = await navService.fetchFavicon(fullUrl);
-      if (res.code === 200 && res.data?.faviconUrl) {
-        const newUrl = res.data.faviconUrl;
-        updateBatchEditSite(catIdx, siteIdx, {
-          iconType: 'FAVICON',
-          iconValue: newUrl
-        });
-      } else {
-        try {
-          const parsed = new URL(fullUrl);
-          const host = parsed.host;
-          const googleCdn = `https://www.google.com/s2/favicons?sz=64&domain=${host}`;
-          updateBatchEditSite(catIdx, siteIdx, {
-            iconType: 'FAVICON',
-            iconValue: googleCdn
-          });
-        } catch {
-          alert('图标自动嗅探失败，请手动上传或输入图标链接');
-        }
-      }
-    } catch (err) {
-      console.error('Detect favicon error:', err);
-    } finally {
+      const parsed = new URL(fullUrl);
+      host = parsed.host;
+    } catch {
       setRowLoadingStatus(prev => ({ ...prev, [rowKey]: false }));
+      return;
     }
+
+    const updateIcon = (iconUrl: string) => {
+      if (!iconUrl) return;
+      updateBatchEditSite(catIdx, siteIdx, {
+        iconType: 'FAVICON',
+        iconValue: iconUrl
+      });
+    };
+
+    // 1. 瞬时响应：Google CDN 打底
+    const googleCdn = `https://www.google.com/s2/favicons?sz=64&domain=${host}`;
+    updateIcon(googleCdn);
+
+    let pendingTasks = 2;
+    const checkDone = () => {
+      pendingTasks--;
+      if (pendingTasks <= 0) {
+        setRowLoadingStatus(prev => ({ ...prev, [rowKey]: false }));
+      }
+    };
+
+    // 2. 备用 CDN：DuckDuckGo 竞速
+    const ddgCdn = `https://icons.duckduckgo.com/ip3/${host}.ico`;
+    const img = new Image();
+    img.onload = () => {
+      updateIcon(ddgCdn);
+      checkDone();
+    };
+    img.onerror = checkDone;
+    img.src = ddgCdn;
+
+    // 3. 后端深度爬虫抓取原生图标竞速
+    navService.fetchFavicon(fullUrl).then(res => {
+      if (res.code === 200 && res.data?.faviconUrl) {
+        updateIcon(res.data.faviconUrl);
+      }
+      checkDone();
+    }).catch(() => {
+      checkDone();
+    });
   };
 
   const handleTriggerRowUpload = (catIdx: number, siteIdx: number) => {
@@ -720,7 +742,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
           <div className="flex-1 overflow-y-auto">
             <div className="grid grid-cols-3 h-full">
               {/* Left: Tabs Content */}
-              <div className="col-span-2 border-r border-border overflow-y-auto">
+              <div className={`${isBatchMode ? 'col-span-3' : 'col-span-2'} border-r border-border overflow-y-auto`}>
                 {activeTab === 'recommended' ? (
                   <div className="p-6 space-y-8 relative">
                     {userRole === 'ADMIN' && (
@@ -830,18 +852,20 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                             <button
                                               onClick={() => handleDetectRowIcon(catIdx, siteIdx)}
                                               disabled={isLoading}
-                                              className="p-1 bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 rounded text-gray-500 dark:text-gray-400 hover:text-blue-500 transition-colors cursor-pointer"
+                                              className="px-2 py-1 flex items-center gap-1 bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 rounded text-xs text-gray-500 dark:text-gray-400 hover:text-blue-500 transition-colors cursor-pointer"
                                               title="自动刷新并检测网站图标"
                                             >
                                               <RotateCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />
+                                              <span>刷新</span>
                                             </button>
                                             <button
                                               onClick={() => handleTriggerRowUpload(catIdx, siteIdx)}
                                               disabled={isLoading}
-                                              className="p-1 bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 rounded text-gray-500 dark:text-gray-400 hover:text-blue-500 transition-colors cursor-pointer"
+                                              className="px-2 py-1 flex items-center gap-1 bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 rounded text-xs text-gray-500 dark:text-gray-400 hover:text-blue-500 transition-colors cursor-pointer"
                                               title="上传本地图片作为图标"
                                             >
                                               <Upload className="w-3 h-3" />
+                                              <span>上传</span>
                                             </button>
                                           </div>
                                         </div>
@@ -1175,8 +1199,9 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
               </div>
 
               {/* Right: Pending Shortcuts */}
-              <div className="col-span-1 bg-background border-l border-border overflow-y-auto transition-colors duration-300">
-                <div className="p-4">
+              {!isBatchMode && (
+                <div className="col-span-1 bg-background border-l border-border overflow-y-auto transition-colors duration-300">
+                  <div className="p-4">
                   <h3 className="text-sm font-medium mb-4">本次添加 ({pendingShortcuts.length})</h3>
                   {pendingShortcuts.length === 0 ? (
                     <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-8">暂无选择</p>
@@ -1228,6 +1253,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                   )}
                 </div>
               </div>
+              )}
             </div>
           </div>
         </div>
