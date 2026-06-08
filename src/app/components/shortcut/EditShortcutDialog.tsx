@@ -242,7 +242,6 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut, showSort
     <>
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
-        onClick={onClose}
       >
         <div
           className="bg-card/95 border border-border backdrop-blur-xl rounded-3xl shadow-2xl w-full max-w-md p-8 text-foreground transition-all duration-300"
