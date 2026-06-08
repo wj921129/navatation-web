@@ -209,6 +209,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
             name: site.name,
             url: site.url,
             color: site.iconColor || '#333',
+            iconColor: site.iconColor || '#333',
             icon: IconMap[site.iconValue] || IconMap.Link,
             iconType: site.iconType,
             iconValue: site.iconValue,
@@ -565,9 +566,24 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                           </div>
                           {userRole === 'ADMIN' && (
                             <div className="flex items-center gap-2">
-                              <button onClick={() => setEditingCategory({ ...category })} className="p-1 text-gray-400 hover:text-blue-500 rounded"><Edit3 className="w-4 h-4" /></button>
-                              <button onClick={() => navService.deleteRecommendCategory(category.categoryId!).then(loadRecommended)} className="p-1 text-gray-400 hover:text-red-500 rounded"><Trash2 className="w-4 h-4" /></button>
-                              <button onClick={() => setEditingSite({ categoryId: category.categoryId, iconType: 'FAVICON', iconColor: '#fff', sortOrder: category.sites.length })} className="p-1 text-gray-400 hover:text-green-500 rounded"><Plus className="w-4 h-4" /></button>
+                              <button onClick={() => {
+                                if (!category.categoryId) {
+                                  alert('当前为系统内置推荐分类，不可直接编辑。请先在数据库中建立。');
+                                  return;
+                                }
+                                setEditingCategory({ ...category })
+                              }} className="p-1 text-gray-400 hover:text-blue-500 rounded"><Edit3 className="w-4 h-4" /></button>
+                              <button onClick={() => {
+                                if (!category.categoryId) return;
+                                navService.deleteRecommendCategory(category.categoryId!).then(loadRecommended)
+                              }} className="p-1 text-gray-400 hover:text-red-500 rounded"><Trash2 className="w-4 h-4" /></button>
+                              <button onClick={() => {
+                                if (!category.categoryId) {
+                                  alert('请先编辑并保存该分类到数据库，然后才能新增网址。');
+                                  return;
+                                }
+                                setEditingSite({ categoryId: category.categoryId, iconType: 'FAVICON', iconColor: '#fff', sortOrder: category.sites.length })
+                              }} className="p-1 text-gray-400 hover:text-green-500 rounded"><Plus className="w-4 h-4" /></button>
                             </div>
                           )}
                         </div>
@@ -608,8 +624,19 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                               </button>
                               {userRole === 'ADMIN' && (
                                 <div className="absolute -top-2 -right-2 hidden group-hover/item:flex items-center gap-1 bg-background border border-border rounded shadow-sm p-0.5 z-10">
-                                  <button onClick={(e) => { e.stopPropagation(); setEditingSite({ ...site, categoryId: category.categoryId }); }} className="p-1 text-gray-400 hover:text-blue-500"><Edit3 className="w-3 h-3" /></button>
-                                  <button onClick={(e) => { e.stopPropagation(); navService.deleteRecommendSite(site.siteId!).then(loadRecommended); }} className="p-1 text-gray-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
+                                  <button onClick={(e) => { 
+                                    e.stopPropagation(); 
+                                    if (!category.categoryId) {
+                                      alert('系统内置推荐网址不可直接编辑。请通过右上角"新增分类"建立数据库数据后再添加。');
+                                      return;
+                                    }
+                                    setEditingSite({ ...site, iconColor: site.iconColor || site.color, categoryId: category.categoryId }); 
+                                  }} className="p-1 text-gray-400 hover:text-blue-500"><Edit3 className="w-3 h-3" /></button>
+                                  <button onClick={(e) => { 
+                                    e.stopPropagation(); 
+                                    if (!site.siteId) return;
+                                    navService.deleteRecommendSite(site.siteId!).then(loadRecommended); 
+                                  }} className="p-1 text-gray-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
                                 </div>
                               )}
                             </div>
@@ -617,7 +644,13 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                           {userRole === 'ADMIN' && (
                             <div className="relative group/item">
                               <button
-                                onClick={() => setEditingSite({ categoryId: category.categoryId, name: '', url: '', iconType: 'FAVICON', iconValue: '', iconColor: '#fff', sortOrder: category.sites.length })}
+                                onClick={() => {
+                                  if (!category.categoryId) {
+                                    alert('系统内置推荐分类不可添加网址。请先保存该分类到数据库，或新建自定义分类。');
+                                    return;
+                                  }
+                                  setEditingSite({ categoryId: category.categoryId, name: '', url: '', iconType: 'FAVICON', iconValue: '', iconColor: '#fff', sortOrder: category.sites.length })
+                                }}
                                 className="flex flex-col items-center gap-2 group cursor-pointer w-full"
                               >
                                 <div
