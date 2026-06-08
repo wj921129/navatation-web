@@ -63,6 +63,7 @@ export interface RecommendSite {
   iconType: IconType;
   iconValue: string;
   iconColor: string;
+  sortOrder: number;
 }
 
 export interface RecommendCategory {
