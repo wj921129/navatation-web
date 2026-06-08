@@ -1118,7 +1118,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                           
                                           {/* 输入区域 - 单行紧凑排列 */}
                                           <div className="flex items-center gap-2">
-                                            <div className="w-40 flex-shrink-0">
+                                            <div className="w-48 flex-shrink-0">
                                               <input
                                                 type="text"
                                                 value={site.name}
@@ -1128,7 +1128,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                                 title="网站名称"
                                               />
                                             </div>
-                                            <div className="w-56 flex-shrink-0">
+                                            <div className="w-80 flex-shrink-0">
                                               <input
                                                 type="text"
                                                 value={site.url}
@@ -1136,16 +1136,6 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                                 className="w-full px-2 py-2 text-sm bg-card border border-border rounded-lg outline-none focus:border-blue-500 focus:bg-background transition-colors"
                                                 placeholder="https://..."
                                                 title="网址链接"
-                                              />
-                                            </div>
-                                            <div className="w-56 flex-shrink-0">
-                                              <input
-                                                type="text"
-                                                value={site.iconValue || ''}
-                                                onChange={(e) => updateBatchEditSite(catIdx, siteIdx, { iconValue: e.target.value, iconType: 'CUSTOM_URL' })}
-                                                className="w-full px-2 py-2 text-sm bg-card border border-border rounded-lg outline-none focus:border-blue-500 focus:bg-background transition-colors text-gray-500"
-                                                placeholder="图标URL"
-                                                title="当前图标链接"
                                               />
                                             </div>
                                             <div className="w-16 flex-shrink-0">
@@ -1186,6 +1176,15 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                                   />
                                                 </button>
                                               ))}
+                                              <input
+                                                type="text"
+                                                value={site.iconValue || ''}
+                                                readOnly={site.iconType === 'FAVICON'}
+                                                onChange={(e) => updateBatchEditSite(catIdx, siteIdx, { iconValue: e.target.value, iconType: 'CUSTOM_URL' })}
+                                                className={`w-56 px-2 py-1.5 text-xs bg-card border border-border rounded-md outline-none transition-colors ml-2 flex-shrink-0 ${site.iconType === 'FAVICON' ? 'text-gray-400 cursor-text' : 'text-foreground focus:border-blue-500'}`}
+                                                placeholder="手动输入自定义图标URL"
+                                                title={site.iconType === 'FAVICON' ? "搜索结果不可编辑，可双击复制" : "手动输入自定义图标URL"}
+                                              />
                                               <button
                                                 onClick={(e) => {
                                                   e.preventDefault();
@@ -1411,9 +1410,15 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                   setIconFromUpload(false);
                                 }
                               }}
+                              readOnly={detectedIcons.length > 0 && detectedIcons.includes(customIconUrl)}
                               placeholder="https://example.com/icon.png"
-                              className="w-full px-4 py-3 pr-10 bg-background border border-border rounded-xl text-foreground outline-none focus:border-blue-500 focus:bg-card transition-all placeholder-gray-400 dark:placeholder-gray-500 h-[46px]"
+                              className={`w-full px-4 py-3 pr-10 bg-background border border-border rounded-xl outline-none transition-all h-[46px] ${
+                                detectedIcons.length > 0 && detectedIcons.includes(customIconUrl)
+                                  ? 'text-gray-400 cursor-text'
+                                  : 'text-foreground focus:border-blue-500 focus:bg-card placeholder-gray-400 dark:placeholder-gray-500'
+                              }`}
                               disabled={!!customIconFile}
+                              title={(detectedIcons.length > 0 && detectedIcons.includes(customIconUrl)) ? "搜索结果不可编辑，可双击复制" : "网址图标链接"}
                             />
                             {(faviconStatus === 'loading' || faviconStatus === 'uploading') && (
                               <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-500 animate-spin" />
