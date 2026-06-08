@@ -1118,7 +1118,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                           
                                           {/* 输入区域 - 单行紧凑排列 */}
                                           <div className="flex items-center gap-2">
-                                            <div className="w-56 flex-shrink-0">
+                                            <div className="w-40 flex-shrink-0">
                                               <input
                                                 type="text"
                                                 value={site.name}
@@ -1128,7 +1128,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                                 title="网站名称"
                                               />
                                             </div>
-                                            <div className="w-96 flex-shrink-0">
+                                            <div className="w-56 flex-shrink-0">
                                               <input
                                                 type="text"
                                                 value={site.url}
@@ -1138,7 +1138,17 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                                 title="网址链接"
                                               />
                                             </div>
-                                            <div className="w-20 flex-shrink-0">
+                                            <div className="w-56 flex-shrink-0">
+                                              <input
+                                                type="text"
+                                                value={site.iconValue || ''}
+                                                onChange={(e) => updateBatchEditSite(catIdx, siteIdx, { iconValue: e.target.value, iconType: 'CUSTOM_URL' })}
+                                                className="w-full px-2 py-2 text-sm bg-card border border-border rounded-lg outline-none focus:border-blue-500 focus:bg-background transition-colors text-gray-500"
+                                                placeholder="图标URL"
+                                                title="当前图标链接"
+                                              />
+                                            </div>
+                                            <div className="w-16 flex-shrink-0">
                                               <input
                                                 type="number"
                                                 step="0.01"
