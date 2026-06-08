@@ -400,10 +400,12 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
               const current = prev[rowKey] || [];
               if (current.includes(nativeIcon)) return prev;
               const newIcons = [...current, nativeIcon];
-              updateBatchEditSite(catIdx, siteIdx, {
-                iconType: 'FAVICON',
-                iconValue: nativeIcon
-              });
+              if (newIcons.length === 1 && !site.iconValue) {
+                updateBatchEditSite(catIdx, siteIdx, {
+                  iconType: 'FAVICON',
+                  iconValue: nativeIcon
+                });
+              }
               return { ...prev, [rowKey]: newIcons };
             });
           }
@@ -520,10 +522,12 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
               const current = prev[rowKey] || [];
               if (current.includes(nativeIcon)) return prev;
               const newIcons = [...current, nativeIcon];
-              updateBatchEditSite(catIdx, siteIdx, {
-                iconType: 'FAVICON',
-                iconValue: nativeIcon
-              });
+              if (newIcons.length === 1 && !site.iconValue) {
+                updateBatchEditSite(catIdx, siteIdx, {
+                  iconType: 'FAVICON',
+                  iconValue: nativeIcon
+                });
+              }
               return { ...prev, [rowKey]: newIcons };
             });
           }
@@ -1114,7 +1118,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                           
                                           {/* 输入区域 - 单行紧凑排列 */}
                                           <div className="flex items-center gap-2">
-                                            <div className="w-32 flex-shrink-0">
+                                            <div className="w-48 flex-shrink-0">
                                               <input
                                                 type="text"
                                                 value={site.name}
@@ -1124,7 +1128,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                                 title="网站名称"
                                               />
                                             </div>
-                                            <div className="w-48 flex-shrink-0">
+                                            <div className="w-80 flex-shrink-0">
                                               <input
                                                 type="text"
                                                 value={site.url}
