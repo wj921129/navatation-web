@@ -262,6 +262,7 @@ export function useWidgets(isEditMode: boolean, authState: AuthState) {
 
   return {
     widgets,
+    setWidgets,
     tempWidgets,
     setTempWidgets,
     addWidget,

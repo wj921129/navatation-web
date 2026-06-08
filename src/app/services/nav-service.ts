@@ -56,6 +56,8 @@ export interface SortItem {
 
 // ---- 推荐分类 ----
 export interface RecommendSite {
+  siteId: string;
+  categoryId: string;
   name: string;
   url: string;
   iconType: IconType;
@@ -67,7 +69,24 @@ export interface RecommendCategory {
   categoryId: string;
   categoryName: string;
   categoryIcon: string;
+  sortOrder: number;
   sites: RecommendSite[];
+}
+
+export interface RecommendCategoryRequest {
+  name: string;
+  icon: string;
+  sortOrder: number;
+}
+
+export interface RecommendSiteRequest {
+  categoryId: string;
+  name: string;
+  url: string;
+  iconType: IconType;
+  iconValue: string;
+  iconColor: string;
+  sortOrder: number;
 }
 
 // ---- Favicon ----
@@ -136,5 +155,23 @@ export const navService = {
   /** 获取系统预置的推荐网站分类及站点列表 */
   getRecommended(): Promise<ApiResponse<RecommendCategory[]>> {
     return api.get('/nav/recommended');
+  },
+  addRecommendCategory(data: RecommendCategoryRequest): Promise<ApiResponse<RecommendCategory>> {
+    return api.post('/nav/recommended/categories', data);
+  },
+  updateRecommendCategory(categoryId: string, data: Partial<RecommendCategoryRequest>): Promise<ApiResponse<null>> {
+    return api.put(`/nav/recommended/categories/${categoryId}`, data);
+  },
+  deleteRecommendCategory(categoryId: string): Promise<ApiResponse<null>> {
+    return api.delete(`/nav/recommended/categories/${categoryId}`);
+  },
+  addRecommendSite(data: RecommendSiteRequest): Promise<ApiResponse<RecommendSite>> {
+    return api.post('/nav/recommended/sites', data);
+  },
+  updateRecommendSite(siteId: string, data: Partial<RecommendSiteRequest>): Promise<ApiResponse<null>> {
+    return api.put(`/nav/recommended/sites/${siteId}`, data);
+  },
+  deleteRecommendSite(siteId: string): Promise<ApiResponse<null>> {
+    return api.delete(`/nav/recommended/sites/${siteId}`);
   },
 };

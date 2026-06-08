@@ -22,6 +22,7 @@ export interface UserInfo {
   userId: string;
   username: string;
   avatar: string | null;
+  role: string;
   createdAt: string;
 }
 

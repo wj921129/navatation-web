@@ -36,6 +36,7 @@ import { AiSearchOverlay } from './components/search/AiSearchOverlay';
 import { useBrightness } from './hooks/useBrightness';
 import { useSettings } from './hooks/useSettings';
 import { useShortcuts } from './hooks/useShortcuts';
+import { publicService } from './services/public-service';
 
 import { DEFAULT_SHORTCUTS, DEFAULT_WALLPAPER } from '../config/app.config';
 
@@ -682,6 +683,53 @@ export default function App() {
     return () => window.removeEventListener('auth:logout', handler);
   }, []);
 
+  // 游客模式下自动拉取超级管理员的配置
+  useEffect(() => {
+    if (!authState.isLoggedIn) {
+      publicService.getGuestConfig().then(res => {
+        if (res.code === 200 && res.data) {
+          const config = res.data;
+          
+          if (config.shortcuts && config.shortcuts.length > 0) {
+            const loaded = config.shortcuts.map(item => ({
+              id: item.shortcutId,
+              categoryId: item.categoryId,
+              name: item.name,
+              url: item.url,
+              color: item.iconColor || '#fff',
+              iconType: item.iconType,
+              iconValue: item.iconValue || 'Link'
+            }));
+            setShortcuts(loaded);
+            setTempShortcuts(loaded);
+          }
+
+          if (config.widgets && config.widgets.length > 0) {
+            const loadedW = config.widgets.map((w: any) => ({
+              id: w.widgetId || `clock-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+              type: w.type,
+              style: w.style,
+              x: Number(w.x),
+              y: Number(w.y),
+              meta: w.meta || {},
+            }));
+            widgetsData.setWidgets(loadedW);
+            widgetsData.setTempWidgets(loadedW);
+          }
+
+          if (config.settings) {
+            settingsData.setSettings(config.settings);
+            if (config.settings.backgroundImage) {
+              setBackgroundImage(config.settings.backgroundImage);
+            }
+          }
+        }
+      }).catch(err => {
+        console.error('Failed to load guest config:', err);
+      });
+    }
+  }, [authState.isLoggedIn, setShortcuts, setTempShortcuts, widgetsData, settingsData, setBackgroundImage]);
+
   const handleSearchEngineChange = (engine: string) => {
     setSearchEngine(engine);
     localStorage.setItem('navatation_search_engine', engine);
@@ -1123,6 +1171,7 @@ export default function App() {
           onAdd={handleAddShortcuts}
           iconSize={settings.iconSize}
           iconRadius={settings.iconRadius}
+          userRole={authState.user?.role}
         />
         {editingShortcut ? (
           <EditShortcutDialog

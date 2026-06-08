@@ -10,18 +10,27 @@ interface AddShortcutDialogProps {
   onAdd: (shortcuts: { name: string; icon: any; color: string; url: string }[]) => void;
   iconSize: number;
   iconRadius: number;
+  userRole?: string;
 }
 
 interface RecommendedSite {
+  siteId?: string;
   name: string;
   icon: LucideIcon;
   color: string;
   url: string;
+  iconType?: string;
+  iconValue?: string;
+  sortOrder?: number;
 }
 
 interface CategoryGroup {
+  categoryId?: string;
   category: string;
   icon: LucideIcon;
+  iconType?: string;
+  iconValue?: string;
+  sortOrder?: number;
   sites: RecommendedSite[];
 }
 
@@ -165,19 +174,52 @@ const getDebounceDelay = (input: string): number => {
  * 添加捷径对话框组件。
  * 支持浏览并选择推荐网站，以及输入链接与图标来自定义创建捷径。
  */
-export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius }: AddShortcutDialogProps) {
+export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius, userRole }: AddShortcutDialogProps) {
   const [activeTab, setActiveTab] = useState<'recommended' | 'custom'>('recommended');
   const [customName, setCustomName] = useState('');
   const [customUrl, setCustomUrl] = useState('');
   const [customIconUrl, setCustomIconUrl] = useState('');
   const [customIconFile, setCustomIconFile] = useState<string | null>(null);
   const [pendingShortcuts, setPendingShortcuts] = useState<RecommendedSite[]>([]);
-  const [categories, setCategories] = useState<CategoryGroup[]>(recommendedCategories);
+  const [categories, setCategories] = useState<CategoryGroup[]>([]);
   const [faviconStatus, setFaviconStatus] = useState<'idle' | 'loading' | 'detected' | 'error' | 'uploading'>('idle');
   const [iconFromUpload, setIconFromUpload] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [detectedIcons, setDetectedIcons] = useState<string[]>([]);
   const debounceTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  // 管理员编辑状态
+  const [editingCategory, setEditingCategory] = useState<any>(null);
+  const [editingSite, setEditingSite] = useState<any>(null);
+
+  const loadRecommended = () => {
+    navService.getRecommended().then(res => {
+      if (res.code === 200 && res.data && res.data.length > 0) {
+        // 格式化后端推荐数据为组件渲染结构
+        const mapped = res.data.map(cat => ({
+          categoryId: cat.categoryId,
+          category: cat.categoryName,
+          icon: IconMap[cat.categoryIcon] || IconMap.Folder,
+          iconType: 'BUILTIN',
+          iconValue: cat.categoryIcon,
+          sortOrder: cat.sortOrder,
+          sites: cat.sites.map(site => ({
+            siteId: site.siteId,
+            name: site.name,
+            url: site.url,
+            color: site.iconColor || '#333',
+            icon: IconMap[site.iconValue] || IconMap.Link,
+            iconType: site.iconType,
+            iconValue: site.iconValue,
+            sortOrder: site.sortOrder
+          }))
+        }));
+        setCategories(mapped);
+      } else {
+        setCategories(recommendedCategories);
+      }
+    }).catch(console.error);
+  };
 
   // 触发网址图标搜索的核心逻辑
   const triggerSearch = (url: string) => {
@@ -302,24 +344,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
       setDetectedIcons([]);
       setActiveTab('recommended'); // 默认重置回推荐页签
 
-      navService.getRecommended().then(res => {
-        if (res.code === 200 && res.data && res.data.length > 0) {
-          // 格式化后端推荐数据为组件渲染结构
-          const mapped = res.data.map(cat => ({
-            category: cat.categoryName,
-            icon: IconMap[cat.categoryIcon] || IconMap.Folder,
-            sites: cat.sites.map(site => ({
-              name: site.name,
-              url: site.url,
-              color: site.iconColor || '#333',
-              icon: IconMap[site.iconValue] || IconMap.Link,
-              iconType: site.iconType,
-              iconValue: site.iconValue
-            }))
-          }));
-          setCategories(mapped);
-        }
-      }).catch(console.error);
+      loadRecommended();
     }
   }, [isOpen]);
 
@@ -516,48 +541,74 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
               {/* Left: Tabs Content */}
               <div className="col-span-2 border-r border-border overflow-y-auto">
                 {activeTab === 'recommended' ? (
-                  <div className="p-6 space-y-8">
+                  <div className="p-6 space-y-8 relative">
+                    {userRole === 'ADMIN' && (
+                      <div className="absolute top-4 right-4">
+                        <button
+                          onClick={() => setEditingCategory({ category: '', iconValue: 'Folder', sortOrder: categories.length })}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm"
+                        >
+                          <Plus className="w-4 h-4" /> 新增分类
+                        </button>
+                      </div>
+                    )}
                     {categories.map((category) => (
                       <div key={category.category}>
-                        <div className="flex items-center gap-2 mb-4">
-                          <category.icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                          <h3 className="text-base font-medium">{category.category}</h3>
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-2">
+                            <category.icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                            <h3 className="text-base font-medium">{category.category}</h3>
+                          </div>
+                          {userRole === 'ADMIN' && (
+                            <div className="flex items-center gap-2">
+                              <button onClick={() => setEditingCategory({ ...category })} className="p-1 text-gray-400 hover:text-blue-500 rounded"><Edit3 className="w-4 h-4" /></button>
+                              <button onClick={() => navService.deleteRecommendCategory(category.categoryId!).then(loadRecommended)} className="p-1 text-gray-400 hover:text-red-500 rounded"><Trash2 className="w-4 h-4" /></button>
+                              <button onClick={() => setEditingSite({ categoryId: category.categoryId, iconType: 'FAVICON', iconColor: '#fff', sortOrder: category.sites.length })} className="p-1 text-gray-400 hover:text-green-500 rounded"><Plus className="w-4 h-4" /></button>
+                            </div>
+                          )}
                         </div>
                         <div className="grid grid-cols-8 gap-6">
                           {category.sites.map((site: any) => (
-                            <button
-                              key={site.name}
-                              onClick={() => handleAddRecommendedToPending(site)}
-                              className="flex flex-col items-center gap-2 group cursor-pointer"
-                            >
-                              <div
-                                className="bg-card flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all duration-200 border border-border overflow-hidden"
-                                style={{
-                                  width: `${iconSize}px`,
-                                  height: `${iconSize}px`,
-                                  borderRadius: borderRadius,
-                                }}
+                            <div key={site.siteId || site.name} className="relative group/item">
+                              <button
+                                onClick={() => handleAddRecommendedToPending(site)}
+                                className="flex flex-col items-center gap-2 group cursor-pointer w-full"
                               >
-                                {(() => {
-                                  if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
-                                    return <img src={site.iconValue} alt={site.name} style={{ width: '50%', height: '50%', objectFit: 'contain' }} />;
-                                  }
-                                  return (
-                                    <site.icon
-                                      style={{
-                                        color: site.color,
-                                        width: `${iconSize * 0.5}px`,
-                                        height: `${iconSize * 0.5}px`,
-                                      }}
-                                      strokeWidth={2}
-                                    />
-                                  );
-                                })()}
-                              </div>
-                              <span className="text-xs text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors">
-                                {site.name}
-                              </span>
-                            </button>
+                                <div
+                                  className="bg-card flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all duration-200 border border-border overflow-hidden"
+                                  style={{
+                                    width: `${iconSize}px`,
+                                    height: `${iconSize}px`,
+                                    borderRadius: borderRadius,
+                                  }}
+                                >
+                                  {(() => {
+                                    if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
+                                      return <img src={site.iconValue} alt={site.name} style={{ width: '50%', height: '50%', objectFit: 'contain' }} />;
+                                    }
+                                    return (
+                                      <site.icon
+                                        style={{
+                                          color: site.color,
+                                          width: `${iconSize * 0.5}px`,
+                                          height: `${iconSize * 0.5}px`,
+                                        }}
+                                        strokeWidth={2}
+                                      />
+                                    );
+                                  })()}
+                                </div>
+                                <span className="text-xs text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors">
+                                  {site.name}
+                                </span>
+                              </button>
+                              {userRole === 'ADMIN' && (
+                                <div className="absolute -top-2 -right-2 hidden group-hover/item:flex items-center gap-1 bg-background border border-border rounded shadow-sm p-0.5 z-10">
+                                  <button onClick={(e) => { e.stopPropagation(); setEditingSite({ ...site, categoryId: category.categoryId }); }} className="p-1 text-gray-400 hover:text-blue-500"><Edit3 className="w-3 h-3" /></button>
+                                  <button onClick={(e) => { e.stopPropagation(); navService.deleteRecommendSite(site.siteId!).then(loadRecommended); }} className="p-1 text-gray-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
+                                </div>
+                              )}
+                            </div>
                           ))}
                         </div>
                       </div>
@@ -774,6 +825,83 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
           </div>
         </div>
       </div>
+
+      {/* Admin Modals */}
+      {editingCategory && (
+        <div className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm flex items-center justify-center" onClick={() => setEditingCategory(null)}>
+          <div className="bg-card p-6 rounded-2xl w-96 shadow-xl" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-medium mb-4">{editingCategory.categoryId ? '编辑分类' : '新增分类'}</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-gray-500 mb-1 block">分类名称</label>
+                <input type="text" className="w-full px-3 py-2 border rounded-lg bg-background" value={editingCategory.category} onChange={e => setEditingCategory({...editingCategory, category: e.target.value})} />
+              </div>
+              <div>
+                <label className="text-sm text-gray-500 mb-1 block">图标 (lucide-react name)</label>
+                <input type="text" className="w-full px-3 py-2 border rounded-lg bg-background" value={editingCategory.iconValue} onChange={e => setEditingCategory({...editingCategory, iconValue: e.target.value})} />
+              </div>
+              <div>
+                <label className="text-sm text-gray-500 mb-1 block">排序</label>
+                <input type="number" className="w-full px-3 py-2 border rounded-lg bg-background" value={editingCategory.sortOrder} onChange={e => setEditingCategory({...editingCategory, sortOrder: Number(e.target.value)})} />
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button onClick={() => setEditingCategory(null)} className="px-4 py-2 border rounded-lg hover:bg-gray-50">取消</button>
+              <button onClick={() => {
+                const req = { name: editingCategory.category, icon: editingCategory.iconValue, sortOrder: editingCategory.sortOrder };
+                const p = editingCategory.categoryId 
+                  ? navService.updateRecommendCategory(editingCategory.categoryId, req)
+                  : navService.addRecommendCategory(req);
+                p.then(() => { loadRecommended(); setEditingCategory(null); });
+              }} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">保存</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editingSite && (
+        <div className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm flex items-center justify-center" onClick={() => setEditingSite(null)}>
+          <div className="bg-card p-6 rounded-2xl w-96 shadow-xl" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-medium mb-4">{editingSite.siteId ? '编辑网址' : '新增网址'}</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-gray-500 mb-1 block">网址名称</label>
+                <input type="text" className="w-full px-3 py-2 border rounded-lg bg-background" value={editingSite.name || ''} onChange={e => setEditingSite({...editingSite, name: e.target.value})} />
+              </div>
+              <div>
+                <label className="text-sm text-gray-500 mb-1 block">URL</label>
+                <input type="text" className="w-full px-3 py-2 border rounded-lg bg-background" value={editingSite.url || ''} onChange={e => setEditingSite({...editingSite, url: e.target.value})} />
+              </div>
+              <div>
+                <label className="text-sm text-gray-500 mb-1 block">Icon URL</label>
+                <input type="text" className="w-full px-3 py-2 border rounded-lg bg-background" value={editingSite.iconValue || ''} onChange={e => setEditingSite({...editingSite, iconValue: e.target.value})} />
+              </div>
+              <div>
+                <label className="text-sm text-gray-500 mb-1 block">排序</label>
+                <input type="number" className="w-full px-3 py-2 border rounded-lg bg-background" value={editingSite.sortOrder || 0} onChange={e => setEditingSite({...editingSite, sortOrder: Number(e.target.value)})} />
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button onClick={() => setEditingSite(null)} className="px-4 py-2 border rounded-lg hover:bg-gray-50">取消</button>
+              <button onClick={() => {
+                const req = { 
+                  categoryId: editingSite.categoryId,
+                  name: editingSite.name,
+                  url: editingSite.url,
+                  iconType: editingSite.iconType || 'FAVICON',
+                  iconValue: editingSite.iconValue || '',
+                  iconColor: editingSite.iconColor || '#fff',
+                  sortOrder: editingSite.sortOrder 
+                };
+                const p = editingSite.siteId 
+                  ? navService.updateRecommendSite(editingSite.siteId, req)
+                  : navService.addRecommendSite(req);
+                p.then(() => { loadRecommended(); setEditingSite(null); });
+              }} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">保存</button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
