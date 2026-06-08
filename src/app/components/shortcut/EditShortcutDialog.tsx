@@ -5,14 +5,16 @@ import { navService } from '../../services/nav-service';
 interface EditShortcutDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (shortcut: { name: string; url: string; iconType: string; iconValue: string }) => void;
+  onSave: (shortcut: { name: string; url: string; iconType: string; iconValue: string; sortOrder?: number }) => void;
   shortcut: {
-    id?: number;
+    id?: number | string;
     name: string;
     url: string;
     iconType?: string;
     iconValue?: string;
+    sortOrder?: number;
   };
+  showSortOrder?: boolean;
 }
 
 
@@ -69,11 +71,12 @@ const getDebounceDelay = (input: string): number => {
   return 1000;
 };
 
-export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditShortcutDialogProps) {
+export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut, showSortOrder }: EditShortcutDialogProps) {
   const [name, setName] = useState(shortcut.name);
   const [url, setUrl] = useState(shortcut.url);
   const [iconType, setIconType] = useState(shortcut.iconType || 'BUILTIN');
   const [iconValue, setIconValue] = useState(shortcut.iconValue || 'Link');
+  const [sortOrder, setSortOrder] = useState(shortcut.sortOrder || 0);
   
   const [faviconStatus, setFaviconStatus] = useState<'idle' | 'loading' | 'detected' | 'error' | 'uploading'>('idle');
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -85,6 +88,7 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
     setUrl(shortcut.url);
     setIconType(shortcut.iconType || 'BUILTIN');
     setIconValue(shortcut.iconValue || 'Link');
+    setSortOrder(shortcut.sortOrder || 0);
     setFaviconStatus('idle');
     setUploadError(null);
     setDetectedIcons([]);
@@ -226,6 +230,7 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
         url: url.startsWith('http') ? url : `https://${url}`,
         iconType,
         iconValue,
+        sortOrder,
       });
       onClose();
     }
@@ -276,6 +281,19 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
                 className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground outline-none focus:border-blue-500 focus:bg-card transition-all placeholder-gray-400 dark:placeholder-gray-500"
               />
             </div>
+
+            {showSortOrder && (
+              <div>
+                <label className="block text-sm text-gray-600 dark:text-gray-400 mb-2">排序序号</label>
+                <input
+                  type="number"
+                  value={sortOrder}
+                  onChange={(e) => setSortOrder(Number(e.target.value))}
+                  placeholder="0"
+                  className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground outline-none focus:border-blue-500 focus:bg-card transition-all placeholder-gray-400 dark:placeholder-gray-500"
+                />
+              </div>
+            )}
 
             <div>
               <label className="block text-sm text-gray-600 dark:text-gray-400 mb-2">网址图标链接</label>

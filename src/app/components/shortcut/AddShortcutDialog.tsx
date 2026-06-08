@@ -1,4 +1,5 @@
 import { X, Link, Upload, Video, Cpu, Code, ShoppingBag, Newspaper, Gamepad2, Music as MusicIcon, BookOpen, Camera, Briefcase, Trash2, Loader2, Check, RotateCw, Plus, Edit3 } from 'lucide-react';
+import { EditShortcutDialog } from './EditShortcutDialog';
 import { IconMap } from '../ui/IconMap';
 import { useState, useEffect, useRef } from 'react';
 import { navService } from '../../services/nav-service';
@@ -613,6 +614,28 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                               )}
                             </div>
                           ))}
+                          {userRole === 'ADMIN' && (
+                            <div className="relative group/item">
+                              <button
+                                onClick={() => setEditingSite({ categoryId: category.categoryId, name: '', url: '', iconType: 'FAVICON', iconValue: '', iconColor: '#fff', sortOrder: category.sites.length })}
+                                className="flex flex-col items-center gap-2 group cursor-pointer w-full"
+                              >
+                                <div
+                                  className="bg-card/50 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/30 transition-all duration-200"
+                                  style={{
+                                    width: `${iconSize}px`,
+                                    height: `${iconSize}px`,
+                                    borderRadius: borderRadius,
+                                  }}
+                                >
+                                  <Plus className="w-6 h-6 text-gray-400 group-hover:text-blue-500" />
+                                </div>
+                                <span className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-blue-500 truncate w-full text-center">
+                                  新增网址
+                                </span>
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -869,61 +892,48 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
       )}
 
       {editingSite && (
-        <div className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm flex items-center justify-center" onClick={() => setEditingSite(null)}>
-          <div className="bg-card p-6 rounded-2xl w-96 shadow-xl" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-medium mb-4">{editingSite.siteId ? '编辑网址' : '新增网址'}</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm text-gray-500 mb-1 block">网址名称</label>
-                <input type="text" className="w-full px-3 py-2 border rounded-lg bg-background" value={editingSite.name || ''} onChange={e => setEditingSite({...editingSite, name: e.target.value})} />
-              </div>
-              <div>
-                <label className="text-sm text-gray-500 mb-1 block">URL</label>
-                <input type="text" className="w-full px-3 py-2 border rounded-lg bg-background" value={editingSite.url || ''} onChange={e => setEditingSite({...editingSite, url: e.target.value})} />
-              </div>
-              <div>
-                <label className="text-sm text-gray-500 mb-1 block">Icon URL</label>
-                <input type="text" className="w-full px-3 py-2 border rounded-lg bg-background" value={editingSite.iconValue || ''} onChange={e => setEditingSite({...editingSite, iconValue: e.target.value})} />
-              </div>
-              <div>
-                <label className="text-sm text-gray-500 mb-1 block">排序</label>
-                <input type="number" className="w-full px-3 py-2 border rounded-lg bg-background" value={editingSite.sortOrder || 0} onChange={e => setEditingSite({...editingSite, sortOrder: Number(e.target.value)})} />
-              </div>
-            </div>
-            <div className="mt-6 flex justify-end gap-3">
-              <button onClick={() => setEditingSite(null)} className="px-4 py-2 border rounded-lg hover:bg-gray-50">取消</button>
-              <button onClick={() => {
-                if (!editingSite.categoryId) {
-                  alert('分类ID丢失，请刷新页面重试');
-                  return;
-                }
-                const req = { 
-                  categoryId: editingSite.categoryId,
-                  name: editingSite.name,
-                  url: editingSite.url,
-                  iconType: editingSite.iconType || 'FAVICON',
-                  iconValue: editingSite.iconValue || '',
-                  iconColor: editingSite.iconColor || '#fff',
-                  sortOrder: editingSite.sortOrder 
-                };
-                const p = editingSite.siteId 
-                  ? navService.updateRecommendSite(editingSite.siteId, req)
-                  : navService.addRecommendSite(req);
-                p.then((res: any) => { 
-                  if (res.code === 200) {
-                    loadRecommended(); 
-                    setEditingSite(null); 
-                  } else {
-                    alert('保存失败: ' + (res.message || '未知错误'));
-                  }
-                }).catch(err => {
-                  console.error('保存网址失败', err);
-                  alert('保存网址失败，请重试');
-                });
-              }} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">保存</button>
-            </div>
-          </div>
-        </div>
+        <EditShortcutDialog
+          isOpen={true}
+          onClose={() => setEditingSite(null)}
+          showSortOrder={true}
+          shortcut={{
+            id: editingSite.siteId,
+            name: editingSite.name || '',
+            url: editingSite.url || '',
+            iconType: editingSite.iconType || 'FAVICON',
+            iconValue: editingSite.iconValue || '',
+            sortOrder: editingSite.sortOrder || 0,
+          }}
+          onSave={(shortcut) => {
+            if (!editingSite.categoryId) {
+              alert('分类ID丢失，请刷新页面重试');
+              return;
+            }
+            const req = { 
+              categoryId: editingSite.categoryId,
+              name: shortcut.name,
+              url: shortcut.url,
+              iconType: shortcut.iconType || 'FAVICON',
+              iconValue: shortcut.iconValue || '',
+              iconColor: editingSite.iconColor || '#fff',
+              sortOrder: shortcut.sortOrder 
+            };
+            const p = editingSite.siteId 
+              ? navService.updateRecommendSite(editingSite.siteId, req)
+              : navService.addRecommendSite(req);
+            p.then((res: any) => { 
+              if (res.code === 200) {
+                loadRecommended(); 
+                setEditingSite(null); 
+              } else {
+                alert('保存失败: ' + (res.message || '未知错误'));
+              }
+            }).catch(err => {
+              console.error('保存网址失败', err);
+              alert('保存网址失败，请重试');
+            });
+          }}
+        />
       )}
     </>
   );
