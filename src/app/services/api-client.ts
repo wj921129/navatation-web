@@ -1,5 +1,5 @@
 /** 后端 API 根路径，优先读取环境变量，回退到本地开发地址 */
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8080/api/v1';
+const API_BASE = import.meta.env.VITE_API_BASE || '/api/v1';
 
 interface ApiResponse<T = any> {
   code: number;

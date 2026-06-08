@@ -44,6 +44,11 @@ async function importPublicKey(pem: string): Promise<CryptoKey> {
   // Base64 解码
   const binaryDer = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
 
+  // 安全上下文检查（非 HTTPS 或 localhost 时 crypto.subtle 为 undefined）
+  if (!window.crypto || !window.crypto.subtle) {
+    throw new Error('【安全限制】当前连接为非安全上下文，浏览器禁用了原生加密接口 (crypto.subtle)。请务必通过 HTTPS 地址或 localhost 访问！');
+  }
+
   // 导入为 CryptoKey
   return crypto.subtle.importKey(
     'spki',

@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import path from 'path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
+import basicSsl from '@vitejs/plugin-basic-ssl'
 
 
 function figmaAssetResolver() {
@@ -23,6 +24,8 @@ export default defineConfig({
     // Tailwind is not being actively used – do not remove them
     react(),
     tailwindcss(),
+    // 自动生成自签名证书以开启开发服务器的 HTTPS
+    basicSsl(),
   ],
   resolve: {
     alias: {
@@ -34,6 +37,10 @@ export default defineConfig({
     // 开启局域网访问权限
     host: true,
     proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
       '/uploads': {
         target: 'http://localhost:8080',
         changeOrigin: true,
