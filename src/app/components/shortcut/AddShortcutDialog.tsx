@@ -203,7 +203,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
           iconType: 'BUILTIN',
           iconValue: cat.categoryIcon,
           sortOrder: cat.sortOrder,
-          sites: cat.sites.map(site => ({
+          sites: Array.isArray(cat.sites) ? cat.sites.map((site: any) => ({
             siteId: site.siteId,
             name: site.name,
             url: site.url,
@@ -212,13 +212,16 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
             iconType: site.iconType,
             iconValue: site.iconValue,
             sortOrder: site.sortOrder
-          }))
+          })) : []
         }));
         setCategories(mapped);
       } else {
         setCategories(recommendedCategories);
       }
-    }).catch(console.error);
+    }).catch(err => {
+      console.error('Failed to load recommended sites:', err);
+      setCategories(recommendedCategories);
+    });
   };
 
   // 触发网址图标搜索的核心逻辑
@@ -852,7 +855,13 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                 const p = editingCategory.categoryId 
                   ? navService.updateRecommendCategory(editingCategory.categoryId, req)
                   : navService.addRecommendCategory(req);
-                p.then(() => { loadRecommended(); setEditingCategory(null); });
+                p.then(() => { 
+                  loadRecommended(); 
+                  setEditingCategory(null); 
+                }).catch(err => {
+                  console.error('保存分类失败', err);
+                  alert('保存分类失败，请重试');
+                });
               }} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">保存</button>
             </div>
           </div>
@@ -884,6 +893,10 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
             <div className="mt-6 flex justify-end gap-3">
               <button onClick={() => setEditingSite(null)} className="px-4 py-2 border rounded-lg hover:bg-gray-50">取消</button>
               <button onClick={() => {
+                if (!editingSite.categoryId) {
+                  alert('分类ID丢失，请刷新页面重试');
+                  return;
+                }
                 const req = { 
                   categoryId: editingSite.categoryId,
                   name: editingSite.name,
@@ -896,7 +909,17 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                 const p = editingSite.siteId 
                   ? navService.updateRecommendSite(editingSite.siteId, req)
                   : navService.addRecommendSite(req);
-                p.then(() => { loadRecommended(); setEditingSite(null); });
+                p.then((res: any) => { 
+                  if (res.code === 200) {
+                    loadRecommended(); 
+                    setEditingSite(null); 
+                  } else {
+                    alert('保存失败: ' + (res.message || '未知错误'));
+                  }
+                }).catch(err => {
+                  console.error('保存网址失败', err);
+                  alert('保存网址失败，请重试');
+                });
               }} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">保存</button>
             </div>
           </div>
