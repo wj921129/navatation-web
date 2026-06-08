@@ -1142,6 +1142,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                               {category.sites.length === 0 ? (
                                 <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-6">暂无网址，请点击右上方“新增网址”</p>
                               ) : (
+                                <>
                                   <Droppable droppableId={catIdx.toString()} direction="vertical">
                                     {(provided) => (
                                       <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-1.5">
@@ -1311,7 +1312,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                     </div>
                                     <span className="text-xs font-medium">添加新网址</span>
                                   </button>
-                                </div>
+                                </>
                               )}
                             </div>
                           </div>
@@ -1417,8 +1418,9 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                       )}
                                     </Draggable>
                                   ))}
-                                  <div className="relative group/item">
-                                    <button
+                                  {userRole === 'ADMIN' && (
+                                    <div className="relative group/item">
+                                      <button
                                       onClick={() => {
                                         if (!category.categoryId) {
                                           alert('系统内置推荐分类不可添加网址。请先保存该分类到数据库，或新建自定义分类。');
