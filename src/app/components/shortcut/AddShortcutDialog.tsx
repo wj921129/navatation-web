@@ -1080,7 +1080,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                               {category.sites.length === 0 ? (
                                 <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-6">暂无网址，请点击右上方“新增网址”</p>
                               ) : (
-                                <div className="space-y-3">
+                                <div className="space-y-1.5">
                                   {/* 卡片列表式 */}
                                   {category.sites.map((site, siteIdx) => {
                                     const rowKey = `${catIdx}-${siteIdx}`;
@@ -1088,7 +1088,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                     const detectedIcons = rowDetectedIcons[rowKey] || [];
                                     
                                     return (
-                                      <div key={site.siteId || siteIdx} className="bg-background border border-border/60 hover:border-border/100 rounded-xl p-3 flex flex-col gap-3 shadow-sm hover:shadow-md transition-all">
+                                      <div key={site.siteId || siteIdx} className="bg-background border border-border/60 hover:border-border/100 rounded-xl p-2 flex flex-col gap-2 shadow-sm hover:shadow-md transition-all">
                                         <div className="flex items-center gap-2 w-full">
                                           {/* 图标展示区 */}
                                           <div className="flex-shrink-0 flex items-center justify-center bg-card shadow-inner border border-border overflow-hidden w-10 h-10 rounded-full relative">
