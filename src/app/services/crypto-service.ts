@@ -1,4 +1,5 @@
 import { API_BASE, ApiResponse } from './api-client';
+import forge from 'node-forge';
 
 interface NonceResult {
   nonce: string;
@@ -25,7 +26,7 @@ async function getNonceAndPublicKey(): Promise<NonceResult> {
 }
 
 /**
- * 将 PEM 格式的公钥导入为 CryptoKey
+ * 将 PEM 格式的公钥导入为 CryptoKey（仅用于原生 Web Cryptography API）
  */
 async function importPublicKey(pem: string): Promise<CryptoKey> {
   // 使用正则提取 Base64 内容，兼容不同的换行格式和额外空白
@@ -44,11 +45,6 @@ async function importPublicKey(pem: string): Promise<CryptoKey> {
   // Base64 解码
   const binaryDer = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
 
-  // 安全上下文检查（非 HTTPS 或 localhost 时 crypto.subtle 为 undefined）
-  if (!window.crypto || !window.crypto.subtle) {
-    throw new Error('【安全限制】当前连接为非安全上下文，浏览器禁用了原生加密接口 (crypto.subtle)。请务必通过 HTTPS 地址或 localhost 访问！');
-  }
-
   // 导入为 CryptoKey
   return crypto.subtle.importKey(
     'spki',
@@ -60,25 +56,48 @@ async function importPublicKey(pem: string): Promise<CryptoKey> {
 }
 
 /**
- * 使用 RSA 公钥加密明文
+ * 使用 RSA 公钥加密明文（自动兼容原生与软件降级实现）
  */
 async function encryptWithPublicKey(plaintext: string, publicKeyPem: string): Promise<string> {
-  const publicKey = await importPublicKey(publicKeyPem);
-  const encoded = new TextEncoder().encode(plaintext);
+  // 1. 若当前环境支持 Web Cryptography API（安全上下文，如 localhost 或 HTTPS），优先采用原生硬件加速
+  if (window.crypto && window.crypto.subtle) {
+    try {
+      const publicKey = await importPublicKey(publicKeyPem);
+      const encoded = new TextEncoder().encode(plaintext);
 
-  const encrypted = await crypto.subtle.encrypt(
-    { name: 'RSA-OAEP' },
-    publicKey,
-    encoded
-  );
+      const encrypted = await crypto.subtle.encrypt(
+        { name: 'RSA-OAEP' },
+        publicKey,
+        encoded
+      );
 
-  // 将 ArrayBuffer 转为 Base64
-  const bytes = new Uint8Array(encrypted);
-  let binary = '';
-  for (let i = 0; i < bytes.byteLength; i++) {
-    binary += String.fromCharCode(bytes[i]);
+      // 将 ArrayBuffer 转为 Base64
+      const bytes = new Uint8Array(encrypted);
+      let binary = '';
+      for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return btoa(binary);
+    } catch (err) {
+      // 容错：如果原生环境加密失败，则自动滑入纯 JS 降级通路
+      console.warn('原生 Web Crypto 加密失败，降级为 node-forge 纯 JS 加密:', err);
+    }
   }
-  return btoa(binary);
+
+  // 2. 降级方案：在非安全上下文（纯 HTTP 局域网访问）中使用 node-forge 进行 RSA-OAEP-256 加密
+  try {
+    const publicKey = forge.pki.publicKeyFromPem(publicKeyPem);
+    const encrypted = publicKey.encrypt(plaintext, 'RSA-OAEP', {
+      md: forge.md.sha256.create(),
+      mgf1: {
+        md: forge.md.sha256.create()
+      }
+    });
+    return forge.util.encode64(encrypted);
+  } catch (err) {
+    console.error('node-forge 降级加密失败:', err);
+    throw new Error('加密计算失败，无法保证安全传输。');
+  }
 }
 
 /**
