@@ -143,6 +143,10 @@ export const navService = {
   fetchFavicon(url: string): Promise<ApiResponse<FaviconResult>> {
     return api.post('/nav/favicon', { url });
   },
+  /** 批量请求后端嗅探并返回指定 URL 列表的网站 Favicon 地址映射 */
+  fetchFaviconsInBatch(urls: string[]): Promise<ApiResponse<Record<string, FaviconResult>>> {
+    return api.post('/nav/favicon/batch', { urls });
+  },
 
   // 图标上传
   /** 上传自定义图标文件，返回可公开访问的图标 URL */

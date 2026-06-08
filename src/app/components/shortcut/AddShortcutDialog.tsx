@@ -2,7 +2,7 @@ import { X, Link, Upload, Video, Cpu, Code, ShoppingBag, Newspaper, Gamepad2, Mu
 import { EditShortcutDialog } from './EditShortcutDialog';
 import { IconMap } from '../ui/IconMap';
 import { useState, useEffect, useRef } from 'react';
-import { navService } from '../../services/nav-service';
+import { navService, IconType } from '../../services/nav-service';
 import { LucideIcon } from 'lucide-react';
 
 interface AddShortcutDialogProps {
@@ -198,6 +198,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
   const [batchEditData, setBatchEditData] = useState<CategoryGroup[]>([]);
   const [rowLoadingStatus, setRowLoadingStatus] = useState<Record<string, boolean>>({});
   const [rowDetectedIcons, setRowDetectedIcons] = useState<Record<string, string[]>>({});
+  const [isAllRefreshing, setIsAllRefreshing] = useState(false);
   const rowFileInputRef = useRef<HTMLInputElement>(null);
   const activeUploadRow = useRef<{ catIdx: number; siteIdx: number } | null>(null);
 
@@ -292,6 +293,178 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
     });
   };
 
+  const handleBatchRefreshCategoryIcons = async (catIdx: number) => {
+    const category = batchEditData[catIdx];
+    const validSites = category.sites.filter(site => site.url.trim() && isValidDomainOrUrl(site.url.trim()));
+    if (validSites.length === 0) {
+      alert('当前分类下没有需要刷新图标的有效网址（网址域名格式需正确）');
+      return;
+    }
+
+    const urls = validSites.map(site => {
+      const u = site.url.trim();
+      return u.startsWith('http') ? u : `https://${u}`;
+    });
+
+    // 1. 先前台竞速：批量标记 loading 并准备本地 CDN
+    validSites.forEach(site => {
+      const siteIdx = category.sites.indexOf(site);
+      const rowKey = `${catIdx}-${siteIdx}`;
+      setRowLoadingStatus(prev => ({ ...prev, [rowKey]: true }));
+      setRowDetectedIcons(prev => ({ ...prev, [rowKey]: [] }));
+
+      try {
+        const u = site.url.trim();
+        const fullUrl = u.startsWith('http') ? u : `https://${u}`;
+        const parsed = new URL(fullUrl);
+        const host = parsed.host;
+        const googleCdn = `https://www.google.com/s2/favicons?sz=64&domain=${host}`;
+        const ddgCdn = `https://icons.duckduckgo.com/ip3/${host}.ico`;
+
+        setRowDetectedIcons(prev => {
+          const current = prev[rowKey] || [];
+          const newIcons = [...current];
+          if (!newIcons.includes(googleCdn)) newIcons.push(googleCdn);
+          if (!newIcons.includes(ddgCdn)) newIcons.push(ddgCdn);
+          // 默认选中第一个
+          if (newIcons.length > 0 && !site.iconValue) {
+            updateBatchEditSite(catIdx, siteIdx, {
+              iconType: 'FAVICON',
+              iconValue: newIcons[0]
+            });
+          }
+          return { ...prev, [rowKey]: newIcons };
+        });
+      } catch (e) {
+        // 忽略
+      }
+    });
+
+    try {
+      // 2. 后端异步批量嗅探
+      const res = await navService.fetchFaviconsInBatch(urls);
+      if (res.code === 200 && res.data) {
+        // 3. 回填后端高清原生图标
+        validSites.forEach(site => {
+          const siteIdx = category.sites.indexOf(site);
+          const rowKey = `${catIdx}-${siteIdx}`;
+          const u = site.url.trim();
+          const fullUrl = u.startsWith('http') ? u : `https://${u}`;
+          const result = res.data[fullUrl];
+          if (result && result.faviconUrl) {
+            const nativeIcon = result.faviconUrl;
+            setRowDetectedIcons(prev => {
+              const current = prev[rowKey] || [];
+              if (current.includes(nativeIcon)) return prev;
+              const newIcons = [...current, nativeIcon];
+              updateBatchEditSite(catIdx, siteIdx, {
+                iconType: 'FAVICON',
+                iconValue: nativeIcon
+              });
+              return { ...prev, [rowKey]: newIcons };
+            });
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Batch refresh category icons error:', err);
+    } finally {
+      // 4. 清除 loading 状态
+      validSites.forEach(site => {
+        const siteIdx = category.sites.indexOf(site);
+        const rowKey = `${catIdx}-${siteIdx}`;
+        setRowLoadingStatus(prev => ({ ...prev, [rowKey]: false }));
+      });
+    }
+  };
+
+  const handleBatchRefreshAllIcons = async () => {
+    // 收集所有分类的有效网址
+    const tasks: { catIdx: number; siteIdx: number; url: string; site: RecommendedSite }[] = [];
+    batchEditData.forEach((category, catIdx) => {
+      category.sites.forEach((site, siteIdx) => {
+        const url = site.url.trim();
+        if (url && isValidDomainOrUrl(url)) {
+          const fullUrl = url.startsWith('http') ? url : `https://${url}`;
+          tasks.push({ catIdx, siteIdx, url: fullUrl, site });
+        }
+      });
+    });
+
+    if (tasks.length === 0) {
+      alert('当前批量管理中没有包含有效链接的网址');
+      return;
+    }
+
+    setIsAllRefreshing(true);
+
+    // 1. 前台本地竞速：开启 loading 并在本地回填 CDN
+    tasks.forEach(({ catIdx, siteIdx, url, site }) => {
+      const rowKey = `${catIdx}-${siteIdx}`;
+      setRowLoadingStatus(prev => ({ ...prev, [rowKey]: true }));
+      setRowDetectedIcons(prev => ({ ...prev, [rowKey]: [] }));
+
+      try {
+        const parsed = new URL(url);
+        const host = parsed.host;
+        const googleCdn = `https://www.google.com/s2/favicons?sz=64&domain=${host}`;
+        const ddgCdn = `https://icons.duckduckgo.com/ip3/${host}.ico`;
+
+        setRowDetectedIcons(prev => {
+          const current = prev[rowKey] || [];
+          const newIcons = [...current];
+          if (!newIcons.includes(googleCdn)) newIcons.push(googleCdn);
+          if (!newIcons.includes(ddgCdn)) newIcons.push(ddgCdn);
+          // 默认选中第一个
+          if (newIcons.length > 0 && !site.iconValue) {
+            updateBatchEditSite(catIdx, siteIdx, {
+              iconType: 'FAVICON',
+              iconValue: newIcons[0]
+            });
+          }
+          return { ...prev, [rowKey]: newIcons };
+        });
+      } catch (e) {
+        // 忽略
+      }
+    });
+
+    try {
+      const urls = tasks.map(t => t.url);
+      // 2. 请求后端批量嗅探接口
+      const res = await navService.fetchFaviconsInBatch(urls);
+      if (res.code === 200 && res.data) {
+        // 3. 回填原生高清图标
+        tasks.forEach(({ catIdx, siteIdx, url }) => {
+          const rowKey = `${catIdx}-${siteIdx}`;
+          const result = res.data[url];
+          if (result && result.faviconUrl) {
+            const nativeIcon = result.faviconUrl;
+            setRowDetectedIcons(prev => {
+              const current = prev[rowKey] || [];
+              if (current.includes(nativeIcon)) return prev;
+              const newIcons = [...current, nativeIcon];
+              updateBatchEditSite(catIdx, siteIdx, {
+                iconType: 'FAVICON',
+                iconValue: nativeIcon
+              });
+              return { ...prev, [rowKey]: newIcons };
+            });
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Batch refresh all icons error:', err);
+    } finally {
+      // 4. 清除 loading
+      tasks.forEach(({ catIdx, siteIdx }) => {
+        const rowKey = `${catIdx}-${siteIdx}`;
+        setRowLoadingStatus(prev => ({ ...prev, [rowKey]: false }));
+      });
+      setIsAllRefreshing(false);
+    }
+  };
+
   const handleTriggerRowUpload = (catIdx: number, siteIdx: number) => {
     activeUploadRow.current = { catIdx, siteIdx };
     if (rowFileInputRef.current) {
@@ -338,7 +511,8 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
       const newEmptySite: RecommendedSite = {
         name: '',
         url: '',
-        iconType: 'FAVICON',
+        icon: Link,
+        iconType: 'FAVICON' as IconType,
         iconValue: '',
         color: '#4285F4',
         sortOrder: nextSortOrder
@@ -357,7 +531,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
     });
   };
 
-  const handleSaveCategorySites = async (categoryGroup: CategoryGroup, catIdx: number) => {
+  const handleSaveCategorySites = async (categoryGroup: CategoryGroup) => {
     const categoryId = categoryGroup.categoryId;
     if (!categoryId) {
       alert('分类不存在或未在数据库建立，请先保存该分类。');
@@ -758,6 +932,16 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                   <div className="p-6 space-y-8 relative">
                     {userRole === 'ADMIN' && (
                       <div className="absolute top-4 right-4 flex items-center gap-3">
+                        {isBatchMode && (
+                          <button
+                            onClick={handleBatchRefreshAllIcons}
+                            disabled={isAllRefreshing}
+                            className="flex items-center gap-1.5 px-4 py-2 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-800 rounded-full text-sm font-medium transition-all cursor-pointer disabled:opacity-50"
+                          >
+                            <RotateCw className={`w-4 h-4 ${isAllRefreshing ? 'animate-spin' : ''}`} />
+                            {isAllRefreshing ? '正在刷新全部图标...' : '一键刷新全部图标'}
+                          </button>
+                        )}
                         <button
                           onClick={() => setIsBatchMode(!isBatchMode)}
                           className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all cursor-pointer ${
@@ -791,13 +975,20 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                               </div>
                               <div className="flex items-center gap-2">
                                 <button
+                                  onClick={() => handleBatchRefreshCategoryIcons(catIdx)}
+                                  className="flex items-center gap-1 px-3 py-1.5 bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-lg text-xs cursor-pointer transition-colors"
+                                  title="批量刷新当前分类下所有网址的图标"
+                                >
+                                  <RotateCw className="w-3.5 h-3.5" /> 一键刷新图标
+                                </button>
+                                <button
                                   onClick={() => handleAddEmptyRow(catIdx)}
                                   className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg text-xs cursor-pointer transition-colors"
                                 >
                                   <Plus className="w-3.5 h-3.5" /> 新增网址
                                 </button>
                                 <button
-                                  onClick={() => handleSaveCategorySites(category, catIdx)}
+                                  onClick={() => handleSaveCategorySites(category)}
                                   className="flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs cursor-pointer transition-colors"
                                 >
                                   保存修改
@@ -1363,10 +1554,10 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
               categoryId: editingSite.categoryId,
               name: shortcut.name,
               url: shortcut.url,
-              iconType: shortcut.iconType || 'FAVICON',
+              iconType: (shortcut.iconType || 'FAVICON') as IconType,
               iconValue: shortcut.iconValue || '',
               iconColor: editingSite.iconColor || '#fff',
-              sortOrder: shortcut.sortOrder 
+              sortOrder: shortcut.sortOrder ?? 0
             };
             const p = editingSite.siteId 
               ? navService.updateRecommendSite(editingSite.siteId, req)
