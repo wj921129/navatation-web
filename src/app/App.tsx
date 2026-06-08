@@ -999,17 +999,17 @@ export default function App() {
                 <div
                   key={`${shortcut.name}-${globalIndex}`}
                   className="flex flex-col items-center group relative"
-                  style={{ gap: `${settings.iconTextGap}px` }}
+                  style={{ width: `${settings.iconSize + 32}px` }}
                 >
                   <a
                     href={shortcut.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex flex-col items-center"
+                    className="flex flex-col items-center w-full"
                     style={{ gap: `${settings.iconTextGap}px` }}
                   >
                     <div
-                      className="bg-icon-bg border border-widget-border flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 overflow-hidden"
+                      className="bg-icon-bg border border-widget-border flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 overflow-hidden shrink-0"
                       style={{
                         width: `${settings.iconSize}px`,
                         height: `${settings.iconSize}px`,
@@ -1040,7 +1040,7 @@ export default function App() {
                       })()}
                     </div>
                     <span
-                      className="text-white font-light tracking-wide drop-shadow-lg"
+                      className="text-white font-light tracking-wide drop-shadow-lg text-center w-full truncate px-1"
                       style={{ fontSize: `${settings.textSize}px` }}
                     >
                       {shortcut.name}
@@ -1055,10 +1055,10 @@ export default function App() {
               <button
                 onClick={() => setIsAddShortcutOpen(true)}
                 className="flex flex-col items-center group"
-                style={{ gap: `${settings.iconTextGap}px` }}
+                style={{ gap: `${settings.iconTextGap}px`, width: `${settings.iconSize + 32}px` }}
               >
                 <div
-                  className="bg-icon-bg/80 border border-widget-border/80 flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 cursor-pointer hover:bg-icon-bg hover:border-widget-border"
+                  className="bg-icon-bg/80 border border-widget-border/80 flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 cursor-pointer hover:bg-icon-bg hover:border-widget-border shrink-0"
                   style={{
                     width: `${settings.iconSize}px`,
                     height: `${settings.iconSize}px`,
@@ -1072,7 +1072,7 @@ export default function App() {
                   />
                 </div>
                 <span
-                  className="text-white font-light tracking-wide drop-shadow-lg opacity-0"
+                  className="text-white font-light tracking-wide drop-shadow-lg opacity-0 text-center w-full truncate px-1"
                   style={{ fontSize: `${settings.textSize}px` }}
                 >
                   添加

@@ -61,7 +61,7 @@ export function DraggableShortcut({
       ref={ref}
       className="flex flex-col items-center group relative cursor-grab active:cursor-grabbing"
       style={{
-        gap: `${iconTextGap}px`,
+        width: `${iconSize + 32}px`,
         opacity: isDragging ? 0.4 : 1,
       }}
     >
@@ -79,11 +79,11 @@ export function DraggableShortcut({
 
       <div
         onClick={onEdit}
-        className="flex flex-col items-center"
+        className="flex flex-col items-center w-full"
         style={{ gap: `${iconTextGap}px` }}
       >
         <div
-          className="bg-icon-bg border border-widget-border flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden"
+          className="bg-icon-bg border border-widget-border flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden shrink-0"
           style={{
             width: `${iconSize}px`,
             height: `${iconSize}px`,
@@ -114,7 +114,7 @@ export function DraggableShortcut({
           })()}
         </div>
         <span
-          className="text-white font-light tracking-wide drop-shadow-lg"
+          className="text-white font-light tracking-wide drop-shadow-lg text-center w-full truncate px-1"
           style={{ fontSize: `${textSize}px` }}
         >
           {shortcut.name}
