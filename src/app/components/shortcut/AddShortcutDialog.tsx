@@ -1,4 +1,5 @@
-import { X, Link, Upload, Video, Cpu, Code, ShoppingBag, Newspaper, Gamepad2, Music as MusicIcon, BookOpen, Camera, Briefcase, Trash2, Loader2, Check, RotateCw, Plus, Edit3 } from 'lucide-react';
+import { X, Link, Upload, Video, Cpu, Code, ShoppingBag, Newspaper, Gamepad2, Music as MusicIcon, BookOpen, Camera, Briefcase, Trash2, Loader2, Check, RotateCw, Plus, Edit3, GripVertical } from 'lucide-react';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { EditShortcutDialog } from './EditShortcutDialog';
 import { IconMap } from '../ui/IconMap';
 import { useState, useEffect, useRef } from 'react';
@@ -22,7 +23,7 @@ interface RecommendedSite {
   url: string;
   iconType?: string;
   iconValue?: string;
-  sortOrder?: number;
+  dragId?: string;
 }
 
 interface CategoryGroup {
@@ -584,10 +585,6 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
     setBatchEditData(prev => {
       const copy = [...prev];
       const categorySites = copy[catIdx].sites;
-      const nextSortOrder = categorySites.length > 0
-        ? Math.max(...categorySites.map(s => s.sortOrder || 0)) + 1
-        : 1;
-      
       const newEmptySite: RecommendedSite = {
         name: '',
         url: '',
@@ -595,7 +592,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
         iconType: 'FAVICON' as IconType,
         iconValue: '',
         color: '#4285F4',
-        sortOrder: nextSortOrder
+        dragId: Math.random().toString(36).substring(7)
       };
       
       copy[catIdx].sites = [...categorySites, newEmptySite];
@@ -609,6 +606,65 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
       copy[catIdx].sites = copy[catIdx].sites.filter((_, idx) => idx !== siteIdx);
       return copy;
     });
+  };
+
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+    const { source, destination } = result;
+
+    if (source.droppableId === destination.droppableId && source.index === destination.index) {
+      return;
+    }
+
+    const sourceCatIdx = parseInt(source.droppableId);
+    const destCatIdx = parseInt(destination.droppableId);
+
+    const updateData = (prev: CategoryGroup[]) => {
+      const copy = prev.map(c => ({...c, sites: [...c.sites]}));
+      const [movedSite] = copy[sourceCatIdx].sites.splice(source.index, 1);
+      copy[destCatIdx].sites.splice(destination.index, 0, movedSite);
+      return copy;
+    };
+
+    if (isBatchMode) {
+      setBatchEditData(updateData);
+    } else {
+      setCategories(updateData);
+    }
+  };
+
+  const handleSaveAllCategories = async () => {
+    const dataToSave = isBatchMode ? batchEditData : categories;
+    try {
+      // Validate first
+      for (const cat of dataToSave) {
+        for (let i = 0; i < cat.sites.length; i++) {
+          const site = cat.sites[i];
+          if (!site.name.trim() || !site.url.trim()) {
+            alert(`分类【${cat.category}】下的部分网址名称或链接为空，请补充完整再保存。`);
+            return;
+          }
+        }
+      }
+
+      await Promise.all(dataToSave.map(cat => {
+        if (!cat.categoryId) return Promise.resolve();
+        const formattedSites = cat.sites.map(site => ({
+          siteId: site.siteId,
+          name: site.name.trim(),
+          url: site.url.trim().startsWith('http') ? site.url.trim() : `https://${site.url.trim()}`,
+          iconType: site.iconType || 'FAVICON',
+          iconValue: site.iconValue || '',
+          iconColor: site.color || '#fff'
+        }));
+        return navService.batchSaveRecommendSites(cat.categoryId, { sites: formattedSites });
+      }));
+      alert('所有拖拽排序修改和网址修改均已同步到后端！');
+      loadRecommended();
+    } catch (err) {
+      console.error('Batch save all sites error:', err);
+      alert('保存时发生异常，请重试');
+    }
   };
 
   const handleSaveCategorySites = async (categoryGroup: CategoryGroup) => {
@@ -637,8 +693,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
       url: site.url.trim().startsWith('http') ? site.url.trim() : `https://${site.url.trim()}`,
       iconType: site.iconType || 'FAVICON',
       iconValue: site.iconValue || '',
-      iconColor: site.color || '#fff',
-      sortOrder: Number(site.sortOrder) || 0.0
+      iconColor: site.color || '#fff'
     }));
     
     try {
@@ -675,7 +730,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
             icon: IconMap[site.iconValue] || IconMap.Link,
             iconType: site.iconType,
             iconValue: site.iconValue,
-            sortOrder: site.sortOrder
+            dragId: site.siteId || Math.random().toString(36).substring(7)
           })) : []
         }));
         setCategories(mapped);
@@ -1009,9 +1064,16 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
               {/* Left: Tabs Content */}
               <div className={`${isBatchMode ? 'col-span-3' : 'col-span-2'} border-r border-border overflow-y-auto`}>
                 {activeTab === 'recommended' ? (
+                  <DragDropContext onDragEnd={handleDragEnd}>
                   <div className="p-6 space-y-8 relative">
                     {userRole === 'ADMIN' && (
                       <div className="absolute top-4 right-4 flex items-center gap-3">
+                        <button
+                          onClick={handleSaveAllCategories}
+                          className="flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-full text-sm font-medium transition-all shadow-sm cursor-pointer"
+                        >
+                          <Check className="w-4 h-4" /> 保存全部更改
+                        </button>
                         {isBatchMode && (
                           <button
                             onClick={handleBatchRefreshAllIcons}
@@ -1035,7 +1097,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                         {!isBatchMode && (
                           <button
                             onClick={() => setEditingCategory({ category: '', iconValue: 'Folder', sortOrder: categories.length })}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm"
+                            className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm cursor-pointer"
                           >
                             <Plus className="w-4 h-4" /> 新增分类
                           </button>
@@ -1080,16 +1142,30 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                               {category.sites.length === 0 ? (
                                 <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-6">暂无网址，请点击右上方“新增网址”</p>
                               ) : (
-                                <div className="space-y-1.5">
-                                  {/* 卡片列表式 */}
-                                  {category.sites.map((site, siteIdx) => {
-                                    const rowKey = `${catIdx}-${siteIdx}`;
-                                    const isLoading = !!rowLoadingStatus[rowKey];
-                                    const detectedIcons = rowDetectedIcons[rowKey] || [];
-                                    
-                                    return (
-                                      <div key={site.siteId || siteIdx} className="bg-background border border-border/60 hover:border-border/100 rounded-xl p-2 flex flex-col gap-2 shadow-sm hover:shadow-md transition-all">
-                                        <div className="flex items-center gap-2 w-full">
+                                  <Droppable droppableId={catIdx.toString()} direction="vertical">
+                                    {(provided) => (
+                                      <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-1.5">
+                                        {/* 卡片列表式 */}
+                                        {category.sites.map((site, siteIdx) => {
+                                          const rowKey = `${catIdx}-${siteIdx}`;
+                                          const isLoading = !!rowLoadingStatus[rowKey];
+                                          const detectedIcons = rowDetectedIcons[rowKey] || [];
+                                          
+                                          return (
+                                            <Draggable key={site.dragId!} draggableId={site.dragId!} index={siteIdx}>
+                                              {(provided) => (
+                                                <div 
+                                                  ref={provided.innerRef} 
+                                                  {...provided.draggableProps} 
+                                                  {...provided.dragHandleProps}
+                                                  className="bg-background border border-border/60 hover:border-border/100 rounded-xl p-2 flex flex-col gap-2 shadow-sm hover:shadow-md transition-all"
+                                                  style={provided.draggableProps.style}
+                                                >
+                                                  <div className="flex items-center gap-2 w-full">
+                                          {/* 拖拽把手 */}
+                                          <div className="flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-400 hover:text-blue-500">
+                                            <GripVertical className="w-5 h-5" />
+                                          </div>
                                           {/* 图标展示区 */}
                                           <div className="flex-shrink-0 flex items-center justify-center bg-card shadow-inner border border-border overflow-hidden w-10 h-10 rounded-full relative">
                                             {isLoading ? (
@@ -1136,17 +1212,6 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                                 className="w-full px-2 py-2 text-sm bg-card border border-border rounded-lg outline-none focus:border-blue-500 focus:bg-background transition-colors"
                                                 placeholder="https://..."
                                                 title="网址链接"
-                                              />
-                                            </div>
-                                            <div className="w-16 flex-shrink-0">
-                                              <input
-                                                type="number"
-                                                step="0.01"
-                                                value={site.sortOrder}
-                                                onChange={(e) => updateBatchEditSite(catIdx, siteIdx, { sortOrder: Number(e.target.value) })}
-                                                className="w-full px-2 py-2 text-sm bg-card border border-border rounded-lg outline-none focus:border-blue-500 focus:bg-background transition-colors text-center"
-                                                placeholder="0"
-                                                title="排序序号"
                                               />
                                             </div>
                                           </div>
@@ -1227,8 +1292,14 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                           </div>
                                         </div>
                                       </div>
-                                    );
-                                  })}
+                                    )}
+                                  </Draggable>
+                                          );
+                                        })}
+                                        {provided.placeholder}
+                                      </div>
+                                    )}
+                                  </Droppable>
                                   
                                   {/* Beautiful + button to add new site */}
                                   <button
@@ -1248,7 +1319,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                       </div>
                     ) : (
                       <div className="space-y-8 mt-12">
-                        {categories.map((category) => (
+                        {categories.map((category, catIdx) => (
                           <div key={category.category}>
                             <div className="flex items-center justify-between mb-4">
                               <div className="flex items-center gap-2">
@@ -1273,101 +1344,116 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                       alert('请先编辑并保存该分类到数据库，然后才能新增网址。');
                                       return;
                                     }
-                                    setEditingSite({ categoryId: category.categoryId, iconType: 'FAVICON', iconColor: '#fff', sortOrder: category.sites.length })
+                                    setEditingSite({ categoryId: category.categoryId, iconType: 'FAVICON', iconColor: '#fff' })
                                   }} className="p-1 text-gray-400 hover:text-green-500 rounded"><Plus className="w-4 h-4" /></button>
                                 </div>
                               )}
                             </div>
-                            <div className="grid grid-cols-8 gap-6">
-                              {category.sites.map((site: any) => (
-                                <div key={site.siteId || site.name} className="relative group/item">
-                                  <button
-                                    onClick={() => {
-                                      handleAddRecommendedToPending(site);
-                                    }}
-                                    className="flex flex-col items-center gap-2 group cursor-pointer w-full"
-                                  >
-                                    <div
-                                      className="bg-card flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all duration-200 border border-border overflow-hidden"
-                                      style={{
-                                        width: `${iconSize}px`,
-                                        height: `${iconSize}px`,
-                                        borderRadius: borderRadius,
-                                      }}
-                                    >
-                                      {(() => {
-                                        if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
-                                          return <img src={site.iconValue} alt={site.name} style={{ width: '50%', height: '50%', objectFit: 'contain' }} />;
-                                        }
-                                        return (
-                                          <site.icon
-                                            style={{
-                                              color: site.color,
-                                              width: `${iconSize * 0.5}px`,
-                                              height: `${iconSize * 0.5}px`,
+                            <Droppable droppableId={catIdx.toString()} direction="horizontal">
+                              {(provided) => (
+                                <div ref={provided.innerRef} {...provided.droppableProps} className="grid grid-cols-8 gap-6">
+                                  {category.sites.map((site: any, siteIdx) => (
+                                    <Draggable key={site.dragId!} draggableId={site.dragId!} index={siteIdx}>
+                                      {(provided) => (
+                                        <div 
+                                          ref={provided.innerRef} 
+                                          {...provided.draggableProps} 
+                                          {...provided.dragHandleProps}
+                                          className="relative group/item"
+                                          style={provided.draggableProps.style}
+                                        >
+                                          <button
+                                            onClick={() => {
+                                              handleAddRecommendedToPending(site);
                                             }}
-                                            strokeWidth={2}
-                                          />
-                                        );
-                                      })()}
-                                    </div>
-                                    <span className="text-xs text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors">
-                                      {site.name}
-                                    </span>
-                                  </button>
-                                  {userRole === 'ADMIN' && (
-                                    <div className="absolute -top-2 -right-2 hidden group-hover/item:flex items-center gap-1 bg-background border border-border rounded shadow-sm p-0.5 z-10">
-                                      <button onClick={(e) => { 
-                                        e.stopPropagation(); 
+                                            className="flex flex-col items-center gap-2 group cursor-pointer w-full"
+                                          >
+                                            <div
+                                              className="bg-card flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all duration-200 border border-border overflow-hidden"
+                                              style={{
+                                                width: `${iconSize}px`,
+                                                height: `${iconSize}px`,
+                                                borderRadius: borderRadius,
+                                              }}
+                                            >
+                                              {(() => {
+                                                if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
+                                                  return <img src={site.iconValue} alt={site.name} style={{ width: '50%', height: '50%', objectFit: 'contain' }} />;
+                                                }
+                                                return (
+                                                  <site.icon
+                                                    style={{
+                                                      color: site.color,
+                                                      width: `${iconSize * 0.5}px`,
+                                                      height: `${iconSize * 0.5}px`,
+                                                    }}
+                                                    strokeWidth={2}
+                                                  />
+                                                );
+                                              })()}
+                                            </div>
+                                            <span className="text-xs text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors">
+                                              {site.name}
+                                            </span>
+                                          </button>
+                                          {userRole === 'ADMIN' && (
+                                            <div className="absolute -top-2 -right-2 hidden group-hover/item:flex items-center gap-1 bg-background border border-border rounded shadow-sm p-0.5 z-10">
+                                              <button onClick={(e) => { 
+                                                e.stopPropagation(); 
+                                                if (!category.categoryId) {
+                                                  alert('系统内置推荐网址不可直接编辑。请通过右上角"新增分类"建立数据库数据后再添加。');
+                                                  return;
+                                                }
+                                                setEditingSite({ ...site, iconColor: site.iconColor || site.color, categoryId: category.categoryId }); 
+                                              }} className="p-1 text-gray-400 hover:text-blue-500"><Edit3 className="w-3 h-3" /></button>
+                                              <button onClick={(e) => { 
+                                                e.stopPropagation(); 
+                                                if (!site.siteId) return;
+                                                navService.deleteRecommendSite(site.siteId!).then(loadRecommended); 
+                                              }} className="p-1 text-gray-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
+                                    </Draggable>
+                                  ))}
+                                  <div className="relative group/item">
+                                    <button
+                                      onClick={() => {
                                         if (!category.categoryId) {
-                                          alert('系统内置推荐网址不可直接编辑。请通过右上角"新增分类"建立数据库数据后再添加。');
+                                          alert('系统内置推荐分类不可添加网址。请先保存该分类到数据库，或新建自定义分类。');
                                           return;
                                         }
-                                        setEditingSite({ ...site, iconColor: site.iconColor || site.color, categoryId: category.categoryId }); 
-                                      }} className="p-1 text-gray-400 hover:text-blue-500"><Edit3 className="w-3 h-3" /></button>
-                                      <button onClick={(e) => { 
-                                        e.stopPropagation(); 
-                                        if (!site.siteId) return;
-                                        navService.deleteRecommendSite(site.siteId!).then(loadRecommended); 
-                                      }} className="p-1 text-gray-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                              {userRole === 'ADMIN' && (
-                                <div className="relative group/item">
-                                  <button
-                                    onClick={() => {
-                                      if (!category.categoryId) {
-                                        alert('系统内置推荐分类不可添加网址。请先保存该分类到数据库，或新建自定义分类。');
-                                        return;
-                                      }
-                                      setEditingSite({ categoryId: category.categoryId, name: '', url: '', iconType: 'FAVICON', iconValue: '', iconColor: '#fff', sortOrder: category.sites.length })
-                                    }}
-                                    className="flex flex-col items-center gap-2 group cursor-pointer w-full"
-                                  >
-                                    <div
-                                      className="bg-card/50 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/30 transition-all duration-200"
-                                      style={{
-                                        width: `${iconSize}px`,
-                                        height: `${iconSize}px`,
-                                        borderRadius: borderRadius,
+                                        setEditingSite({ categoryId: category.categoryId, name: '', url: '', iconType: 'FAVICON', iconValue: '', iconColor: '#fff' })
                                       }}
+                                      className="flex flex-col items-center gap-2 group cursor-pointer w-full"
                                     >
-                                      <Plus className="w-6 h-6 text-gray-400 group-hover:text-blue-500" />
-                                    </div>
-                                    <span className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-blue-500 truncate w-full text-center">
-                                      新增网址
-                                    </span>
-                                  </button>
-                                </div>
-                              )}
-                            </div>
+                                      <div
+                                        className="bg-card/50 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/30 transition-all duration-200"
+                                        style={{
+                                          width: `${iconSize}px`,
+                                          height: `${iconSize}px`,
+                                          borderRadius: borderRadius,
+                                        }}
+                                      >
+                                        <Plus className="w-6 h-6 text-gray-400 group-hover:text-blue-500" />
+                                      </div>
+                                      <span className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-blue-500 truncate w-full text-center">
+                                        新增网址
+                                      </span>
+                                    </button>
+                                  </div>
+                                )}
+                                {provided.placeholder}
+                              </div>
+                            )}
+                          </Droppable>
                           </div>
                         ))}
                       </div>
                     )}
                   </div>
+                  </DragDropContext>
                 ) : (
                   <div className="p-8">
                     <div className="max-w-xl mx-auto space-y-6">
@@ -1631,14 +1717,12 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
         <EditShortcutDialog
           isOpen={true}
           onClose={() => setEditingSite(null)}
-          showSortOrder={true}
           shortcut={{
             id: editingSite.siteId,
             name: editingSite.name || '',
             url: editingSite.url || '',
             iconType: editingSite.iconType || 'FAVICON',
             iconValue: editingSite.iconValue || '',
-            sortOrder: editingSite.sortOrder || 0,
           }}
           onSave={(shortcut) => {
             if (!editingSite.categoryId) {
@@ -1651,8 +1735,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
               url: shortcut.url,
               iconType: (shortcut.iconType || 'FAVICON') as IconType,
               iconValue: shortcut.iconValue || '',
-              iconColor: editingSite.iconColor || '#fff',
-              sortOrder: shortcut.sortOrder ?? 0
+              iconColor: editingSite.iconColor || '#fff'
             };
             const p = editingSite.siteId 
               ? navService.updateRecommendSite(editingSite.siteId, req)
