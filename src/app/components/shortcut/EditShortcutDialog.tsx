@@ -302,6 +302,7 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut, showSort
                   <input
                     type="text"
                     value={showImagePreview ? iconValue : ''}
+                    readOnly={detectedIcons.length > 0 && detectedIcons.includes(iconValue)}
                     onChange={(e) => {
                       const val = e.target.value;
                       setIconValue(val);
@@ -314,7 +315,12 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut, showSort
                       }
                     }}
                     placeholder="https://example.com/icon.png"
-                    className="w-full px-4 py-3 pr-10 bg-background border border-border rounded-xl text-foreground outline-none focus:border-blue-500 focus:bg-card transition-all placeholder-gray-400 dark:placeholder-gray-500 h-[46px]"
+                    className={`w-full px-4 py-3 pr-10 bg-background border border-border rounded-xl outline-none transition-all h-[46px] ${
+                      detectedIcons.length > 0 && detectedIcons.includes(iconValue)
+                        ? 'text-gray-400 cursor-text'
+                        : 'text-foreground focus:border-blue-500 focus:bg-card placeholder-gray-400 dark:placeholder-gray-500'
+                    }`}
+                    title={(detectedIcons.length > 0 && detectedIcons.includes(iconValue)) ? "搜索结果不可编辑，可双击复制" : "网址图标链接"}
                   />
                   {(faviconStatus === 'loading' || faviconStatus === 'uploading') && (
                     <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-500 animate-spin" />
