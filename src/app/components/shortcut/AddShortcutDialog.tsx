@@ -590,7 +590,17 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                           {category.sites.map((site: any) => (
                             <div key={site.siteId || site.name} className="relative group/item">
                               <button
-                                onClick={() => handleAddRecommendedToPending(site)}
+                                onClick={() => {
+                                  if (userRole === 'ADMIN') {
+                                    if (!category.categoryId) {
+                                      alert('系统内置推荐网址不可直接编辑。请通过右上角"新增分类"建立数据库数据后再添加。');
+                                      return;
+                                    }
+                                    setEditingSite({ ...site, iconColor: site.iconColor || site.color, categoryId: category.categoryId });
+                                  } else {
+                                    handleAddRecommendedToPending(site);
+                                  }
+                                }}
                                 className="flex flex-col items-center gap-2 group cursor-pointer w-full"
                               >
                                 <div
