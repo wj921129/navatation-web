@@ -202,7 +202,11 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
 
   useEffect(() => {
     if (isBatchMode) {
-      setBatchEditData(JSON.parse(JSON.stringify(categories)));
+      const deepCopied = categories.map(cat => ({
+        ...cat,
+        sites: Array.isArray(cat.sites) ? cat.sites.map(site => ({ ...site })) : []
+      }));
+      setBatchEditData(deepCopied);
     }
   }, [isBatchMode, categories]);
 
