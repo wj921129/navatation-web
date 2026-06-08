@@ -783,7 +783,33 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                       <div className="space-y-8 mt-12">
                         <input type="file" ref={rowFileInputRef} onChange={handleRowIconUpload} className="hidden" accept="image/*" />
                         {batchEditData.map((category, catIdx) => (
-                          <div key={category.categoryId || catIdx} className="bg-card                                <div className="space-y-3">
+                          <div key={category.categoryId || catIdx} className="bg-card/45 border border-border p-6 rounded-3xl backdrop-blur-md shadow-sm space-y-4">
+                            <div className="flex items-center justify-between border-b border-border pb-3">
+                              <div className="flex items-center gap-2">
+                                <category.icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                                <h3 className="text-base font-medium">{category.category}</h3>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => handleAddEmptyRow(catIdx)}
+                                  className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg text-xs cursor-pointer transition-colors"
+                                >
+                                  <Plus className="w-3.5 h-3.5" /> 新增网址
+                                </button>
+                                <button
+                                  onClick={() => handleSaveCategorySites(category, catIdx)}
+                                  className="flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs cursor-pointer transition-colors"
+                                >
+                                  保存修改
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="space-y-3">
+                              {category.sites.length === 0 ? (
+                                <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-6">暂无网址，请点击右上方“新增网址”</p>
+                              ) : (
+                                <div className="space-y-3">
                                   {/* 卡片列表式 */}
                                   {category.sites.map((site, siteIdx) => {
                                     const rowKey = `${catIdx}-${siteIdx}`;
