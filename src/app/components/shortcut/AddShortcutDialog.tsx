@@ -193,6 +193,177 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
   const [editingCategory, setEditingCategory] = useState<any>(null);
   const [editingSite, setEditingSite] = useState<any>(null);
 
+  // 批量管理状态
+  const [isBatchMode, setIsBatchMode] = useState(false);
+  const [batchEditData, setBatchEditData] = useState<CategoryGroup[]>([]);
+  const [rowLoadingStatus, setRowLoadingStatus] = useState<Record<string, boolean>>({});
+  const rowFileInputRef = useRef<HTMLInputElement>(null);
+  const activeUploadRow = useRef<{ catIdx: number; siteIdx: number } | null>(null);
+
+  useEffect(() => {
+    if (isBatchMode) {
+      setBatchEditData(JSON.parse(JSON.stringify(categories)));
+    }
+  }, [isBatchMode, categories]);
+
+  const updateBatchEditSite = (catIdx: number, siteIdx: number, fields: Partial<RecommendedSite>) => {
+    setBatchEditData(prev => {
+      const copy = [...prev];
+      copy[catIdx].sites[siteIdx] = {
+        ...copy[catIdx].sites[siteIdx],
+        ...fields
+      };
+      return copy;
+    });
+  };
+
+  const handleDetectRowIcon = async (catIdx: number, siteIdx: number) => {
+    const site = batchEditData[catIdx].sites[siteIdx];
+    const url = site.url.trim();
+    if (!url || !isValidDomainOrUrl(url)) {
+      alert('请输入合法且完整的网址链接再进行检测');
+      return;
+    }
+    const rowKey = `${catIdx}-${siteIdx}`;
+    setRowLoadingStatus(prev => ({ ...prev, [rowKey]: true }));
+    const fullUrl = url.startsWith('http') ? url : `https://${url}`;
+    
+    try {
+      const res = await navService.fetchFavicon(fullUrl);
+      if (res.code === 200 && res.data?.faviconUrl) {
+        const newUrl = res.data.faviconUrl;
+        updateBatchEditSite(catIdx, siteIdx, {
+          iconType: 'FAVICON',
+          iconValue: newUrl
+        });
+      } else {
+        try {
+          const parsed = new URL(fullUrl);
+          const host = parsed.host;
+          const googleCdn = `https://www.google.com/s2/favicons?sz=64&domain=${host}`;
+          updateBatchEditSite(catIdx, siteIdx, {
+            iconType: 'FAVICON',
+            iconValue: googleCdn
+          });
+        } catch {
+          alert('图标自动嗅探失败，请手动上传或输入图标链接');
+        }
+      }
+    } catch (err) {
+      console.error('Detect favicon error:', err);
+    } finally {
+      setRowLoadingStatus(prev => ({ ...prev, [rowKey]: false }));
+    }
+  };
+
+  const handleTriggerRowUpload = (catIdx: number, siteIdx: number) => {
+    activeUploadRow.current = { catIdx, siteIdx };
+    if (rowFileInputRef.current) {
+      rowFileInputRef.current.click();
+    }
+  };
+
+  const handleRowIconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !activeUploadRow.current) return;
+    e.target.value = '';
+    const { catIdx, siteIdx } = activeUploadRow.current;
+    const rowKey = `${catIdx}-${siteIdx}`;
+    
+    setRowLoadingStatus(prev => ({ ...prev, [rowKey]: true }));
+    try {
+      const res = await navService.uploadIcon(file);
+      if (res.code === 200 && res.data?.iconUrl) {
+        updateBatchEditSite(catIdx, siteIdx, {
+          iconType: 'CUSTOM_UPLOAD',
+          iconValue: res.data.iconUrl
+        });
+      } else {
+        alert(res.message || '上传文件失败');
+      }
+    } catch (err) {
+      console.error('Row upload icon error:', err);
+      alert('上传发生异常');
+    } finally {
+      setRowLoadingStatus(prev => ({ ...prev, [rowKey]: false }));
+      activeUploadRow.current = null;
+    }
+  };
+
+  const handleAddEmptyRow = (catIdx: number) => {
+    setBatchEditData(prev => {
+      const copy = [...prev];
+      const categorySites = copy[catIdx].sites;
+      const nextSortOrder = categorySites.length > 0
+        ? Math.max(...categorySites.map(s => s.sortOrder || 0)) + 1
+        : 1;
+      
+      const newEmptySite: RecommendedSite = {
+        name: '',
+        url: '',
+        iconType: 'FAVICON',
+        iconValue: '',
+        color: '#4285F4',
+        sortOrder: nextSortOrder
+      };
+      
+      copy[catIdx].sites = [...categorySites, newEmptySite];
+      return copy;
+    });
+  };
+
+  const handleDeleteRow = (catIdx: number, siteIdx: number) => {
+    setBatchEditData(prev => {
+      const copy = [...prev];
+      copy[catIdx].sites = copy[catIdx].sites.filter((_, idx) => idx !== siteIdx);
+      return copy;
+    });
+  };
+
+  const handleSaveCategorySites = async (categoryGroup: CategoryGroup, catIdx: number) => {
+    const categoryId = categoryGroup.categoryId;
+    if (!categoryId) {
+      alert('分类不存在或未在数据库建立，请先保存该分类。');
+      return;
+    }
+    
+    const sites = categoryGroup.sites;
+    for (let i = 0; i < sites.length; i++) {
+      const site = sites[i];
+      if (!site.name.trim()) {
+        alert(`第 ${i + 1} 行网站名称不能为空`);
+        return;
+      }
+      if (!site.url.trim()) {
+        alert(`第 ${i + 1} 行网址链接不能为空`);
+        return;
+      }
+    }
+    
+    const formattedSites = sites.map(site => ({
+      siteId: site.siteId,
+      name: site.name.trim(),
+      url: site.url.trim().startsWith('http') ? site.url.trim() : `https://${site.url.trim()}`,
+      iconType: site.iconType || 'FAVICON',
+      iconValue: site.iconValue || '',
+      iconColor: site.color || '#fff',
+      sortOrder: Number(site.sortOrder) || 0.0
+    }));
+    
+    try {
+      const res = await navService.batchSaveRecommendSites(categoryId, { sites: formattedSites });
+      if (res.code === 200) {
+        alert('该分类下的网址批量保存成功！');
+        loadRecommended();
+      } else {
+        alert(res.message || '保存失败');
+      }
+    } catch (err) {
+      console.error('Batch save sites error:', err);
+      alert('批量保存时发生异常，请重试');
+    }
+  };
+
   const loadRecommended = () => {
     navService.getRecommended().then(res => {
       if (res.code === 200 && res.data && res.data.length > 0) {
@@ -348,6 +519,8 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
       setUploadError(null);
       setDetectedIcons([]);
       setActiveTab('recommended'); // 默认重置回推荐页签
+      setIsBatchMode(false);
+      setBatchEditData([]);
 
       loadRecommended();
     }
@@ -547,132 +720,302 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                 {activeTab === 'recommended' ? (
                   <div className="p-6 space-y-8 relative">
                     {userRole === 'ADMIN' && (
-                      <div className="absolute top-4 right-4">
+                      <div className="absolute top-4 right-4 flex items-center gap-3">
                         <button
-                          onClick={() => setEditingCategory({ category: '', iconValue: 'Folder', sortOrder: categories.length })}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm"
+                          onClick={() => setIsBatchMode(!isBatchMode)}
+                          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all cursor-pointer ${
+                            isBatchMode
+                              ? 'bg-blue-600 text-white shadow-md'
+                              : 'bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-700 dark:text-gray-300'
+                          }`}
                         >
-                          <Plus className="w-4 h-4" /> 新增分类
+                          {isBatchMode ? '返回预览模式' : '批量管理模式'}
                         </button>
+                        {!isBatchMode && (
+                          <button
+                            onClick={() => setEditingCategory({ category: '', iconValue: 'Folder', sortOrder: categories.length })}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm"
+                          >
+                            <Plus className="w-4 h-4" /> 新增分类
+                          </button>
+                        )}
                       </div>
                     )}
-                    {categories.map((category) => (
-                      <div key={category.category}>
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-2">
-                            <category.icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                            <h3 className="text-base font-medium">{category.category}</h3>
-                          </div>
-                          {userRole === 'ADMIN' && (
-                            <div className="flex items-center gap-2">
-                              <button onClick={() => {
-                                if (!category.categoryId) {
-                                  alert('当前为系统内置推荐分类，不可直接编辑。请先在数据库中建立。');
-                                  return;
-                                }
-                                setEditingCategory({ ...category })
-                              }} className="p-1 text-gray-400 hover:text-blue-500 rounded"><Edit3 className="w-4 h-4" /></button>
-                              <button onClick={() => {
-                                if (!category.categoryId) return;
-                                navService.deleteRecommendCategory(category.categoryId!).then(loadRecommended)
-                              }} className="p-1 text-gray-400 hover:text-red-500 rounded"><Trash2 className="w-4 h-4" /></button>
-                              <button onClick={() => {
-                                if (!category.categoryId) {
-                                  alert('请先编辑并保存该分类到数据库，然后才能新增网址。');
-                                  return;
-                                }
-                                setEditingSite({ categoryId: category.categoryId, iconType: 'FAVICON', iconColor: '#fff', sortOrder: category.sites.length })
-                              }} className="p-1 text-gray-400 hover:text-green-500 rounded"><Plus className="w-4 h-4" /></button>
-                            </div>
-                          )}
-                        </div>
-                        <div className="grid grid-cols-8 gap-6">
-                          {category.sites.map((site: any) => (
-                            <div key={site.siteId || site.name} className="relative group/item">
-                              <button
-                                onClick={() => {
-                                  handleAddRecommendedToPending(site);
-                                }}
-                                className="flex flex-col items-center gap-2 group cursor-pointer w-full"
-                              >
-                                <div
-                                  className="bg-card flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all duration-200 border border-border overflow-hidden"
-                                  style={{
-                                    width: `${iconSize}px`,
-                                    height: `${iconSize}px`,
-                                    borderRadius: borderRadius,
-                                  }}
+
+                    {isBatchMode ? (
+                      <div className="space-y-8 mt-12">
+                        <input type="file" ref={rowFileInputRef} onChange={handleRowIconUpload} className="hidden" accept="image/*" />
+                        {batchEditData.map((category, catIdx) => (
+                          <div key={category.categoryId || catIdx} className="bg-card/45 border border-border p-6 rounded-3xl backdrop-blur-md shadow-sm space-y-4">
+                            <div className="flex items-center justify-between border-b border-border pb-3">
+                              <div className="flex items-center gap-2">
+                                <category.icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                                <h3 className="text-base font-medium">{category.category}</h3>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => handleAddEmptyRow(catIdx)}
+                                  className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg text-xs cursor-pointer transition-colors"
                                 >
-                                  {(() => {
-                                    if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
-                                      return <img src={site.iconValue} alt={site.name} style={{ width: '50%', height: '50%', objectFit: 'contain' }} />;
-                                    }
+                                  <Plus className="w-3.5 h-3.5" /> 新增网址
+                                </button>
+                                <button
+                                  onClick={() => handleSaveCategorySites(category, catIdx)}
+                                  className="flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs cursor-pointer transition-colors"
+                                >
+                                  保存修改
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="space-y-3">
+                              {category.sites.length === 0 ? (
+                                <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-6">暂无网址，请点击右上方“新增网址”</p>
+                              ) : (
+                                <div className="space-y-2">
+                                  {/* Table Header */}
+                                  <div className="grid grid-cols-[120px_1.5fr_2.5fr_100px_50px] gap-4 pb-2 px-2 text-xs font-semibold text-gray-500 dark:text-gray-400 border-b border-border/20">
+                                    <div>图标与控制</div>
+                                    <div>网站名称</div>
+                                    <div>网址链接</div>
+                                    <div>排序序号</div>
+                                    <div className="text-center">操作</div>
+                                  </div>
+                                  
+                                  {/* Table Rows */}
+                                  {category.sites.map((site, siteIdx) => {
+                                    const rowKey = `${catIdx}-${siteIdx}`;
+                                    const isLoading = !!rowLoadingStatus[rowKey];
                                     return (
-                                      <site.icon
-                                        style={{
-                                          color: site.color,
-                                          width: `${iconSize * 0.5}px`,
-                                          height: `${iconSize * 0.5}px`,
-                                        }}
-                                        strokeWidth={2}
-                                      />
+                                      <div key={site.siteId || siteIdx} className="grid grid-cols-[120px_1.5fr_2.5fr_100px_50px] gap-4 items-center py-2 px-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-colors">
+                                        {/* Col 1: Icon Control */}
+                                        <div className="flex items-center gap-2">
+                                          <div
+                                            className="bg-card flex items-center justify-center shadow-inner border border-border overflow-hidden flex-shrink-0"
+                                            style={{
+                                              width: `36px`,
+                                              height: `36px`,
+                                              borderRadius: `50%`,
+                                            }}
+                                          >
+                                            {isLoading ? (
+                                              <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
+                                            ) : (
+                                              (() => {
+                                                if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
+                                                  return <img src={site.iconValue} alt={site.name} className="w-[18px] h-[18px] object-contain" onError={(e) => {
+                                                    (e.target as any).style.display = 'none';
+                                                  }} />;
+                                                }
+                                                const IconComponent = IconMap[site.iconValue || ''] || Link;
+                                                return (
+                                                  <IconComponent
+                                                    style={{
+                                                      color: site.color || '#333',
+                                                      width: `18px`,
+                                                      height: `18px`,
+                                                    }}
+                                                    strokeWidth={2}
+                                                  />
+                                                );
+                                              })()
+                                            )}
+                                          </div>
+                                          
+                                          <div className="flex items-center gap-1">
+                                            <button
+                                              onClick={() => handleDetectRowIcon(catIdx, siteIdx)}
+                                              disabled={isLoading}
+                                              className="p-1 bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 rounded text-gray-500 dark:text-gray-400 hover:text-blue-500 transition-colors cursor-pointer"
+                                              title="自动刷新并检测网站图标"
+                                            >
+                                              <RotateCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />
+                                            </button>
+                                            <button
+                                              onClick={() => handleTriggerRowUpload(catIdx, siteIdx)}
+                                              disabled={isLoading}
+                                              className="p-1 bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 rounded text-gray-500 dark:text-gray-400 hover:text-blue-500 transition-colors cursor-pointer"
+                                              title="上传本地图片作为图标"
+                                            >
+                                              <Upload className="w-3 h-3" />
+                                            </button>
+                                          </div>
+                                        </div>
+
+                                        {/* Col 2: Site Name */}
+                                        <div>
+                                          <input
+                                            type="text"
+                                            value={site.name}
+                                            onChange={(e) => updateBatchEditSite(catIdx, siteIdx, { name: e.target.value })}
+                                            className="w-full px-3 py-1.5 bg-background border border-border rounded-lg text-sm text-foreground focus:border-blue-500 outline-none"
+                                            placeholder="网站名称"
+                                          />
+                                        </div>
+
+                                        {/* Col 3: Site URL */}
+                                        <div>
+                                          <input
+                                            type="text"
+                                            value={site.url}
+                                            onChange={(e) => updateBatchEditSite(catIdx, siteIdx, { url: e.target.value })}
+                                            className="w-full px-3 py-1.5 bg-background border border-border rounded-lg text-sm text-foreground focus:border-blue-500 outline-none"
+                                            placeholder="网址链接"
+                                          />
+                                        </div>
+
+                                        {/* Col 4: Sort Order */}
+                                        <div>
+                                          <input
+                                            type="number"
+                                            step="0.01"
+                                            value={site.sortOrder}
+                                            onChange={(e) => updateBatchEditSite(catIdx, siteIdx, { sortOrder: Number(e.target.value) })}
+                                            className="w-full px-3 py-1.5 bg-background border border-border rounded-lg text-sm text-foreground focus:border-blue-500 outline-none"
+                                            placeholder="序号"
+                                          />
+                                        </div>
+
+                                        {/* Col 5: Delete Button */}
+                                        <div className="text-center">
+                                          <button
+                                            onClick={() => handleDeleteRow(catIdx, siteIdx)}
+                                            className="p-2 text-gray-400 hover:text-red-500 rounded hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors cursor-pointer"
+                                            title="移除此行"
+                                          >
+                                            <Trash2 className="w-4 h-4" />
+                                          </button>
+                                        </div>
+                                      </div>
                                     );
-                                  })()}
-                                </div>
-                                <span className="text-xs text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors">
-                                  {site.name}
-                                </span>
-                              </button>
-                              {userRole === 'ADMIN' && (
-                                <div className="absolute -top-2 -right-2 hidden group-hover/item:flex items-center gap-1 bg-background border border-border rounded shadow-sm p-0.5 z-10">
-                                  <button onClick={(e) => { 
-                                    e.stopPropagation(); 
-                                    if (!category.categoryId) {
-                                      alert('系统内置推荐网址不可直接编辑。请通过右上角"新增分类"建立数据库数据后再添加。');
-                                      return;
-                                    }
-                                    setEditingSite({ ...site, iconColor: site.iconColor || site.color, categoryId: category.categoryId }); 
-                                  }} className="p-1 text-gray-400 hover:text-blue-500"><Edit3 className="w-3 h-3" /></button>
-                                  <button onClick={(e) => { 
-                                    e.stopPropagation(); 
-                                    if (!site.siteId) return;
-                                    navService.deleteRecommendSite(site.siteId!).then(loadRecommended); 
-                                  }} className="p-1 text-gray-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
+                                  })}
                                 </div>
                               )}
                             </div>
-                          ))}
-                          {userRole === 'ADMIN' && (
-                            <div className="relative group/item">
-                              <button
-                                onClick={() => {
-                                  if (!category.categoryId) {
-                                    alert('系统内置推荐分类不可添加网址。请先保存该分类到数据库，或新建自定义分类。');
-                                    return;
-                                  }
-                                  setEditingSite({ categoryId: category.categoryId, name: '', url: '', iconType: 'FAVICON', iconValue: '', iconColor: '#fff', sortOrder: category.sites.length })
-                                }}
-                                className="flex flex-col items-center gap-2 group cursor-pointer w-full"
-                              >
-                                <div
-                                  className="bg-card/50 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/30 transition-all duration-200"
-                                  style={{
-                                    width: `${iconSize}px`,
-                                    height: `${iconSize}px`,
-                                    borderRadius: borderRadius,
-                                  }}
-                                >
-                                  <Plus className="w-6 h-6 text-gray-400 group-hover:text-blue-500" />
-                                </div>
-                                <span className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-blue-500 truncate w-full text-center">
-                                  新增网址
-                                </span>
-                              </button>
-                            </div>
-                          )}
-                        </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    ) : (
+                      <div className="space-y-8 mt-12">
+                        {categories.map((category) => (
+                          <div key={category.category}>
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center gap-2">
+                                <category.icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                                <h3 className="text-base font-medium">{category.category}</h3>
+                              </div>
+                              {userRole === 'ADMIN' && (
+                                <div className="flex items-center gap-2">
+                                  <button onClick={() => {
+                                    if (!category.categoryId) {
+                                      alert('当前为系统内置推荐分类，不可直接编辑。请先在数据库中建立。');
+                                      return;
+                                    }
+                                    setEditingCategory({ ...category })
+                                  }} className="p-1 text-gray-400 hover:text-blue-500 rounded"><Edit3 className="w-4 h-4" /></button>
+                                  <button onClick={() => {
+                                    if (!category.categoryId) return;
+                                    navService.deleteRecommendCategory(category.categoryId!).then(loadRecommended)
+                                  }} className="p-1 text-gray-400 hover:text-red-500 rounded"><Trash2 className="w-4 h-4" /></button>
+                                  <button onClick={() => {
+                                    if (!category.categoryId) {
+                                      alert('请先编辑并保存该分类到数据库，然后才能新增网址。');
+                                      return;
+                                    }
+                                    setEditingSite({ categoryId: category.categoryId, iconType: 'FAVICON', iconColor: '#fff', sortOrder: category.sites.length })
+                                  }} className="p-1 text-gray-400 hover:text-green-500 rounded"><Plus className="w-4 h-4" /></button>
+                                </div>
+                              )}
+                            </div>
+                            <div className="grid grid-cols-8 gap-6">
+                              {category.sites.map((site: any) => (
+                                <div key={site.siteId || site.name} className="relative group/item">
+                                  <button
+                                    onClick={() => {
+                                      handleAddRecommendedToPending(site);
+                                    }}
+                                    className="flex flex-col items-center gap-2 group cursor-pointer w-full"
+                                  >
+                                    <div
+                                      className="bg-card flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all duration-200 border border-border overflow-hidden"
+                                      style={{
+                                        width: `${iconSize}px`,
+                                        height: `${iconSize}px`,
+                                        borderRadius: borderRadius,
+                                      }}
+                                    >
+                                      {(() => {
+                                        if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
+                                          return <img src={site.iconValue} alt={site.name} style={{ width: '50%', height: '50%', objectFit: 'contain' }} />;
+                                        }
+                                        return (
+                                          <site.icon
+                                            style={{
+                                              color: site.color,
+                                              width: `${iconSize * 0.5}px`,
+                                              height: `${iconSize * 0.5}px`,
+                                            }}
+                                            strokeWidth={2}
+                                          />
+                                        );
+                                      })()}
+                                    </div>
+                                    <span className="text-xs text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors">
+                                      {site.name}
+                                    </span>
+                                  </button>
+                                  {userRole === 'ADMIN' && (
+                                    <div className="absolute -top-2 -right-2 hidden group-hover/item:flex items-center gap-1 bg-background border border-border rounded shadow-sm p-0.5 z-10">
+                                      <button onClick={(e) => { 
+                                        e.stopPropagation(); 
+                                        if (!category.categoryId) {
+                                          alert('系统内置推荐网址不可直接编辑。请通过右上角"新增分类"建立数据库数据后再添加。');
+                                          return;
+                                        }
+                                        setEditingSite({ ...site, iconColor: site.iconColor || site.color, categoryId: category.categoryId }); 
+                                      }} className="p-1 text-gray-400 hover:text-blue-500"><Edit3 className="w-3 h-3" /></button>
+                                      <button onClick={(e) => { 
+                                        e.stopPropagation(); 
+                                        if (!site.siteId) return;
+                                        navService.deleteRecommendSite(site.siteId!).then(loadRecommended); 
+                                      }} className="p-1 text-gray-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                              {userRole === 'ADMIN' && (
+                                <div className="relative group/item">
+                                  <button
+                                    onClick={() => {
+                                      if (!category.categoryId) {
+                                        alert('系统内置推荐分类不可添加网址。请先保存该分类到数据库，或新建自定义分类。');
+                                        return;
+                                      }
+                                      setEditingSite({ categoryId: category.categoryId, name: '', url: '', iconType: 'FAVICON', iconValue: '', iconColor: '#fff', sortOrder: category.sites.length })
+                                    }}
+                                    className="flex flex-col items-center gap-2 group cursor-pointer w-full"
+                                  >
+                                    <div
+                                      className="bg-card/50 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/30 transition-all duration-200"
+                                      style={{
+                                        width: `${iconSize}px`,
+                                        height: `${iconSize}px`,
+                                        borderRadius: borderRadius,
+                                      }}
+                                    >
+                                      <Plus className="w-6 h-6 text-gray-400 group-hover:text-blue-500" />
+                                    </div>
+                                    <span className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-blue-500 truncate w-full text-center">
+                                      新增网址
+                                    </span>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="p-8">

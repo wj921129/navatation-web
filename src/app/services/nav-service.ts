@@ -175,4 +175,7 @@ export const navService = {
   deleteRecommendSite(siteId: string): Promise<ApiResponse<null>> {
     return api.delete(`/nav/recommended/sites/${siteId}`);
   },
+  batchSaveRecommendSites(categoryId: string, data: { sites: any[] }): Promise<ApiResponse<null>> {
+    return api.post(`/nav/recommended/categories/${categoryId}/sites/batch`, data);
+  },
 };
