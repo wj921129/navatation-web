@@ -79,10 +79,10 @@
   font-weight: 500 !important;
   letter-spacing: 0.015em !important;
   
-  /* 默认亮色模式：极简纯白毛玻璃态 */
-  background: rgba(255, 255, 255, 0.9) !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  color: #1f2937 !important; /* 经典深灰文字 */
+  /* 与系统主题变量自动打通：极简半透毛玻璃态 */
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--widget-border) !important;
+  color: var(--text-primary) !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
@@ -94,16 +94,9 @@
   transition: all 0.2s ease !important;
 }
 
-/* 3. 暗色模式（Dark Theme）：极简纯黑毛玻璃态 */
-.dark [data-sonner-toaster] [data-sonner-toast],
-.dark [data-sonner-toaster] [data-sonner-toast][data-type="success"],
-.dark [data-sonner-toaster] [data-sonner-toast][data-type="error"],
-.dark [data-sonner-toaster] [data-sonner-toast][data-type="warning"],
-.dark [data-sonner-toaster] [data-sonner-toast][data-type="info"] {
-  background: rgba(24, 24, 27, 0.9) !important; /* 纯净暗色背景 */
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  color: #f4f4f5 !important; /* 纯净亮色文字 */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+/* 3. 暗色模式下微调阴影效果，保持与页面阴影一致 */
+.dark [data-sonner-toaster] [data-sonner-toast] {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3) !important;
 }
 
 /* 4. 图标与文字在气泡内的彻底居中与间距 */
