@@ -5,6 +5,7 @@ import { SettingsDialog } from './components/settings/SettingsDialog';
 import { LoginDialog } from './components/auth/LoginDialog';
 import { AddShortcutDialog } from './components/shortcut/AddShortcutDialog';
 import { EditShortcutDialog } from './components/shortcut/EditShortcutDialog';
+import { ManageHomepageShortcutsDialog } from './components/shortcut/ManageHomepageShortcutsDialog';
 import { LogoutConfirmDialog } from './components/auth/LogoutConfirmDialog';
 import { TodoPanel } from './components/todo/TodoPanel';
 import { TopDock } from './components/dock/TopDock';
@@ -49,6 +50,7 @@ export default function App() {
   const [searchEngine, setSearchEngine] = useState(() => localStorage.getItem('navatation_search_engine') || 'google');
   const [isTodoOpen, setIsTodoOpen] = useState(false);
   const [isAiSearchOpen, setIsAiSearchOpen] = useState(false);
+  const [isManageHomepageOpen, setIsManageHomepageOpen] = useState(false);
   const [aiSearchQuery, setAiSearchQuery] = useState('');
   const [aiSearchEngine, setAiSearchEngine] = useState('');
   const [clocksVisible, setClocksVisible] = useState<boolean>(() => {
@@ -1117,6 +1119,20 @@ export default function App() {
             </>
           ) : (
             <>
+              {/* Manage Homepage Shortcuts Button (Admin only) */}
+              {authState.isLoggedIn && authState.user?.role === 'ADMIN' ? (
+                <button
+                  onClick={() => setIsManageHomepageOpen(true)}
+                  className="w-12 h-12 rounded-full glass-button flex items-center justify-center hover:scale-110 shadow-lg relative group"
+                >
+                  <IconMap.LayoutGrid className="w-5 h-5 text-white" />
+                  <div className="absolute bottom-full mb-2 px-3 py-1.5 bg-black/80 backdrop-blur-sm text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-all shadow-xl translate-y-2 group-hover:translate-y-0">
+                    一键管理首页图标
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 border-x-4 border-x-transparent border-t-4 border-t-black/80" />
+                  </div>
+                </button>
+              ) : null}
+
               {/* Edit Button */}
               {authState.isLoggedIn ? (
                 <button
@@ -1197,6 +1213,18 @@ export default function App() {
             shortcut={editingShortcut.shortcut}
           />
         ) : null}
+        <ManageHomepageShortcutsDialog
+          isOpen={isManageHomepageOpen}
+          onClose={() => setIsManageHomepageOpen(false)}
+          shortcuts={shortcuts}
+          iconSize={settings.iconSize}
+          iconRadius={settings.iconRadius}
+          iconSpacingX={settings.iconSpacingX}
+          iconSpacingY={settings.iconSpacingY}
+          iconTextGap={settings.iconTextGap}
+          textSize={settings.textSize}
+          onSaveComplete={() => fetchShortcuts()}
+        />
         <AiSearchOverlay
           isOpen={isAiSearchOpen}
           onClose={() => setIsAiSearchOpen(false)}
