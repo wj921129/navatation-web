@@ -1162,13 +1162,18 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                           
                                           return (
                                             <Draggable key={site.dragId!} draggableId={site.dragId!} index={siteIdx}>
-                                              {(provided) => (
+                                              {(provided, snapshot) => (
                                                 <div 
                                                   ref={provided.innerRef} 
                                                   {...provided.draggableProps} 
                                                   {...provided.dragHandleProps}
-                                                  className="bg-background border border-border/60 hover:border-border/100 rounded-xl p-2 flex flex-col gap-2 shadow-sm hover:shadow-md transition-all"
-                                                  style={provided.draggableProps.style}
+                                                  className="bg-background border border-border/60 hover:border-border/100 rounded-xl p-2 flex flex-col gap-2 shadow-sm hover:shadow-md transition-shadow transition-colors duration-200"
+                                                  style={{
+                                                    ...provided.draggableProps.style,
+                                                    transition: snapshot.isDropAnimating
+                                                      ? 'transform 0.12s cubic-bezier(0.2, 1, 0.1, 1)'
+                                                      : provided.draggableProps.style?.transition
+                                                  }}
                                                 >
                                                   <div className="flex items-center gap-2 w-full">
                                           {/* 拖拽把手 */}
@@ -1364,13 +1369,18 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                   {/* 将原本的 grid-cols-8 替换为水平 flex 滚动，以适配 @hello-pangea/dnd 的一维水平拖拽，避免折行导致的异常跳跃问题 */}
                                   {category.sites.map((site: any, siteIdx) => (
                                     <Draggable key={site.dragId!} draggableId={site.dragId!} index={siteIdx}>
-                                      {(provided) => (
+                                      {(provided, snapshot) => (
                                         <div 
                                           ref={provided.innerRef} 
                                           {...provided.draggableProps} 
                                           {...provided.dragHandleProps}
                                           className="relative group/item flex-shrink-0"
-                                          style={provided.draggableProps.style}
+                                          style={{
+                                            ...provided.draggableProps.style,
+                                            transition: snapshot.isDropAnimating
+                                              ? 'transform 0.12s cubic-bezier(0.2, 1, 0.1, 1)'
+                                              : provided.draggableProps.style?.transition
+                                          }}
                                         >
                                           {/* 使用 flex-shrink-0 保证图标在横向 flex 容器中不被挤压变形 */}
                                           <button
