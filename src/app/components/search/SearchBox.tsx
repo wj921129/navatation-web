@@ -1,6 +1,7 @@
 import { Search } from 'lucide-react';
 import { useState } from 'react';
 import { SearchEngineSelect, searchEngines } from './SearchEngineSelect';
+import { Tooltip } from '../ui/Tooltip';
 
 interface SearchBoxProps {
   searchEngine: string;
@@ -50,12 +51,14 @@ export function SearchBox({ searchEngine, onSearchEngineChange, onAiSearch, sett
             style={{ height: `${settings.searchBoxHeight}px` }}
           />
 
-          <button
-            type="submit"
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full text-text-secondary hover:text-text-primary hover:bg-input-bg transition-colors"
-          >
-            <Search className="w-5 h-5 text-current" />
-          </button>
+          <Tooltip content="立即搜索" side="top">
+            <button
+              type="submit"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full text-text-secondary hover:text-text-primary hover:bg-input-bg transition-all active:scale-95"
+            >
+              <Search className="w-5 h-5 text-current" />
+            </button>
+          </Tooltip>
         </div>
       </div>
     </form>

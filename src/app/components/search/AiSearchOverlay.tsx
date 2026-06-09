@@ -4,6 +4,7 @@ import {
   Check, Play, MessageSquare, ArrowRight, Zap, CheckCircle2, ShieldAlert
 } from 'lucide-react';
 import { BaseModal } from '../ui/BaseModal';
+import { Tooltip } from '../ui/Tooltip';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -280,49 +281,54 @@ export function AiSearchOverlay({ isOpen, onClose, initialQuery, initialEngine }
         {/* 顶部视图模式控制器与总结开关 */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full p-1.5 backdrop-blur-xl">
-            <button
-              onClick={() => setViewMode('focus')}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                viewMode === 'focus' 
-                  ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Layout className="w-3.5 h-3.5" />
-              单轨聚焦
-            </button>
-            <button
-              onClick={() => setViewMode('split')}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                viewMode === 'split' 
-                  ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md' 
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Layers className="w-3.5 h-3.5" />
-              并列对比
-            </button>
+            <Tooltip content="单轨聚焦" side="bottom">
+              <button
+                onClick={() => setViewMode('focus')}
+                className={`flex items-center justify-center w-8 h-8 rounded-full transition-all active:scale-95 ${
+                  viewMode === 'focus' 
+                    ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md shadow-indigo-500/20' 
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-white/10'
+                }`}
+              >
+                <Layout className="w-4 h-4" />
+              </button>
+            </Tooltip>
+            <Tooltip content="并列对比" side="bottom">
+              <button
+                onClick={() => setViewMode('split')}
+                className={`flex items-center justify-center w-8 h-8 rounded-full transition-all active:scale-95 ${
+                  viewMode === 'split' 
+                    ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md shadow-indigo-500/20' 
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-white/10'
+                }`}
+              >
+                <Layers className="w-4 h-4" />
+              </button>
+            </Tooltip>
           </div>
 
-          <button
-            onClick={() => setShowSynthesis(!showSynthesis)}
-            className={`flex items-center gap-1.5 px-4 py-2 border rounded-full text-xs font-semibold transition-all ${
-              showSynthesis 
-                ? 'bg-purple-500/20 border-purple-500/40 text-purple-300' 
-                : 'bg-white/5 border-white/10 text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            融合提炼: {showSynthesis ? '开启' : '关闭'}
-          </button>
+          <Tooltip content={showSynthesis ? '关闭融合提炼' : '开启融合提炼'} side="bottom">
+            <button
+              onClick={() => setShowSynthesis(!showSynthesis)}
+              className={`flex items-center justify-center w-9 h-9 border rounded-full transition-all active:scale-95 ${
+                showSynthesis 
+                  ? 'bg-purple-500/20 border-purple-500/40 text-purple-300 shadow-md shadow-purple-500/20' 
+                  : 'bg-white/5 border-white/10 text-slate-400 hover:text-slate-200 hover:bg-white/10'
+              }`}
+            >
+              <Sparkles className="w-4 h-4" />
+            </button>
+          </Tooltip>
 
           {/* 关闭按钮 */}
-          <button 
-            onClick={onClose}
-            className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all active:scale-95"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <Tooltip content="关闭" side="bottom">
+            <button 
+              onClick={onClose}
+              className="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all active:scale-95"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </Tooltip>
         </div>
       </header>
 
@@ -345,13 +351,14 @@ export function AiSearchOverlay({ isOpen, onClose, initialQuery, initialEngine }
                 </h3>
               </div>
               <div className="flex items-center gap-2">
-                <button 
-                  onClick={() => handleCopy(synthesisContent, 'synthesis')}
-                  className="p-2 rounded-full hover:bg-white/5 text-slate-400 hover:text-slate-200 transition-colors"
-                  title="复制大师总结"
-                >
-                  {copiedIndex === 'synthesis' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                </button>
+                <Tooltip content="复制大师总结" side="top">
+                  <button 
+                    onClick={() => handleCopy(synthesisContent, 'synthesis')}
+                    className="p-2 rounded-full hover:bg-white/5 text-slate-400 hover:text-slate-200 transition-colors active:scale-95"
+                  >
+                    {copiedIndex === 'synthesis' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                  </button>
+                </Tooltip>
               </div>
             </div>
 
@@ -400,13 +407,14 @@ export function AiSearchOverlay({ isOpen, onClose, initialQuery, initialEngine }
                       <span className="text-[10px] bg-white/5 text-slate-400 px-2 py-0.5 rounded-full font-mono">
                         {engine.tokenCount} TK
                       </span>
-                      <button 
-                        onClick={() => handleCopy(engine.streamedContent, key)}
-                        className="p-1.5 rounded-full hover:bg-white/5 text-slate-400 hover:text-slate-200 transition-colors"
-                        title="复制回答"
-                      >
-                        {copiedIndex === key ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                      </button>
+                      <Tooltip content="复制回答" side="top">
+                        <button 
+                          onClick={() => handleCopy(engine.streamedContent, key)}
+                          className="p-1.5 rounded-full hover:bg-white/5 text-slate-400 hover:text-slate-200 transition-colors active:scale-95"
+                        >
+                          {copiedIndex === key ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        </button>
+                      </Tooltip>
                     </div>
                   </div>
 
@@ -485,22 +493,18 @@ export function AiSearchOverlay({ isOpen, onClose, initialQuery, initialEngine }
                   </div>
                 </div>
 
-                <button 
-                  onClick={() => handleCopy(engines[activeEngine].streamedContent, activeEngine)}
-                  className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-full border border-white/5 transition-all"
-                >
-                  {copiedIndex === activeEngine ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-400" />
-                      已复制
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5" />
-                      复制原文
-                    </>
-                  )}
-                </button>
+                <Tooltip content="复制原文" side="top">
+                  <button 
+                    onClick={() => handleCopy(engines[activeEngine].streamedContent, activeEngine)}
+                    className="flex items-center justify-center w-8 h-8 text-slate-400 hover:text-slate-200 bg-white/5 hover:bg-white/10 rounded-full border border-white/5 transition-all active:scale-95"
+                  >
+                    {copiedIndex === activeEngine ? (
+                      <Check className="w-4 h-4 text-emerald-400" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
+                  </button>
+                </Tooltip>
               </div>
 
               {/* 对话流区域 */}

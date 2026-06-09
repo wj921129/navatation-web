@@ -2,6 +2,7 @@ import { LogOut, X, Key } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { authStore } from '../../stores/auth-store';
 import { BaseModal } from '../ui/BaseModal';
+import { Tooltip } from '../ui/Tooltip';
 
 interface LogoutConfirmDialogProps {
   isOpen: boolean;
@@ -78,12 +79,14 @@ export function LogoutConfirmDialog({ isOpen, onClose, onConfirm, username }: Lo
       overlayClassName="bg-black/50 dark:bg-black/70 backdrop-blur-sm"
     >
       <div className="flex justify-end absolute top-4 right-4">
-        <button
-          onClick={onClose}
-          className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-        >
-          <X className="w-5 h-5 text-gray-600 dark:text-neutral-400" />
-        </button>
+        <Tooltip content="关闭" side="left">
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors active:scale-95 cursor-pointer"
+          >
+            <X className="w-5 h-5 text-gray-600 dark:text-neutral-400" />
+          </button>
+        </Tooltip>
       </div>
 
       {view === 'confirm' ? (

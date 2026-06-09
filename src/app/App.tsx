@@ -1,5 +1,6 @@
 import { Plus, Edit3, Save, Settings, User, Clock, Calendar, Timer, Flower2, CloudSun, LayoutGrid } from 'lucide-react';
 import { IconMap } from './components/ui/IconMap';
+import { Tooltip } from './components/ui/Tooltip';
 import { useState, useEffect, useCallback } from 'react';
 import { SettingsDialog } from './components/settings/SettingsDialog';
 import { LoginDialog } from './components/auth/LoginDialog';
@@ -1127,32 +1128,28 @@ export default function App() {
 
             {/* Add Shortcut Button */}
             {isEditMode ? (
-              <button
-                onClick={() => setIsAddShortcutOpen(true)}
-                className="flex flex-col items-center group"
-                style={{ gap: `${settings.iconTextGap}px`, width: `${settings.iconSize + 32}px` }}
-              >
-                <div
-                  className="bg-icon-bg/80 border border-widget-border/80 flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 cursor-pointer hover:bg-icon-bg hover:border-widget-border shrink-0"
-                  style={{
-                    width: `${settings.iconSize}px`,
-                    height: `${settings.iconSize}px`,
-                    borderRadius: borderRadius
-                  }}
+              <Tooltip content="添加图标" side="top">
+                <button
+                  onClick={() => setIsAddShortcutOpen(true)}
+                  className="flex flex-col items-center group"
+                  style={{ gap: `${settings.iconTextGap}px`, width: `${settings.iconSize + 32}px` }}
                 >
-                  <Plus
-                    className="text-gray-400 group-hover:text-gray-600 transition-colors"
-                    style={{ width: `${iconInnerSize}px`, height: `${iconInnerSize}px` }}
-                    strokeWidth={2}
-                  />
-                </div>
-                <span
-                  className="text-white font-light tracking-wide drop-shadow-lg opacity-0 text-center w-full truncate px-1"
-                  style={{ fontSize: `${settings.textSize}px` }}
-                >
-                  添加
-                </span>
-              </button>
+                  <div
+                    className="bg-icon-bg/80 border border-widget-border/80 flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer hover:bg-icon-bg hover:border-widget-border shrink-0"
+                    style={{
+                      width: `${settings.iconSize}px`,
+                      height: `${settings.iconSize}px`,
+                      borderRadius: borderRadius
+                    }}
+                  >
+                    <Plus
+                      className="text-gray-400 group-hover:text-gray-600 transition-colors"
+                      style={{ width: `${iconInnerSize}px`, height: `${iconInnerSize}px` }}
+                      strokeWidth={2}
+                    />
+                  </div>
+                </button>
+              </Tooltip>
             ) : null}
         </div>
         </div>
@@ -1163,69 +1160,77 @@ export default function App() {
           {isEditMode ? (
             <>
               {/* Cancel Button */}
-              <button
-                onClick={handleCancelEdits}
-                className="w-12 h-12 rounded-full glass-button flex items-center justify-center hover:scale-110 shadow-lg"
-              >
-                <Plus className="w-5 h-5 text-white rotate-45" />
-              </button>
+              <Tooltip content="取消编辑" side="top">
+                <button
+                  onClick={handleCancelEdits}
+                  className="w-12 h-12 rounded-full glass-button flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-lg hover:shadow-xl"
+                >
+                  <Plus className="w-5 h-5 text-white rotate-45" />
+                </button>
+              </Tooltip>
 
               {/* Save Button */}
-              <button
-                onClick={handleSaveEdits}
-                className="w-12 h-12 rounded-full bg-green-500/80 backdrop-blur-xl border border-green-400/50 flex items-center justify-center hover:bg-green-600 hover:scale-110 transition-all duration-200 shadow-lg"
-              >
-                <Save className="w-5 h-5 text-white" />
-              </button>
+              <Tooltip content="保存布局" side="top">
+                <button
+                  onClick={handleSaveEdits}
+                  className="w-12 h-12 rounded-full bg-green-500/80 backdrop-blur-xl border border-green-400/50 flex items-center justify-center hover:bg-green-600 hover:scale-110 active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  <Save className="w-5 h-5 text-white" />
+                </button>
+              </Tooltip>
             </>
           ) : (
             <>
               {/* Manage Homepage Shortcuts Button (Admin only) */}
               {authState.isLoggedIn && authState.user?.role === 'ADMIN' ? (
-                <button
-                  onClick={() => setIsManageHomepageOpen(true)}
-                  className="w-12 h-12 rounded-full glass-button flex items-center justify-center hover:scale-110 shadow-lg relative group"
-                >
-                  <LayoutGrid className="w-5 h-5 text-white" />
-                  <div className="absolute bottom-full mb-2 px-3 py-1.5 bg-black/80 backdrop-blur-sm text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-all shadow-xl translate-y-2 group-hover:translate-y-0">
-                    一键管理首页图标
-                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 border-x-4 border-x-transparent border-t-4 border-t-black/80" />
-                  </div>
-                </button>
+                <Tooltip content="管理首页图标" side="top">
+                  <button
+                    onClick={() => setIsManageHomepageOpen(true)}
+                    className="w-12 h-12 rounded-full glass-button flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-lg hover:shadow-xl"
+                  >
+                    <LayoutGrid className="w-5 h-5 text-white" />
+                  </button>
+                </Tooltip>
               ) : null}
 
               {/* Edit Button */}
               {authState.isLoggedIn ? (
-                <button
-                  onClick={handleStartEdit}
-                  className="w-12 h-12 rounded-full glass-button flex items-center justify-center hover:scale-110 shadow-lg"
-                >
-                  <Edit3 className="w-5 h-5 text-white" />
-                </button>
+                <Tooltip content="编辑布局" side="top">
+                  <button
+                    onClick={handleStartEdit}
+                    className="w-12 h-12 rounded-full glass-button flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-lg hover:shadow-xl"
+                  >
+                    <Edit3 className="w-5 h-5 text-white" />
+                  </button>
+                </Tooltip>
               ) : null}
 
               {/* Settings Button */}
-              <button
-                onClick={handleOpenSettings}
-                className="w-12 h-12 rounded-full glass-button flex items-center justify-center hover:scale-110 shadow-lg"
-              >
-                <Settings className="w-5 h-5 text-white" />
-              </button>
+              <Tooltip content="个性化设置" side="top">
+                <button
+                  onClick={handleOpenSettings}
+                  className="w-12 h-12 rounded-full glass-button flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-lg hover:shadow-xl"
+                >
+                  <Settings className="w-5 h-5 text-white" />
+                </button>
+              </Tooltip>
 
               {/* Account Button */}
-              <button
-                onClick={() => authState.isLoggedIn ? setIsLogoutConfirmOpen(true) : setIsLoginOpen(true)}
-                className="w-12 h-12 rounded-full glass-button flex items-center justify-center hover:scale-110 shadow-lg relative"
-              >
-                {authState.isLoggedIn && authState.user ? (
-                  <span className="text-white text-sm font-medium">{authState.user.username.charAt(0).toUpperCase()}</span>
-                ) : (
-                  <User className="w-5 h-5 text-white" />
-                )}
-                {authState.isLoggedIn ? (
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-neutral-900" />
-                ) : null}
-              </button>
+              <Tooltip content={authState.isLoggedIn ? "账号设置" : "登录/注册"} side="top">
+                <button
+                  onClick={() => authState.isLoggedIn ? setIsLogoutConfirmOpen(true) : setIsLoginOpen(true)}
+                  className="w-12 h-12 rounded-full glass-button flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-lg hover:shadow-xl relative"
+                >
+                  {authState.isLoggedIn && authState.user ? (
+                    <span className="text-white text-sm font-medium">{authState.user.username.charAt(0).toUpperCase()}</span>
+                  ) : (
+                    <User className="w-5 h-5 text-white" />
+                  )}
+                  {authState.isLoggedIn ? (
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-neutral-900" />
+                  ) : null}
+                </button>
+              </Tooltip>
             </>
           )}
         </div>

@@ -1,5 +1,6 @@
 import { Check } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
+import { Tooltip } from '../ui/Tooltip';
 
 interface SearchEngine {
   name: string;
@@ -44,13 +45,15 @@ export function SearchEngineSelect({ value, onChange }: SearchEngineSelectProps)
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-input-bg transition-colors"
-      >
-        <img src={currentEngine.icon} alt={currentEngine.name} className="w-5 h-5 object-contain" />
-      </button>
+      <Tooltip content="切换搜索引擎" side="top">
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-input-bg transition-colors active:scale-95 shadow-sm"
+        >
+          <img src={currentEngine.icon} alt={currentEngine.name} className="w-5 h-5 object-contain" />
+        </button>
+      </Tooltip>
 
       {isOpen && (
         <div className="absolute top-full mt-2 left-0 bg-widget-bg border border-widget-border backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden z-20 min-w-[140px]">

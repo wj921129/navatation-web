@@ -2,6 +2,7 @@ import { X } from 'lucide-react';
 import { useState } from 'react';
 import { authStore } from '../../stores/auth-store';
 import { BaseModal } from '../ui/BaseModal';
+import { Tooltip } from '../ui/Tooltip';
 
 interface LoginDialogProps {
   isOpen: boolean;
@@ -87,12 +88,14 @@ export function LoginDialog({ isOpen, onClose }: LoginDialogProps) {
             注册
           </button>
         </div>
-        <button
-          onClick={handleClose}
-          className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 active:bg-black/10 dark:active:bg-white/10 transition-colors"
-        >
-          <X className="w-5 h-5 text-gray-500 dark:text-neutral-400 hover:text-gray-800 dark:hover:text-neutral-200 transition-colors" />
-        </button>
+        <Tooltip content="关闭" side="left">
+          <button
+            onClick={handleClose}
+            className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 active:bg-black/10 dark:active:bg-white/10 transition-colors active:scale-95"
+          >
+            <X className="w-5 h-5 text-gray-500 dark:text-neutral-400 hover:text-gray-800 dark:hover:text-neutral-200 transition-colors" />
+          </button>
+        </Tooltip>
       </div>
 
       {error && (

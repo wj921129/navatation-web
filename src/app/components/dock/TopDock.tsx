@@ -1,5 +1,6 @@
 import { CheckSquare, Shuffle, Sun, Moon, Loader2, LayoutGrid } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
+import { Tooltip } from '../ui/Tooltip';
 
 interface TopDockProps {
   theme: string;
@@ -128,65 +129,60 @@ export function TopDock({
     >
       {/* 待办事项小组件 */}
       <div ref={item1Ref} className="relative group" onMouseEnter={onMouseEnterOtherWidget}>
-        <button
-          onClick={onToggleTodo}
-          className="p-2 rounded-full text-text-secondary hover:text-text-primary hover:bg-input-bg transition-all duration-200 active:scale-95 flex items-center justify-center cursor-pointer"
-          aria-label="待办事项"
-        >
-          <span className="dock-icon-wrapper transition-transform duration-150 ease-out flex items-center justify-center" style={{ willChange: 'transform' }}>
-            <CheckSquare className="w-4 h-4" />
-          </span>
-        </button>
-        <span className="pointer-events-none absolute top-[42px] left-1/2 -translate-x-1/2 px-2 py-1 bg-widget-bg/95 border border-widget-border text-text-primary shadow-md text-[10px] rounded opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap z-50 backdrop-blur-md">
-          待办事项
-        </span>
+        <Tooltip content="待办事项" side="bottom">
+          <button
+            onClick={onToggleTodo}
+            className="p-2 rounded-full text-text-secondary hover:text-text-primary hover:bg-input-bg transition-all duration-200 active:scale-95 flex items-center justify-center cursor-pointer"
+            aria-label="待办事项"
+          >
+            <span className="dock-icon-wrapper transition-transform duration-150 ease-out flex items-center justify-center" style={{ willChange: 'transform' }}>
+              <CheckSquare className="w-4 h-4" />
+            </span>
+          </button>
+        </Tooltip>
       </div>
 
       <div className="w-[1px] h-4 bg-widget-border" />
 
       {/* 随机壁纸小组件 */}
       <div ref={item2Ref} className="relative group" onMouseEnter={onMouseEnterOtherWidget}>
-        <button
-          onClick={handleRandomWallpaperClick}
-          className="p-2 rounded-full text-text-secondary hover:text-text-primary hover:bg-input-bg transition-all duration-200 active:scale-95 flex items-center justify-center cursor-pointer"
-          aria-label="随机壁纸"
-          disabled={shuffling}
-        >
-          <span className="dock-icon-wrapper transition-transform duration-150 ease-out flex items-center justify-center" style={{ willChange: 'transform' }}>
-            {shuffling ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Shuffle className="w-4 h-4 transition-transform duration-300 group-hover:rotate-45" />
-            )}
-          </span>
-        </button>
-        <span className="pointer-events-none absolute top-[42px] left-1/2 -translate-x-1/2 px-2 py-1 bg-widget-bg/95 border border-widget-border text-text-primary shadow-md text-[10px] rounded opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap z-50 backdrop-blur-md">
-          随机壁纸
-        </span>
+        <Tooltip content="随机壁纸" side="bottom">
+          <button
+            onClick={handleRandomWallpaperClick}
+            className="p-2 rounded-full text-text-secondary hover:text-text-primary hover:bg-input-bg transition-all duration-200 active:scale-95 flex items-center justify-center cursor-pointer"
+            aria-label="随机壁纸"
+            disabled={shuffling}
+          >
+            <span className="dock-icon-wrapper transition-transform duration-150 ease-out flex items-center justify-center" style={{ willChange: 'transform' }}>
+              {shuffling ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Shuffle className="w-4 h-4 transition-transform duration-300 group-hover:rotate-45" />
+              )}
+            </span>
+          </button>
+        </Tooltip>
       </div>
 
       <div className="w-[1px] h-4 bg-widget-border" />
 
       {/* 快速主题切换小组件 */}
       <div ref={item3Ref} className="relative group" onMouseEnter={onMouseEnterTheme} onMouseLeave={onMouseLeaveTheme}>
-        <button
-          onClick={onToggleTheme}
-          className="p-2 rounded-full text-text-secondary hover:text-text-primary hover:bg-input-bg transition-all duration-200 active:scale-95 flex items-center justify-center cursor-pointer"
-          aria-label="切换主题"
-        >
-          <span className="dock-icon-wrapper transition-transform duration-150 ease-out flex items-center justify-center" style={{ willChange: 'transform' }}>
-            {theme === 'dark' ? (
-              <Sun className="w-4 h-4 transition-transform duration-300 group-hover:rotate-12" />
-            ) : (
-              <Moon className="w-4 h-4 transition-transform duration-300 group-hover:-rotate-12" />
-            )}
-          </span>
-        </button>
-        <span className={`pointer-events-none absolute top-[42px] left-1/2 -translate-x-1/2 px-2 py-1 bg-widget-bg/95 border border-widget-border text-text-primary shadow-md text-[10px] rounded opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap z-50 backdrop-blur-md ${
-          isHoveringBrightness ? '!opacity-0 !scale-95' : ''
-        }`}>
-          切换主题
-        </span>
+        <Tooltip content="切换主题" side="bottom" className={isHoveringBrightness ? 'hidden' : ''}>
+          <button
+            onClick={onToggleTheme}
+            className="p-2 rounded-full text-text-secondary hover:text-text-primary hover:bg-input-bg transition-all duration-200 active:scale-95 flex items-center justify-center cursor-pointer"
+            aria-label="切换主题"
+          >
+            <span className="dock-icon-wrapper transition-transform duration-150 ease-out flex items-center justify-center" style={{ willChange: 'transform' }}>
+              {theme === 'dark' ? (
+                <Sun className="w-4 h-4 transition-transform duration-300 group-hover:rotate-12" />
+              ) : (
+                <Moon className="w-4 h-4 transition-transform duration-300 group-hover:-rotate-12" />
+              )}
+            </span>
+          </button>
+        </Tooltip>
         {brightnessPanel}
       </div>
 
@@ -199,26 +195,23 @@ export function TopDock({
           onMouseEnter={onMouseEnterClock}
           onMouseLeave={onMouseLeaveClock}
         >
-          <button
-            onClick={isEditMode ? undefined : onToggleClockVisibility}
-            className={`p-2 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center ${
-              isEditMode
-                ? 'text-text-secondary hover:text-text-primary hover:bg-input-bg cursor-pointer'
-                : clocksVisible
+          <Tooltip content={isEditMode ? '添加小组件' : clocksVisible ? '隐藏小组件' : '显示小组件'} side="bottom" className={isHoveringClockMenu ? 'hidden' : ''}>
+            <button
+              onClick={isEditMode ? undefined : onToggleClockVisibility}
+              className={`p-2 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center ${
+                isEditMode
                   ? 'text-text-secondary hover:text-text-primary hover:bg-input-bg cursor-pointer'
-                  : 'text-text-secondary/40 hover:text-text-secondary hover:bg-input-bg cursor-pointer'
-            }`}
-            aria-label={isEditMode ? '添加小组件' : clocksVisible ? '隐藏小组件' : '显示小组件'}
-          >
-            <span className="dock-icon-wrapper transition-transform duration-150 ease-out flex items-center justify-center" style={{ willChange: 'transform' }}>
-              <LayoutGrid className="w-4 h-4" />
-            </span>
-          </button>
-          <span className={`pointer-events-none absolute top-[42px] left-1/2 -translate-x-1/2 px-2 py-1 bg-widget-bg/95 border border-widget-border text-text-primary shadow-md text-[10px] rounded opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 whitespace-nowrap z-50 backdrop-blur-md ${
-            isHoveringClockMenu ? '!opacity-0 !scale-95' : ''
-          }`}>
-            {isEditMode ? '添加小组件' : clocksVisible ? '隐藏小组件' : '显示小组件'}
-          </span>
+                  : clocksVisible
+                    ? 'text-text-secondary hover:text-text-primary hover:bg-input-bg cursor-pointer'
+                    : 'text-text-secondary/40 hover:text-text-secondary hover:bg-input-bg cursor-pointer'
+              }`}
+              aria-label={isEditMode ? '添加小组件' : clocksVisible ? '隐藏小组件' : '显示小组件'}
+            >
+              <span className="dock-icon-wrapper transition-transform duration-150 ease-out flex items-center justify-center" style={{ willChange: 'transform' }}>
+                <LayoutGrid className="w-4 h-4" />
+              </span>
+            </button>
+          </Tooltip>
           {clockMenuPanel}
         </div>
       </>
