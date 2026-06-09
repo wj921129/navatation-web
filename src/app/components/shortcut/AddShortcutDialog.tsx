@@ -1411,8 +1411,14 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                               }} className="p-1 text-gray-400 hover:text-blue-500"><Edit3 className="w-3 h-3" /></button>
                                               <button onClick={(e) => { 
                                                 e.stopPropagation(); 
-                                                if (!site.siteId) return;
-                                                navService.deleteRecommendSite(site.siteId!).then(loadRecommended); 
+                                                setCategories(prev => {
+                                                  const copy = [...prev];
+                                                  copy[catIdx] = {
+                                                    ...copy[catIdx],
+                                                    sites: copy[catIdx].sites.filter((s: any) => s.dragId !== site.dragId)
+                                                  };
+                                                  return copy;
+                                                });
                                               }} className="p-1 text-gray-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
                                             </div>
                                           )}
@@ -1734,28 +1740,44 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
               alert('分类ID丢失，请刷新页面重试');
               return;
             }
-            const req = { 
-              categoryId: editingSite.categoryId,
-              name: shortcut.name,
-              url: shortcut.url,
-              iconType: (shortcut.iconType || 'FAVICON') as IconType,
-              iconValue: shortcut.iconValue || '',
-              iconColor: editingSite.iconColor || '#fff'
-            };
-            const p = editingSite.siteId 
-              ? navService.updateRecommendSite(editingSite.siteId, req)
-              : navService.addRecommendSite(req);
-            p.then((res: any) => { 
-              if (res.code === 200) {
-                loadRecommended(); 
-                setEditingSite(null); 
+            
+            setCategories(prev => {
+              const copy = [...prev];
+              const catIdx = copy.findIndex(c => c.categoryId === editingSite.categoryId);
+              if (catIdx === -1) return copy;
+              
+              if (editingSite.siteId || editingSite.dragId) {
+                // Update existing
+                const siteIdx = copy[catIdx].sites.findIndex(s => 
+                  (editingSite.siteId && s.siteId === editingSite.siteId) || 
+                  (editingSite.dragId && s.dragId === editingSite.dragId)
+                );
+                
+                if (siteIdx !== -1) {
+                  copy[catIdx].sites[siteIdx] = {
+                    ...copy[catIdx].sites[siteIdx],
+                    name: shortcut.name,
+                    url: shortcut.url,
+                    iconType: (shortcut.iconType || 'FAVICON') as IconType,
+                    iconValue: shortcut.iconValue || '',
+                  };
+                }
               } else {
-                alert('保存失败: ' + (res.message || '未知错误'));
+                // Add new
+                copy[catIdx].sites.push({
+                  name: shortcut.name,
+                  url: shortcut.url,
+                  iconType: (shortcut.iconType || 'FAVICON') as IconType,
+                  iconValue: shortcut.iconValue || '',
+                  color: '#4285F4',
+                  iconColor: '#4285F4',
+                  icon: Link,
+                  dragId: Math.random().toString(36).substring(7)
+                });
               }
-            }).catch(err => {
-              console.error('保存网址失败', err);
-              alert('保存网址失败，请重试');
+              return copy;
             });
+            setEditingSite(null);
           }}
         />
       )}
