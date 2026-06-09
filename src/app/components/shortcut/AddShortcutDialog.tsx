@@ -3,6 +3,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { EditShortcutDialog } from './EditShortcutDialog';
 import { IconMap } from '../ui/IconMap';
 import { useState, useEffect, useRef } from 'react';
+import { useDrag, useDrop } from 'react-dnd';
 import { navService, IconType } from '../../services/nav-service';
 import { LucideIcon } from 'lucide-react';
 
@@ -646,6 +647,15 @@ export function AddShortcutDialog({
     } else {
       setCategories(updateData);
     }
+  };
+
+  const moveSite = (sourceCatIdx: number, sourceSiteIdx: number, destCatIdx: number, destSiteIdx: number) => {
+    setCategories(prev => {
+      const copy = prev.map(c => ({ ...c, sites: [...c.sites] }));
+      const [movedSite] = copy[sourceCatIdx].sites.splice(sourceSiteIdx, 1);
+      copy[destCatIdx].sites.splice(destSiteIdx, 0, movedSite);
+      return copy;
+    });
   };
 
   const handleSaveAllCategories = async () => {
@@ -1378,143 +1388,70 @@ export function AddShortcutDialog({
                                 </div>
                               )}
                             </div>
-                            <Droppable droppableId={catIdx.toString()} direction="horizontal">
-                              {(provided) => (
+                            <div 
+                              className="flex flex-wrap items-center pb-4"
+                              style={{ 
+                                margin: `-${iconSpacingY / 2}px -${iconSpacingX / 2}px`,
+                              }}
+                            >
+                              {category.sites.map((site: any, siteIdx) => (
+                                <DraggableRecommendSite
+                                  key={site.dragId!}
+                                  site={site}
+                                  siteIdx={siteIdx}
+                                  catIdx={catIdx}
+                                  moveSite={moveSite}
+                                  iconSize={iconSize}
+                                  borderRadius={borderRadius}
+                                  iconTextGap={iconTextGap}
+                                  textSize={textSize}
+                                  userRole={userRole}
+                                  category={category}
+                                  setEditingSite={setEditingSite}
+                                  setCategories={setCategories}
+                                  handleAddRecommendedToPending={handleAddRecommendedToPending}
+                                />
+                              ))}
+                              {userRole === 'ADMIN' && (
                                 <div 
-                                  ref={provided.innerRef} 
-                                  {...provided.droppableProps} 
-                                  className="flex flex-wrap items-center pb-4"
+                                  className="relative group/item flex-shrink-0" 
                                   style={{ 
-                                    margin: `-${iconSpacingY / 2}px -${iconSpacingX / 2}px`,
+                                    width: `${iconSize + 32}px`,
+                                    margin: `${iconSpacingY / 2}px ${iconSpacingX / 2}px`
                                   }}
                                 >
-                                  {/* 将原本的 grid-cols-8 替换为水平 flex 滚动，以适配 @hello-pangea/dnd 的一维水平拖拽，避免折行导致的异常跳跃问题 */}
-                                  {category.sites.map((site: any, siteIdx) => (
-                                    <Draggable key={site.dragId!} draggableId={site.dragId!} index={siteIdx}>
-                                      {(provided, snapshot) => (
-                                        <div 
-                                          ref={provided.innerRef} 
-                                          {...provided.draggableProps} 
-                                          {...provided.dragHandleProps}
-                                          className="relative group/item flex-shrink-0"
-                                          style={{
-                                            ...provided.draggableProps.style,
-                                            width: `${iconSize + 32}px`,
-                                            margin: `${iconSpacingY / 2}px ${iconSpacingX / 2}px`,
-                                            transition: snapshot.isDropAnimating
-                                              ? 'transform 0.12s cubic-bezier(0.2, 1, 0.1, 1)'
-                                              : provided.draggableProps.style?.transition
-                                          }}
-                                        >
-                                          {/* 使用 flex-shrink-0 保证图标在横向 flex 容器中不被挤压变形 */}
-                                          <div
-                                            onClick={() => {
-                                              handleAddRecommendedToPending(site);
-                                            }}
-                                            className="flex flex-col items-center group cursor-pointer w-full"
-                                            style={{ gap: `${iconTextGap}px` }}
-                                          >
-                                            <div
-                                              className="bg-card flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all duration-200 border border-border overflow-hidden"
-                                              style={{
-                                                width: `${iconSize}px`,
-                                                height: `${iconSize}px`,
-                                                borderRadius: borderRadius,
-                                              }}
-                                            >
-                                              {(() => {
-                                                if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
-                                                  return <img src={site.iconValue} alt={site.name} style={{ width: '50%', height: '50%', objectFit: 'contain' }} />;
-                                                }
-                                                return (
-                                                  <site.icon
-                                                    style={{
-                                                      color: site.color,
-                                                      width: `${iconSize * 0.5}px`,
-                                                      height: `${iconSize * 0.5}px`,
-                                                    }}
-                                                    strokeWidth={2}
-                                                  />
-                                                );
-                                              })()}
-                                            </div>
-                                            <span 
-                                              className="text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors truncate w-full text-center px-1 font-light tracking-wide"
-                                              style={{ fontSize: `${textSize}px` }}
-                                            >
-                                              {site.name}
-                                            </span>
-                                          </div>
-                                          {userRole === 'ADMIN' && (
-                                            <div className="absolute -top-2 -right-2 hidden group-hover/item:flex items-center gap-1 bg-background border border-border rounded shadow-sm p-0.5 z-10">
-                                              <button onClick={(e) => { 
-                                                e.stopPropagation(); 
-                                                if (!category.categoryId) {
-                                                  alert('系统内置推荐网址不可直接编辑。请通过右上角"新增分类"建立数据库数据后再添加。');
-                                                  return;
-                                                }
-                                                setEditingSite({ ...site, iconColor: site.iconColor || site.color, categoryId: category.categoryId }); 
-                                              }} className="p-1 text-gray-400 hover:text-blue-500"><Edit3 className="w-3 h-3" /></button>
-                                              <button onClick={(e) => { 
-                                                e.stopPropagation(); 
-                                                setCategories(prev => {
-                                                  const copy = [...prev];
-                                                  copy[catIdx] = {
-                                                    ...copy[catIdx],
-                                                    sites: copy[catIdx].sites.filter((s: any) => s.dragId !== site.dragId)
-                                                  };
-                                                  return copy;
-                                                });
-                                              }} className="p-1 text-gray-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
-                                            </div>
-                                          )}
-                                        </div>
-                                      )}
-                                    </Draggable>
-                                  ))}
-                                {provided.placeholder}
-                                {userRole === 'ADMIN' && (
-                                  <div 
-                                    className="relative group/item flex-shrink-0" 
-                                    style={{ 
-                                      width: `${iconSize + 32}px`,
-                                      margin: `${iconSpacingY / 2}px ${iconSpacingX / 2}px`
+                                  {/* 在水平 flex 容器中，新增网址按钮同样需要 flex-shrink-0 避免缩水 */}
+                                  <button
+                                    onClick={() => {
+                                      if (!category.categoryId) {
+                                        alert('系统内置推荐分类不可添加网址。请先保存该分类到数据库，或新建自定义分类。');
+                                        return;
+                                      }
+                                      setEditingSite({ categoryId: category.categoryId, name: '', url: '', iconType: 'FAVICON', iconValue: '', iconColor: '#fff' })
                                     }}
+                                    className="flex flex-col items-center group cursor-pointer w-full"
+                                    style={{ gap: `${iconTextGap}px` }}
                                   >
-                                    {/* 在水平 flex 容器中，新增网址按钮同样需要 flex-shrink-0 避免缩水 */}
-                                    <button
-                                      onClick={() => {
-                                        if (!category.categoryId) {
-                                          alert('系统内置推荐分类不可添加网址。请先保存该分类到数据库，或新建自定义分类。');
-                                          return;
-                                        }
-                                        setEditingSite({ categoryId: category.categoryId, name: '', url: '', iconType: 'FAVICON', iconValue: '', iconColor: '#fff' })
+                                    <div
+                                      className="bg-card/50 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/30 transition-all duration-200"
+                                      style={{
+                                        width: `${iconSize}px`,
+                                        height: `${iconSize}px`,
+                                        borderRadius: borderRadius,
                                       }}
-                                      className="flex flex-col items-center group cursor-pointer w-full"
-                                      style={{ gap: `${iconTextGap}px` }}
                                     >
-                                      <div
-                                        className="bg-card/50 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/30 transition-all duration-200"
-                                        style={{
-                                          width: `${iconSize}px`,
-                                          height: `${iconSize}px`,
-                                          borderRadius: borderRadius,
-                                        }}
-                                      >
-                                        <Plus className="w-6 h-6 text-gray-400 group-hover:text-blue-500" />
-                                      </div>
-                                      <span 
-                                        className="text-gray-500 dark:text-gray-400 group-hover:text-blue-500 truncate w-full text-center font-light tracking-wide"
-                                        style={{ fontSize: `${textSize}px` }}
-                                      >
-                                        新增网址
-                                      </span>
-                                    </button>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </Droppable>
+                                      <Plus className="w-6 h-6 text-gray-400 group-hover:text-blue-500" />
+                                    </div>
+                                    <span 
+                                      className="text-gray-500 dark:text-gray-400 group-hover:text-blue-500 truncate w-full text-center font-light tracking-wide"
+                                      style={{ fontSize: `${textSize}px` }}
+                                    >
+                                      新增网址
+                                    </span>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -1838,5 +1775,148 @@ export function AddShortcutDialog({
         />
       )}
     </>
+  );
+}
+
+const RECOMMEND_SITE_DRAG_TYPE = 'RECOMMEND_SITE';
+
+interface DraggableRecommendSiteProps {
+  site: any;
+  siteIdx: number;
+  catIdx: number;
+  moveSite: (sourceCatIdx: number, sourceSiteIdx: number, destCatIdx: number, destSiteIdx: number) => void;
+  iconSize: number;
+  borderRadius: string;
+  iconTextGap: number;
+  textSize: number;
+  userRole?: string;
+  category: any;
+  setEditingSite: (site: any) => void;
+  setCategories: React.Dispatch<React.SetStateAction<CategoryGroup[]>>;
+  handleAddRecommendedToPending: (site: any) => void;
+}
+
+function DraggableRecommendSite({
+  site,
+  siteIdx,
+  catIdx,
+  moveSite,
+  iconSize,
+  borderRadius,
+  iconTextGap,
+  textSize,
+  userRole,
+  category,
+  setEditingSite,
+  setCategories,
+  handleAddRecommendedToPending,
+}: DraggableRecommendSiteProps) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  const [{ isDragging }, drag] = useDrag({
+    type: RECOMMEND_SITE_DRAG_TYPE,
+    item: { catIdx, siteIdx },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  });
+
+  const [, drop] = useDrop({
+    accept: RECOMMEND_SITE_DRAG_TYPE,
+    hover: (item: { catIdx: number; siteIdx: number }) => {
+      if (!ref.current) return;
+      const dragCatIdx = item.catIdx;
+      const dragSiteIdx = item.siteIdx;
+      const hoverCatIdx = catIdx;
+      const hoverSiteIdx = siteIdx;
+
+      if (dragCatIdx === hoverCatIdx && dragSiteIdx === hoverSiteIdx) {
+        return;
+      }
+
+      // 仅限在同分类内部进行拖动排序以防止跨分类的排版冲突
+      if (dragCatIdx !== hoverCatIdx) {
+        return;
+      }
+
+      moveSite(dragCatIdx, dragSiteIdx, hoverCatIdx, hoverSiteIdx);
+      item.siteIdx = hoverSiteIdx;
+    },
+  });
+
+  drag(drop(ref));
+
+  return (
+    <div 
+      ref={ref} 
+      className="relative group/item flex-shrink-0 cursor-grab active:cursor-grabbing"
+      style={{
+        width: `${iconSize + 32}px`,
+        opacity: isDragging ? 0.35 : 1,
+      }}
+    >
+      {/* 使用 flex-shrink-0 保证图标在横向 flex 容器中不被挤压变形 */}
+      <div
+        onClick={() => {
+          handleAddRecommendedToPending(site);
+        }}
+        className="flex flex-col items-center group cursor-pointer w-full"
+        style={{ gap: `${iconTextGap}px` }}
+      >
+        <div
+          className="bg-card flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all duration-200 border border-border overflow-hidden"
+          style={{
+            width: `${iconSize}px`,
+            height: `${iconSize}px`,
+            borderRadius: borderRadius,
+          }}
+        >
+          {(() => {
+            if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
+              return <img src={site.iconValue} alt={site.name} style={{ width: '50%', height: '50%', objectFit: 'contain' }} />;
+            }
+            return (
+              <site.icon
+                style={{
+                  color: site.color,
+                  width: `${iconSize * 0.5}px`,
+                  height: `${iconSize * 0.5}px`,
+                }}
+                strokeWidth={2}
+              />
+            );
+          })()}
+        </div>
+        <span 
+          className="text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors truncate w-full text-center px-1 font-light tracking-wide"
+          style={{ fontSize: `${textSize}px` }}
+        >
+          {site.name}
+        </span>
+      </div>
+      {userRole === 'ADMIN' && (
+        <div className="absolute -top-2 -right-2 hidden group-hover/item:flex items-center gap-1 bg-background border border-border rounded shadow-sm p-0.5 z-10">
+          <button onClick={(e) => { 
+            e.stopPropagation(); 
+            if (!category.categoryId) {
+              alert('系统内置推荐网址不可直接编辑。请通过右上角"新增分类"建立数据库数据后再添加。');
+              return;
+            }
+            setEditingSite({ ...site, iconColor: site.iconColor || site.color, categoryId: category.categoryId }); 
+          }} className="p-1 text-gray-400 hover:text-blue-500"><Edit3 className="w-3 h-3" /></button>
+          <button onClick={(e) => { 
+            e.stopPropagation(); 
+            setCategories(prev => {
+              const copy = [...prev];
+              copy[catIdx] = {
+                ...copy[catIdx],
+                sites: copy[catIdx].sites.filter((s: any) => s.dragId !== site.dragId)
+              };
+              return copy;
+            });
+          }} className="p-1 text-gray-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
+        </div>
+      )}
+    </div>
   );
 }
