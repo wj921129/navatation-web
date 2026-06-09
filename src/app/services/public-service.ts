@@ -1,11 +1,11 @@
 import { api, ApiResponse } from './api-client';
-import { Settings } from './settings-service';
-import { Widget } from './widget-service';
+import { UserSettings } from './settings-service';
+import { WidgetItemDTO } from './widget-service';
 import { NavCategory, NavShortcut } from './nav-service';
 
 export interface GuestConfig {
-  settings: Settings;
-  widgets: Widget[];
+  settings: UserSettings;
+  widgets: WidgetItemDTO[];
   categories: NavCategory[];
   shortcuts: NavShortcut[];
 }

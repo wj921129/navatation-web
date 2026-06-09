@@ -2,14 +2,10 @@ import { Plus, Edit3, Save, Settings, User, Clock, Calendar, Timer, Flower2, Clo
 import { IconMap } from './components/ui/IconMap';
 import { Tooltip } from './components/ui/Tooltip';
 import { useState, useEffect, useCallback } from 'react';
-import { SettingsDialog } from './components/settings/SettingsDialog';
-import { LoginDialog } from './components/auth/LoginDialog';
-import { AddShortcutDialog } from './components/shortcut/AddShortcutDialog';
-import { EditShortcutDialog } from './components/shortcut/EditShortcutDialog';
-import { ManageHomepageShortcutsDialog } from './components/shortcut/ManageHomepageShortcutsDialog';
-import { LogoutConfirmDialog } from './components/auth/LogoutConfirmDialog';
-import { TodoPanel } from './components/todo/TodoPanel';
+import { AppDialogs } from './components/layout/AppDialogs';
+
 import { TopDock } from './components/dock/TopDock';
+import { WidgetLayer } from './components/layout/WidgetLayer';
 import { TodoListWidget } from './components/todo/TodoListWidget';
 import { useTheme } from 'next-themes';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent } from '@dnd-kit/core';
@@ -34,12 +30,13 @@ import SimpleWeather from './components/widgets/SimpleWeather';
 
 
 import { SearchBox } from './components/search/SearchBox';
-import { DraggableShortcut } from './components/shortcut/DraggableShortcut';
+import { ShortcutGrid } from './components/shortcut/ShortcutGrid';
 import { AiSearchOverlay } from './components/search/AiSearchOverlay';
 
 import { useBrightness } from './hooks/useBrightness';
 import { useSettings } from './hooks/useSettings';
 import { useShortcuts } from './hooks/useShortcuts';
+import { useAppInit } from './hooks/useAppInit';
 import { publicService } from './services/public-service';
 
 import { DEFAULT_SHORTCUTS, DEFAULT_WALLPAPER } from '../config/app.config';
@@ -191,6 +188,7 @@ export default function App() {
     setBgBrightness,
     isBrightnessOpen,
     isBrightnessClosing,
+    setIsBrightnessClosing,
     isHoveringBrightness,
     setIsHoveringBrightness,
     brightnessTimerRef,
@@ -201,6 +199,17 @@ export default function App() {
     handleMouseLeaveTheme,
     handleMouseEnterOtherWidget,
   } = brightnessData;
+
+  useAppInit(
+    authState,
+    setIsEditMode,
+    setBackgroundImage,
+    setShortcuts,
+    setTempShortcuts,
+    setWidgets,
+    setTempWidgets,
+    setSettings
+  );
 
   // 统一保存与取消逻辑
   const handleSaveEdits = useCallback(async () => {
@@ -669,85 +678,7 @@ export default function App() {
     </div>
   );
 
-  // 当用户登出（未登录）时，强制退出编辑模式，清空临时状态与壁纸缓存，回归游客初始数据
-  useEffect(() => {
-    if (!authState.isLoggedIn) {
-      setIsEditMode(false);
-      localStorage.removeItem('navatation_wallpaper');
-      setBackgroundImage(DEFAULT_WALLPAPER);
-      setShortcuts(DEFAULT_SHORTCUTS);
-      setTempShortcuts(DEFAULT_SHORTCUTS);
-    }
-  }, [authState.isLoggedIn, setBackgroundImage, setShortcuts, setTempShortcuts, setIsEditMode]);
 
-  // 初始化挂载：如果本地存在 Token，则尝试获取用户信息
-  useEffect(() => {
-    authStore.fetchUser();
-  }, []);
-
-  // 监听来自 API 客户端的强制登出事件（如 401 未授权时触发）
-  useEffect(() => {
-    const handler = () => authStore.logout();
-    window.addEventListener('auth:logout', handler);
-    return () => window.removeEventListener('auth:logout', handler);
-  }, []);
-
-  // 游客模式下自动拉取超级管理员的配置
-  useEffect(() => {
-    if (!authState.isLoggedIn) {
-      publicService.getGuestConfig().then(res => {
-        if (res.code === 200 && res.data) {
-          const config = res.data;
-          
-          if (config.shortcuts && config.shortcuts.length > 0) {
-            const loaded = config.shortcuts.map(item => ({
-              id: item.shortcutId,
-              categoryId: item.categoryId,
-              name: item.name,
-              url: item.url,
-              color: item.iconColor || '#fff',
-              iconType: item.iconType,
-              iconValue: item.iconValue || 'Link',
-              dragId: item.shortcutId || Math.random().toString(36).substring(7)
-            }));
-            setShortcuts(loaded);
-            setTempShortcuts(loaded);
-            // 写入本地游客快捷方式缓存，防止首屏加载闪跃
-            localStorage.setItem('navatation_guest_shortcuts', JSON.stringify(loaded));
-          }
-
-          if (config.widgets && config.widgets.length > 0) {
-            const loadedW = config.widgets.map((w: any) => ({
-              id: w.widgetId || `clock-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-              type: w.type,
-              style: w.style,
-              x: Number(w.x),
-              y: Number(w.y),
-              meta: w.meta || {},
-            }));
-            setWidgets(loadedW);
-            setTempWidgets(loadedW);
-            // 写入小组件物理位置本地缓存，消灭首屏浮现跳跃 Bug
-            localStorage.setItem('navatation_widgets', JSON.stringify(loadedW));
-          }
-
-          if (config.settings) {
-            setSettings(config.settings);
-            // 写入设置本地缓存
-            localStorage.setItem('navatation_settings', JSON.stringify(config.settings));
-            if (config.settings.backgroundImage) {
-              setBackgroundImage(config.settings.backgroundImage);
-              // 写入壁纸本地缓存，避免壁纸闪烁
-              localStorage.setItem('navatation_wallpaper', config.settings.backgroundImage);
-            }
-          }
-        }
-      }).catch(err => {
-        console.error('Failed to load guest config:', err);
-      });
-    }
-    // 细化依赖项，不直接依赖 widgetsData 和 settingsData 对象引用，防止每次渲染由于对象引用改变而重复拉取游客配置
-  }, [authState.isLoggedIn, setShortcuts, setTempShortcuts, setWidgets, setTempWidgets, setSettings, setBackgroundImage]);
 
   const handleSearchEngineChange = (engine: string) => {
     setSearchEngine(engine);
@@ -813,104 +744,19 @@ export default function App() {
         />
 
         {/* Widgets Rendering */}
-        {(isEditMode ? tempWidgets : (clocksVisible ? widgets : []))
-          .filter((w) => w.type === 'clock')
-          .map((widget) => (
-            <ClockWidget
-              key={widget.id}
-              id={widget.id}
-              style={widget.style as 'analog' | 'digital' | 'flip' | 'traditional'}
-              x={widget.x}
-              y={widget.y}
-              isEditMode={isEditMode}
-              // 传入 isDragging 属性，当 activeDraggingId 与当前组件 id 一致时为 true，借此动态控制 will-change 以避免毛玻璃背景闪烁
-              isDragging={activeDraggingId === widget.id}
-              onStartDrag={(id, style, ox, oy) => {
-                activeDraggingStyleRef.current = style;
-                setActiveDraggingId(id);
-                setDragOffset({ x: ox, y: oy });
-              }}
-              onDelete={removeWidget}
-            />
-          ))}
-
-        {(isEditMode ? tempWidgets : (clocksVisible ? widgets : []))
-          .filter((w) => w.type === 'pomodoro')
-          .map((widget) => (
-            <PomodoroWidget
-              key={widget.id}
-              id={widget.id}
-              x={widget.x}
-              y={widget.y}
-              isEditMode={isEditMode}
-              isDragging={activeDraggingId === widget.id}
-              onStartDrag={(id, type, ox, oy) => {
-                activeDraggingStyleRef.current = type as any;
-                setActiveDraggingId(id);
-                setDragOffset({ x: ox, y: oy });
-              }}
-              onDelete={removeWidget}
-            />
-          ))}
-
-        {(isEditMode ? tempWidgets : (clocksVisible ? widgets : []))
-          .filter((w) => w.type === 'breathe')
-          .map((widget) => (
-            <BreatheWidget
-              key={widget.id}
-              id={widget.id}
-              x={widget.x}
-              y={widget.y}
-              isEditMode={isEditMode}
-              isDragging={activeDraggingId === widget.id}
-              onStartDrag={(id, type, ox, oy) => {
-                activeDraggingStyleRef.current = type as any;
-                setActiveDraggingId(id);
-                setDragOffset({ x: ox, y: oy });
-              }}
-              onDelete={removeWidget}
-            />
-          ))}
-
-        {(isEditMode ? tempWidgets : (calendarVisible ? widgets : []))
-          .filter((w) => w.type === 'calendar')
-          .map((widget) => (
-            <CalendarWidget
-              key={widget.id}
-              id={widget.id}
-              style={widget.style}
-              x={widget.x}
-              y={widget.y}
-              isEditMode={isEditMode}
-              isDragging={activeDraggingId === widget.id}
-              onStartDrag={(id, type, style, ox, oy) => {
-                activeDraggingStyleRef.current = style as any;
-                setActiveDraggingId(id);
-                setDragOffset({ x: ox, y: oy });
-              }}
-              onDelete={removeWidget}
-            />
-          ))}
-
-        {(isEditMode ? tempWidgets : (weatherVisible ? widgets : []))
-          .filter((w) => w.type === 'weather')
-          .map((widget) => (
-            <WeatherWidget
-              key={widget.id}
-              id={widget.id}
-              style={widget.style}
-              x={widget.x}
-              y={widget.y}
-              isEditMode={isEditMode}
-              isDragging={activeDraggingId === widget.id}
-              onStartDrag={(id, type, style, ox, oy) => {
-                activeDraggingStyleRef.current = style as any;
-                setActiveDraggingId(id);
-                setDragOffset({ x: ox, y: oy });
-              }}
-              onDelete={removeWidget}
-            />
-          ))}
+        <WidgetLayer
+          isEditMode={isEditMode}
+          tempWidgets={tempWidgets}
+          widgets={widgets}
+          clocksVisible={clocksVisible}
+          calendarVisible={calendarVisible}
+          weatherVisible={weatherVisible}
+          activeDraggingId={activeDraggingId}
+          activeDraggingStyleRef={activeDraggingStyleRef}
+          setActiveDraggingId={setActiveDraggingId}
+          setDragOffset={setDragOffset}
+          removeWidget={removeWidget}
+        />
 
         {menuDraggingStyle && menuDragHasMoved && (
           <div
@@ -1018,140 +864,19 @@ export default function App() {
           />
 
           {/* Shortcuts Grid */}
-          <div 
-            className="flex flex-wrap justify-center w-full mx-auto" 
-            style={{ 
-              gap: `${settings.iconSpacingY}px ${settings.iconSpacingX}px`,
-              maxWidth: '1200px',
-              paddingLeft: `${settings.iconsMarginX}%`,
-              paddingRight: `${settings.iconsMarginX}%`
-            }}
-          >
-            {isEditMode ? (
-              <DndContext 
-                sensors={sensors} 
-                collisionDetection={closestCenter} 
-                onDragStart={handleDragStartGrid}
-                onDragEnd={handleDragEndGrid}
-                onDragCancel={handleDragCancelGrid}
-              >
-                <SortableContext items={displayShortcuts.map((s, idx) => s.dragId || `shortcut-edit-${idx}`)} strategy={rectSortingStrategy}>
-                  {displayShortcuts.map((shortcut, globalIndex) => (
-                    <SortableGridItem key={shortcut.dragId || `shortcut-edit-${globalIndex}`} id={shortcut.dragId || `shortcut-edit-${globalIndex}`}>
-                      <DraggableShortcut
-                        shortcut={shortcut}
-                        iconInnerSize={iconInnerSize}
-                        iconSize={settings.iconSize}
-                        iconRadius={settings.iconRadius}
-                        iconTextGap={settings.iconTextGap}
-                        textSize={settings.textSize}
-                        onEdit={() => handleEditShortcut(globalIndex)}
-                        onDelete={() => handleDeleteShortcut(globalIndex)}
-                      />
-                    </SortableGridItem>
-                  ))}
-                </SortableContext>
-                <GridDragOverlay>
-                  {activeDragShortcut ? (
-                    <div className="flex flex-col items-center relative cursor-grabbing" style={{ width: `${settings.iconSize + 32}px` }}>
-                      <div className="bg-icon-bg border-2 border-blue-500/60 flex items-center justify-center shadow-2xl scale-110 overflow-hidden pointer-events-none transition-transform" style={{ width: `${settings.iconSize}px`, height: `${settings.iconSize}px`, borderRadius: borderRadius }}>
-                        {(() => {
-                          if (activeDragShortcut.iconType === 'CUSTOM_URL' || activeDragShortcut.iconType === 'FAVICON' || activeDragShortcut.iconType === 'CUSTOM_UPLOAD') {
-                            return <img src={activeDragShortcut.iconValue} alt={activeDragShortcut.name} style={{ width: '50%', height: '50%', objectFit: 'contain' }} />;
-                          }
-                          const IconComp = IconMap[activeDragShortcut.iconValue] || IconMap.Link;
-                          return <IconComp style={{ color: activeDragShortcut.color || '#333', width: `${iconInnerSize}px`, height: `${iconInnerSize}px` }} strokeWidth={2} />;
-                        })()}
-                      </div>
-                      <span className="mt-2 font-medium tracking-wide text-center w-full truncate px-1 opacity-0 pointer-events-none" style={{ fontSize: `${settings.textSize}px` }}>{activeDragShortcut.name || '未命名'}</span>
-                    </div>
-                  ) : null}
-                </GridDragOverlay>
-              </DndContext>
-            ) : (
-              <>
-                {displayShortcuts.map((shortcut, globalIndex) => (
-                  <div
-                    key={shortcut.dragId || `shortcut-${globalIndex}`}
-                    className="flex flex-col items-center group relative"
-                    style={{ width: `${settings.iconSize + 32}px` }}
-                  >
-                    <a
-                      href={shortcut.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex flex-col items-center w-full"
-                      style={{ gap: `${settings.iconTextGap}px` }}
-                    >
-                      <div
-                        className="bg-icon-bg border border-widget-border flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 overflow-hidden shrink-0"
-                        style={{
-                          width: `${settings.iconSize}px`,
-                          height: `${settings.iconSize}px`,
-                          borderRadius: borderRadius
-                        }}
-                      >
-                        {(() => {
-                          if (shortcut.iconType === 'CUSTOM_URL' || shortcut.iconType === 'FAVICON' || shortcut.iconType === 'CUSTOM_UPLOAD') {
-                            return (
-                              <img
-                                src={shortcut.iconValue}
-                                alt={shortcut.name}
-                                style={{ width: '50%', height: '50%', objectFit: 'contain' }}
-                              />
-                            );
-                          }
-                          let IconComp = IconMap.Link;
-                          const iconName = shortcut.iconValue;
-                          if (iconName && IconMap[iconName]) {
-                            IconComp = IconMap[iconName];
-                          }
-                          return (
-                            <IconComp
-                              style={{ color: shortcut.color || '#333', width: `${iconInnerSize}px`, height: `${iconInnerSize}px` }}
-                              strokeWidth={2}
-                            />
-                          );
-                        })()}
-                      </div>
-                      <span
-                        className="text-white font-light tracking-wide drop-shadow-lg text-center w-full truncate px-1"
-                        style={{ fontSize: `${settings.textSize}px` }}
-                      >
-                        {shortcut.name}
-                      </span>
-                    </a>
-                  </div>
-                ))}
-              </>
-            )}
-
-            {/* Add Shortcut Button */}
-            {isEditMode ? (
-              <Tooltip content="添加图标" side="top">
-                <button
-                  onClick={() => setIsAddShortcutOpen(true)}
-                  className="flex flex-col items-center group"
-                  style={{ gap: `${settings.iconTextGap}px`, width: `${settings.iconSize + 32}px` }}
-                >
-                  <div
-                    className="bg-icon-bg/80 border border-widget-border/80 flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer hover:bg-icon-bg hover:border-widget-border shrink-0"
-                    style={{
-                      width: `${settings.iconSize}px`,
-                      height: `${settings.iconSize}px`,
-                      borderRadius: borderRadius
-                    }}
-                  >
-                    <Plus
-                      className="text-gray-400 group-hover:text-gray-600 transition-colors"
-                      style={{ width: `${iconInnerSize}px`, height: `${iconInnerSize}px` }}
-                      strokeWidth={2}
-                    />
-                  </div>
-                </button>
-              </Tooltip>
-            ) : null}
-        </div>
+          <ShortcutGrid
+            settings={settings}
+            isEditMode={isEditMode}
+            displayShortcuts={displayShortcuts}
+            sensors={sensors}
+            handleDragStartGrid={handleDragStartGrid}
+            handleDragEndGrid={handleDragEndGrid}
+            handleDragCancelGrid={handleDragCancelGrid}
+            activeDragShortcut={activeDragShortcut}
+            handleEditShortcut={handleEditShortcut}
+            handleDeleteShortcut={handleDeleteShortcut}
+            setIsAddShortcutOpen={setIsAddShortcutOpen}
+          />
         </div>
 
         {/* Bottom Right Controls */}
@@ -1236,66 +961,36 @@ export default function App() {
         </div>
 
         {/* Dialogs */}
-        <SettingsDialog
-          isOpen={isSettingsOpen}
-          onClose={handleCloseSettings}
-          onSave={handleSaveSettings}
-          onPreview={handlePreviewSettings}
+        <AppDialogs
+          isSettingsOpen={isSettingsOpen}
+          handleCloseSettings={handleCloseSettings}
+          handleSaveSettings={handleSaveSettings}
+          handlePreviewSettings={handlePreviewSettings}
           settings={settings}
           backgroundImage={backgroundImage}
-          currentTheme={theme || 'light'}
-        />
-        <LoginDialog
-          isOpen={isLoginOpen}
-          onClose={() => setIsLoginOpen(false)}
-        />
-        <TodoPanel
-          isOpen={isTodoOpen}
-          onClose={() => setIsTodoOpen(false)}
-        />
-        <LogoutConfirmDialog
-          isOpen={isLogoutConfirmOpen}
-          onClose={() => setIsLogoutConfirmOpen(false)}
-          onConfirm={handleLogout}
-          username={authState.user?.username}
-        />
-        <AddShortcutDialog
-          isOpen={isAddShortcutOpen}
-          onClose={() => setIsAddShortcutOpen(false)}
-          onAdd={handleAddShortcuts}
-          iconSize={settings.iconSize}
-          iconRadius={settings.iconRadius}
-          iconSpacingX={settings.iconSpacingX}
-          iconSpacingY={settings.iconSpacingY}
-          iconTextGap={settings.iconTextGap}
-          textSize={settings.textSize}
-          userRole={authState.user?.role}
-        />
-        {editingShortcut ? (
-          <EditShortcutDialog
-            isOpen={!!editingShortcut}
-            onClose={() => setEditingShortcut(null)}
-            onSave={handleSaveEdit}
-            shortcut={editingShortcut.shortcut}
-          />
-        ) : null}
-        <ManageHomepageShortcutsDialog
-          isOpen={isManageHomepageOpen}
-          onClose={() => setIsManageHomepageOpen(false)}
+          theme={theme || 'light'}
+          isLoginOpen={isLoginOpen}
+          setIsLoginOpen={setIsLoginOpen}
+          isTodoOpen={isTodoOpen}
+          setIsTodoOpen={setIsTodoOpen}
+          isLogoutConfirmOpen={isLogoutConfirmOpen}
+          setIsLogoutConfirmOpen={setIsLogoutConfirmOpen}
+          handleLogout={handleLogout}
+          authState={authState}
+          isAddShortcutOpen={isAddShortcutOpen}
+          setIsAddShortcutOpen={setIsAddShortcutOpen}
+          handleAddShortcuts={handleAddShortcuts}
+          editingShortcut={editingShortcut}
+          setEditingShortcut={setEditingShortcut}
+          handleSaveEdit={handleSaveEdit}
+          isManageHomepageOpen={isManageHomepageOpen}
+          setIsManageHomepageOpen={setIsManageHomepageOpen}
           shortcuts={shortcuts}
-          iconSize={settings.iconSize}
-          iconRadius={settings.iconRadius}
-          iconSpacingX={settings.iconSpacingX}
-          iconSpacingY={settings.iconSpacingY}
-          iconTextGap={settings.iconTextGap}
-          textSize={settings.textSize}
-          onSaveComplete={() => fetchShortcuts()}
-        />
-        <AiSearchOverlay
-          isOpen={isAiSearchOpen}
-          onClose={() => setIsAiSearchOpen(false)}
-          initialQuery={aiSearchQuery}
-          initialEngine={aiSearchEngine}
+          fetchShortcuts={fetchShortcuts}
+          isAiSearchOpen={isAiSearchOpen}
+          setIsAiSearchOpen={setIsAiSearchOpen}
+          aiSearchQuery={aiSearchQuery}
+          aiSearchEngine={aiSearchEngine}
         />
       </div>
   );

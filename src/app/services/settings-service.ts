@@ -14,6 +14,7 @@ export interface UserSettings {
   iconTextGap: number;
   textSize: number;
   iconsMarginTop: number;
+  iconsMarginX: number;
   theme: string;
 }
 
