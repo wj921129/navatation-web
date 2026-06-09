@@ -170,6 +170,7 @@ export function useShortcuts(authState: any) {
         color: s.color || '#fff',
         iconType: s.iconType || 'BUILTIN',
         iconValue: iconName,
+        dragId: Math.random().toString(36).substring(7),
       };
     });
     setTempShortcuts(prev => [...prev, ...formatted]);
