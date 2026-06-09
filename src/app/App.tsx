@@ -705,6 +705,8 @@ export default function App() {
             }));
             setShortcuts(loaded);
             setTempShortcuts(loaded);
+            // 写入本地游客快捷方式缓存，防止首屏加载闪跃
+            localStorage.setItem('navatation_guest_shortcuts', JSON.stringify(loaded));
           }
 
           if (config.widgets && config.widgets.length > 0) {
@@ -718,12 +720,18 @@ export default function App() {
             }));
             setWidgets(loadedW);
             setTempWidgets(loadedW);
+            // 写入小组件物理位置本地缓存，消灭首屏浮现跳跃 Bug
+            localStorage.setItem('navatation_widgets', JSON.stringify(loadedW));
           }
 
           if (config.settings) {
             setSettings(config.settings);
+            // 写入设置本地缓存
+            localStorage.setItem('navatation_settings', JSON.stringify(config.settings));
             if (config.settings.backgroundImage) {
               setBackgroundImage(config.settings.backgroundImage);
+              // 写入壁纸本地缓存，避免壁纸闪烁
+              localStorage.setItem('navatation_wallpaper', config.settings.backgroundImage);
             }
           }
         }

@@ -3,12 +3,32 @@ import { navService } from '../services/nav-service';
 import { DEFAULT_SHORTCUTS } from '../../config/app.config';
 
 export function useShortcuts(authState: any) {
-  const [shortcuts, setShortcuts] = useState<any[]>(() => 
-    authState.isLoggedIn ? [] : DEFAULT_SHORTCUTS
-  );
-  const [tempShortcuts, setTempShortcuts] = useState<any[]>(() => 
-    authState.isLoggedIn ? [] : DEFAULT_SHORTCUTS
-  );
+  const [shortcuts, setShortcuts] = useState<any[]>(() => {
+    if (authState.isLoggedIn) return [];
+    // 未登录时，优先从本地游客快捷方式缓存加载，消除刷新瞬间的视觉跳变
+    const local = localStorage.getItem('navatation_guest_shortcuts');
+    if (local) {
+      try {
+        return JSON.parse(local);
+      } catch {
+        return DEFAULT_SHORTCUTS;
+      }
+    }
+    return DEFAULT_SHORTCUTS;
+  });
+  const [tempShortcuts, setTempShortcuts] = useState<any[]>(() => {
+    if (authState.isLoggedIn) return [];
+    // 未登录时，优先从本地游客快捷方式缓存加载，消除刷新瞬间的视觉跳变
+    const local = localStorage.getItem('navatation_guest_shortcuts');
+    if (local) {
+      try {
+        return JSON.parse(local);
+      } catch {
+        return DEFAULT_SHORTCUTS;
+      }
+    }
+    return DEFAULT_SHORTCUTS;
+  });
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingShortcut, setEditingShortcut] = useState<{ index: number; shortcut: any } | null>(null);
   
