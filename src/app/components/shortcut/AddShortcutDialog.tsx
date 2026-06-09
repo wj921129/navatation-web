@@ -530,7 +530,7 @@ export function AddShortcutDialog({
       const res = await navService.fetchFaviconsInBatch(urls);
       if (res.code === 200 && res.data) {
         // 3. 回填原生高清图标
-        tasks.forEach(({ catIdx, siteIdx, url }) => {
+        tasks.forEach(({ catIdx, siteIdx, url, site }) => {
           const rowKey = `${catIdx}-${siteIdx}`;
           const result = res.data[url];
           if (result && result.faviconUrl) {
