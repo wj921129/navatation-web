@@ -8,7 +8,17 @@ import { Toaster } from "sonner";
 
 createRoot(document.getElementById("root")!).render(
   <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-    <Toaster position="top-center" richColors />
+    <Toaster 
+      position="top-center" 
+      richColors 
+      toastOptions={{
+        style: {
+          width: 'fit-content',
+          minWidth: 'unset',
+          margin: '0 auto',
+        }
+      }}
+    />
     <App />
   </ThemeProvider>
 );
