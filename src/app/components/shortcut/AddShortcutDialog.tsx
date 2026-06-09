@@ -12,6 +12,10 @@ interface AddShortcutDialogProps {
   onAdd: (shortcuts: { name: string; icon: any; color: string; url: string }[]) => void;
   iconSize: number;
   iconRadius: number;
+  iconSpacingX?: number;
+  iconSpacingY?: number;
+  iconTextGap?: number;
+  textSize?: number;
   userRole?: string;
 }
 
@@ -176,7 +180,18 @@ const getDebounceDelay = (input: string): number => {
  * 添加捷径对话框组件。
  * 支持浏览并选择推荐网站，以及输入链接与图标来自定义创建捷径。
  */
-export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius, userRole }: AddShortcutDialogProps) {
+export function AddShortcutDialog({
+  isOpen,
+  onClose,
+  onAdd,
+  iconSize,
+  iconRadius,
+  iconSpacingX = 16,
+  iconSpacingY = 16,
+  iconTextGap = 8,
+  textSize = 12,
+  userRole,
+}: AddShortcutDialogProps) {
   const [activeTab, setActiveTab] = useState<'recommended' | 'custom'>('recommended');
   const [customName, setCustomName] = useState('');
   const [customUrl, setCustomUrl] = useState('');
@@ -1365,7 +1380,12 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                             </div>
                             <Droppable droppableId={catIdx.toString()} direction="horizontal">
                               {(provided) => (
-                                <div ref={provided.innerRef} {...provided.droppableProps} className="flex flex-wrap items-center gap-4 pb-4">
+                                <div 
+                                  ref={provided.innerRef} 
+                                  {...provided.droppableProps} 
+                                  className="flex flex-wrap items-center pb-4"
+                                  style={{ gap: `${iconSpacingY}px ${iconSpacingX}px` }}
+                                >
                                   {/* 将原本的 grid-cols-8 替换为水平 flex 滚动，以适配 @hello-pangea/dnd 的一维水平拖拽，避免折行导致的异常跳跃问题 */}
                                   {category.sites.map((site: any, siteIdx) => (
                                     <Draggable key={site.dragId!} draggableId={site.dragId!} index={siteIdx}>
@@ -1377,7 +1397,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                           className="relative group/item flex-shrink-0"
                                           style={{
                                             ...provided.draggableProps.style,
-                                            width: `${iconSize + 24}px`,
+                                            width: `${iconSize + 32}px`,
                                             transition: snapshot.isDropAnimating
                                               ? 'transform 0.12s cubic-bezier(0.2, 1, 0.1, 1)'
                                               : provided.draggableProps.style?.transition
@@ -1388,7 +1408,8 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                             onClick={() => {
                                               handleAddRecommendedToPending(site);
                                             }}
-                                            className="flex flex-col items-center gap-2 group cursor-pointer w-full"
+                                            className="flex flex-col items-center group cursor-pointer w-full"
+                                            style={{ gap: `${iconTextGap}px` }}
                                           >
                                             <div
                                               className="bg-card flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all duration-200 border border-border overflow-hidden"
@@ -1414,7 +1435,10 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                                 );
                                               })()}
                                             </div>
-                                            <span className="text-xs text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors truncate w-full text-center px-1">
+                                            <span 
+                                              className="text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors truncate w-full text-center px-1 font-light tracking-wide"
+                                              style={{ fontSize: `${textSize}px` }}
+                                            >
                                               {site.name}
                                             </span>
                                           </div>
@@ -1446,7 +1470,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                     </Draggable>
                                   ))}
                                   {userRole === 'ADMIN' && (
-                                    <div className="relative group/item flex-shrink-0" style={{ width: `${iconSize + 24}px` }}>
+                                    <div className="relative group/item flex-shrink-0" style={{ width: `${iconSize + 32}px` }}>
                                       {/* 在水平 flex 容器中，新增网址按钮同样需要 flex-shrink-0 避免缩水 */}
                                       <button
                                       onClick={() => {
@@ -1456,7 +1480,8 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                         }
                                         setEditingSite({ categoryId: category.categoryId, name: '', url: '', iconType: 'FAVICON', iconValue: '', iconColor: '#fff' })
                                       }}
-                                      className="flex flex-col items-center gap-2 group cursor-pointer w-full"
+                                      className="flex flex-col items-center group cursor-pointer w-full"
+                                      style={{ gap: `${iconTextGap}px` }}
                                     >
                                       <div
                                         className="bg-card/50 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/30 transition-all duration-200"
@@ -1468,7 +1493,10 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                       >
                                         <Plus className="w-6 h-6 text-gray-400 group-hover:text-blue-500" />
                                       </div>
-                                      <span className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-blue-500 truncate w-full text-center">
+                                      <span 
+                                        className="text-gray-500 dark:text-gray-400 group-hover:text-blue-500 truncate w-full text-center font-light tracking-wide"
+                                        style={{ fontSize: `${textSize}px` }}
+                                      >
                                         新增网址
                                       </span>
                                     </button>

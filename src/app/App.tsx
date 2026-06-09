@@ -1183,6 +1183,10 @@ export default function App() {
           onAdd={handleAddShortcuts}
           iconSize={settings.iconSize}
           iconRadius={settings.iconRadius}
+          iconSpacingX={settings.iconSpacingX}
+          iconSpacingY={settings.iconSpacingY}
+          iconTextGap={settings.iconTextGap}
+          textSize={settings.textSize}
           userRole={authState.user?.role}
         />
         {editingShortcut ? (
