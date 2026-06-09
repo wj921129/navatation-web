@@ -1384,7 +1384,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                           }}
                                         >
                                           {/* 使用 flex-shrink-0 保证图标在横向 flex 容器中不被挤压变形 */}
-                                          <button
+                                          <div
                                             onClick={() => {
                                               handleAddRecommendedToPending(site);
                                             }}
@@ -1417,7 +1417,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                             <span className="text-xs text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors truncate w-full text-center px-1">
                                               {site.name}
                                             </span>
-                                          </button>
+                                          </div>
                                           {userRole === 'ADMIN' && (
                                             <div className="absolute -top-2 -right-2 hidden group-hover/item:flex items-center gap-1 bg-background border border-border rounded shadow-sm p-0.5 z-10">
                                               <button onClick={(e) => { 
