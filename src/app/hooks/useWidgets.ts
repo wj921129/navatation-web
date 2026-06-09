@@ -1,6 +1,9 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { widgetService } from '../services/widget-service';
 
+/**
+ * WidgetItem 组件/功能描述
+ */
 export interface WidgetItem {
   id: string;
   type: string; // e.g., 'clock'
@@ -10,6 +13,9 @@ export interface WidgetItem {
   meta?: Record<string, any>;
 }
 
+/**
+ * AuthState 组件/功能描述
+ */
 export interface AuthState {
   isLoggedIn: boolean;
   user?: any;

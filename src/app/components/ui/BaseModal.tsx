@@ -1,7 +1,13 @@
 import { ReactNode, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
+/**
+ * AnimationType 组件/功能描述
+ */
 export type AnimationType = 'scale' | 'slide-right' | 'slide-left' | 'slide-up' | 'fade';
+/**
+ * ModalPosition 组件/功能描述
+ */
 export type ModalPosition = 'center' | 'right' | 'left' | 'top' | 'bottom' | 'custom';
 
 interface BaseModalProps {
@@ -83,6 +89,9 @@ const getPositionClasses = (position: ModalPosition) => {
   }
 };
 
+/**
+ * BaseModal 组件/功能描述
+ */
 export function BaseModal({
   isOpen,
   onClose,

@@ -3,6 +3,9 @@ import { UserSettings } from './settings-service';
 import { WidgetItemDTO } from './widget-service';
 import { NavCategory, NavShortcut } from './nav-service';
 
+/**
+ * GuestConfig 组件/功能描述
+ */
 export interface GuestConfig {
   settings: UserSettings;
   widgets: WidgetItemDTO[];

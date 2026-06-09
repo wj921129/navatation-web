@@ -103,7 +103,10 @@ export function AiSearchOverlay({ isOpen, onClose, initialQuery, initialEngine }
       if (engine === 'qwen') {
         return `### 🚀 通义千问：现代前端毛玻璃最佳实践\n\n毛玻璃风格（Glassmorphism）非常适合用于高档新标签页及仪表盘设计。以下是基于标准 CSS 与 Tailwind 4 的落地方案：\n\n#### 🛠️ 属性拆解：\n1. **模糊滤镜**: \`backdrop-filter: blur(12px);\` (硬件加速，由浏览器渲染引擎优化)\n2. **透光层**: \`background: rgba(255, 255, 255, 0.08);\`\n3. **光泽边框**: \`border: 1px solid rgba(255, 255, 255, 0.15);\`\n\n\`\`\`css\n/* 纯 CSS 极致版 */\n.glass-effect {\n  background: rgba(15, 15, 25, 0.6);\n  backdrop-filter: blur(20px) saturate(180%);\n  border: 1px solid rgba(255, 255, 255, 0.08);\n  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);\n}\n\`\`\`\n\n#### ⚠️ 性能避坑：\n- 在老旧设备上频繁触发 \`backdrop-filter\` 会导致重绘掉帧。建议添加 \`will-change: transform\` 或在容器上加入 \`transform-gpu\` 以强制启用 GPU 渲染。`;
       }
-      return `### 🍬 豆包AI：超简单的毛玻璃小卡片！\n\n嗨！要做一个好看的毛玻璃效果非常简单哦，我们只需要在容器上套上几层好看的 Tailwind 样式即可：\n\n- ✨ **背景模糊**：用 \`backdrop-blur-lg\` 或 \`backdrop-blur-xl\`。\n- 🎨 **自适应暗色**：白天用 \`bg-white/40\`，夜间用 \`bg-neutral-900/40\`。\n- 📐 **微光边框**：添加 \`border border-white/20\` 就像真的有阳光照在玻璃边缘一样！\n\n**你可以直接复制下面这个组件代码去用哦：**\n\`\`\`jsx\nexport default function GlassCard() {\n  return (\n    <div className="p-6 rounded-3xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 shadow-lg text-slate-100">\n      <span className="text-xs bg-cyan-400/20 text-cyan-300 px-2.5 py-1 rounded-full font-bold">豆包推荐</span>\n      <p className="mt-4 text-sm font-medium">这是一个充满了呼吸感和轻量化设计的毛玻璃卡片！</p>\n    </div>\n  );\n}\n\`\`\``;
+      return `### 🍬 豆包AI：超简单的毛玻璃小卡片！\n\n嗨！要做一个好看的毛玻璃效果非常简单哦，我们只需要在容器上套上几层好看的 Tailwind 样式即可：\n\n- ✨ **背景模糊**：用 \`backdrop-blur-lg\` 或 \`backdrop-blur-xl\`。\n- 🎨 **自适应暗色**：白天用 \`bg-white/40\`，夜间用 \`bg-neutral-900/40\`。\n- 📐 **微光边框**：添加 \`border border-white/20\` 就像真的有阳光照在玻璃边缘一样！\n\n**你可以直接复制下面这个组件代码去用哦：**\n\`\`\`jsx\n/**
+ * GlassCard 组件/功能描述
+ */
+export default function GlassCard() {\n  return (\n    <div className="p-6 rounded-3xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 shadow-lg text-slate-100">\n      <span className="text-xs bg-cyan-400/20 text-cyan-300 px-2.5 py-1 rounded-full font-bold">豆包推荐</span>\n      <p className="mt-4 text-sm font-medium">这是一个充满了呼吸感和轻量化设计的毛玻璃卡片！</p>\n    </div>\n  );\n}\n\`\`\``;
     }
 
     // 话题2: 算法/排序/代码/algorithm

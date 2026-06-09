@@ -27,6 +27,9 @@ interface SettingsDialogProps {
   currentTheme: string;
 }
 
+/**
+ * SettingsDialog 组件/功能描述
+ */
 export function SettingsDialog({ isOpen, onClose, onSave, onPreview, settings, backgroundImage, currentTheme }: SettingsDialogProps) {
   const [draftSettings, setDraftSettings] = useState(settings);
   const [draftBackgroundImage, setDraftBackgroundImage] = useState(backgroundImage);

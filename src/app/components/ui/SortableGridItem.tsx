@@ -9,6 +9,9 @@ interface SortableGridItemProps {
   style?: React.CSSProperties;
 }
 
+/**
+ * SortableGridItem 组件/功能描述
+ */
 export function SortableGridItem({ id, children, className = '', style = {} }: SortableGridItemProps) {
   const {
     attributes,

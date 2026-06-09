@@ -11,6 +11,9 @@ interface PomodoroWidgetProps {
   isDragging?: boolean;
 }
 
+/**
+ * PomodoroWidget 组件/功能描述
+ */
 export default function PomodoroWidget({
   id,
   x,

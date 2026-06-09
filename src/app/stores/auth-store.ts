@@ -3,6 +3,9 @@ import { setTokens, clearTokens, getAccessToken } from '../services/api-client';
 
 type AuthListener = (state: AuthState) => void;
 
+/**
+ * AuthState 组件/功能描述
+ */
 export interface AuthState {
   isLoggedIn: boolean;
   isLoading: boolean;

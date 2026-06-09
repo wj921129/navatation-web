@@ -13,6 +13,9 @@ interface WeatherWidgetProps {
   isDragging?: boolean;
 }
 
+/**
+ * WeatherWidget 组件/功能描述
+ */
 export default function WeatherWidget({ id, style, x, y, isEditMode, onStartDrag, onDelete, isDragging = false }: WeatherWidgetProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 

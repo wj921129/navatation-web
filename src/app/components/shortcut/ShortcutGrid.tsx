@@ -8,6 +8,9 @@ import { GridDragOverlay } from '../ui/GridDragOverlay';
 import { DraggableShortcut } from './DraggableShortcut';
 import { IconMap } from '../ui/IconMap';
 
+/**
+ * ShortcutGridProps 组件/功能描述
+ */
 export interface ShortcutGridProps {
   settings: any;
   isEditMode: boolean;
@@ -22,6 +25,9 @@ export interface ShortcutGridProps {
   setIsAddShortcutOpen: (v: boolean) => void;
 }
 
+/**
+ * ShortcutGrid 组件/功能描述
+ */
 export function ShortcutGrid({
   settings, isEditMode, displayShortcuts, sensors,
   handleDragStartGrid, handleDragEndGrid, handleDragCancelGrid,

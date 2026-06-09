@@ -8,6 +8,9 @@ interface WeatherData {
   city: string;
 }
 
+/**
+ * SimpleWeather 组件/功能描述
+ */
 export default function SimpleWeather() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);

@@ -1,6 +1,12 @@
 // 默认兜底壁纸
+/**
+ * DEFAULT_WALLPAPER 组件/功能描述
+ */
 export const DEFAULT_WALLPAPER = 'https://images.unsplash.com/photo-1598439473183-42c9301db5dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=2400';
 
+/**
+ * DEFAULT_SETTINGS 组件/功能描述
+ */
 export const DEFAULT_SETTINGS = {
   searchBoxWidth: 50,      // 搜索框宽度占比，单位百分比 (%)
   searchBoxHeight: 64,     // 搜索框高度，单位像素 (px)
@@ -16,6 +22,9 @@ export const DEFAULT_SETTINGS = {
 };
 
 // 游客模式默认预设的网址捷径列表
+/**
+ * DEFAULT_SHORTCUTS 组件/功能描述
+ */
 export const DEFAULT_SHORTCUTS = [
   // First row - 9 icons
   { name: 'Google', iconValue: 'Search', iconType: 'BUILTIN', color: '#4285F4', url: 'https://google.com' },

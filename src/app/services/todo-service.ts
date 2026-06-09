@@ -1,5 +1,8 @@
 import { api, ApiResponse } from './api-client';
 
+/**
+ * TodoItem 组件/功能描述
+ */
 export interface TodoItem {
   todoId: string;
   content: string;
@@ -9,6 +12,9 @@ export interface TodoItem {
   completedAt: string | null;
 }
 
+/**
+ * TodoSortItem 组件/功能描述
+ */
 export interface TodoSortItem {
   todoId: string;
   sortOrder: number;

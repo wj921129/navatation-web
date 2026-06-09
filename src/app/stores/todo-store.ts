@@ -2,6 +2,9 @@ import { todoService, TodoItem } from '../services/todo-service';
 
 type TodoListener = (state: TodoState) => void;
 
+/**
+ * TodoState 组件/功能描述
+ */
 export interface TodoState {
   todos: TodoItem[];
   loading: boolean;

@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
+/**
+ * MonthCalendar 组件/功能描述
+ */
 export default function MonthCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
 

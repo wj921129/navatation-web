@@ -1,23 +1,35 @@
 import { api, ApiResponse } from './api-client';
 import { prepareSecureData } from './crypto-service';
 
+/**
+ * LoginRequest 组件/功能描述
+ */
 export interface LoginRequest {
   username: string;
   password: string;
 }
 
+/**
+ * RegisterRequest 组件/功能描述
+ */
 export interface RegisterRequest {
   username: string;
   password: string;
   confirmPassword: string;
 }
 
+/**
+ * ChangePasswordRequest 组件/功能描述
+ */
 export interface ChangePasswordRequest {
   oldPassword: string;
   newPassword: string;
   confirmPassword: string;
 }
 
+/**
+ * UserInfo 组件/功能描述
+ */
 export interface UserInfo {
   userId: string;
   username: string;
@@ -26,6 +38,9 @@ export interface UserInfo {
   createdAt: string;
 }
 
+/**
+ * LoginResult 组件/功能描述
+ */
 export interface LoginResult {
   accessToken: string;
   refreshToken: string;
@@ -34,6 +49,9 @@ export interface LoginResult {
   userInfo: UserInfo;
 }
 
+/**
+ * RegisterResult 组件/功能描述
+ */
 export interface RegisterResult {
   userId: string;
   username: string;

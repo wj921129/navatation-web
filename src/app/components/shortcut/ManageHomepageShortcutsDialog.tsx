@@ -17,6 +17,9 @@ const isValidDomainOrUrl = (input: string): boolean => {
   return domainRegex.test(url);
 };
 
+/**
+ * ManageHomepageShortcutsDialogProps 组件/功能描述
+ */
 export interface ManageHomepageShortcutsDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -30,6 +33,9 @@ export interface ManageHomepageShortcutsDialogProps {
   onSaveComplete?: () => void;
 }
 
+/**
+ * ManageHomepageShortcutsDialog 组件/功能描述
+ */
 export function ManageHomepageShortcutsDialog({
   isOpen,
   onClose,

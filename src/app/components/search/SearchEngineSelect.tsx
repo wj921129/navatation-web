@@ -24,6 +24,9 @@ interface SearchEngineSelectProps {
   onChange: (value: string) => void;
 }
 
+/**
+ * SearchEngineSelect 组件/功能描述
+ */
 export function SearchEngineSelect({ value, onChange }: SearchEngineSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);

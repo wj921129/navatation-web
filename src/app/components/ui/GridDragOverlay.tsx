@@ -10,6 +10,9 @@ interface GridDragOverlayProps {
   children: ReactNode;
 }
 
+/**
+ * GridDragOverlay 组件/功能描述
+ */
 export function GridDragOverlay({ children }: GridDragOverlayProps) {
   return (
     <DragOverlay dropAnimation={dropAnimationConfig}>

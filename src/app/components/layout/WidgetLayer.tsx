@@ -5,6 +5,9 @@ import BreatheWidget from '../widgets/BreatheWidget';
 import CalendarWidget from '../widgets/CalendarWidget';
 import WeatherWidget from '../widgets/WeatherWidget';
 
+/**
+ * WidgetLayerProps 组件/功能描述
+ */
 export interface WidgetLayerProps {
   isEditMode: boolean;
   tempWidgets: any[];
@@ -19,6 +22,9 @@ export interface WidgetLayerProps {
   removeWidget: (id: string) => void;
 }
 
+/**
+ * WidgetLayer 组件/功能描述
+ */
 export function WidgetLayer({
   isEditMode, tempWidgets, widgets, clocksVisible, calendarVisible, weatherVisible,
   activeDraggingId, activeDraggingStyleRef, setActiveDraggingId, setDragOffset, removeWidget

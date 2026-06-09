@@ -12,6 +12,9 @@ interface BreatheWidgetProps {
   isDragging?: boolean;
 }
 
+/**
+ * BreatheWidget 组件/功能描述
+ */
 export default function BreatheWidget({
   id,
   x,

@@ -17,6 +17,9 @@ interface CustomShortcutTabProps {
   iconRadius: number;
 }
 
+/**
+ * CustomShortcutTab 组件/功能描述
+ */
 export function CustomShortcutTab({
   customName,
   setCustomName,

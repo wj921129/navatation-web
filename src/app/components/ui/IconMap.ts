@@ -11,6 +11,9 @@ import {
   MessageCircle, Mail, MessageSquare, Slack, Dribbble, Globe
 } from 'lucide-react';
 
+/**
+ * IconMap 组件/功能描述
+ */
 export const IconMap: Record<string, any> = {
   // Action/UI
   Link, Folder, Search, Settings, User, Plus, Edit3, X, Save, XCircle, CheckSquare,

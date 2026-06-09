@@ -1,5 +1,8 @@
 import { api, ApiResponse } from './api-client';
 
+/**
+ * UserSettings 组件/功能描述
+ */
 export interface UserSettings {
   searchEngine: string;
   backgroundImage: string | null;
@@ -18,6 +21,9 @@ export interface UserSettings {
   theme: string;
 }
 
+/**
+ * WallpaperUploadResult 组件/功能描述
+ */
 export interface WallpaperUploadResult {
   wallpaperUrl: string;
 }

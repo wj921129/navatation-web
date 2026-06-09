@@ -13,6 +13,9 @@ interface CalendarWidgetProps {
   isDragging?: boolean;
 }
 
+/**
+ * CalendarWidget 组件/功能描述
+ */
 export default function CalendarWidget({ id, style, x, y, isEditMode, onStartDrag, onDelete, isDragging = false }: CalendarWidgetProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 

@@ -1,5 +1,8 @@
 import { api, ApiResponse } from './api-client';
 
+/**
+ * WidgetItemDTO 组件/功能描述
+ */
 export interface WidgetItemDTO {
   widgetId?: string;
   type: string;

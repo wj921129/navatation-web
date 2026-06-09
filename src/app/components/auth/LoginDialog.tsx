@@ -9,6 +9,9 @@ interface LoginDialogProps {
   onClose: () => void;
 }
 
+/**
+ * LoginDialog 组件/功能描述
+ */
 export function LoginDialog({ isOpen, onClose }: LoginDialogProps) {
   const [tab, setTab] = useState<'login' | 'register'>('login');
   const [username, setUsername] = useState('');

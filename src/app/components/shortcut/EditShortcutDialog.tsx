@@ -70,6 +70,9 @@ const getDebounceDelay = (input: string): number => {
   return 1000;
 };
 
+/**
+ * EditShortcutDialog 组件/功能描述
+ */
 export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditShortcutDialogProps) {
   const [name, setName] = useState(shortcut.name);
   const [url, setUrl] = useState(shortcut.url);

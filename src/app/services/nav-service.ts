@@ -1,6 +1,9 @@
 import { api, ApiResponse } from './api-client';
 
 // ---- 分类 ----
+/**
+ * NavCategory 组件/功能描述
+ */
 export interface NavCategory {
   categoryId: string;
   name: string;
@@ -8,14 +11,23 @@ export interface NavCategory {
   shortcutCount: number;
 }
 
+/**
+ * CreateCategoryRequest 组件/功能描述
+ */
 export interface CreateCategoryRequest {
   name: string;
   sortOrder: number;
 }
 
 // ---- 快捷方式 ----
+/**
+ * IconType 组件/功能描述
+ */
 export type IconType = 'BUILTIN' | 'FAVICON' | 'CUSTOM_URL' | 'CUSTOM_UPLOAD';
 
+/**
+ * NavShortcut 组件/功能描述
+ */
 export interface NavShortcut {
   shortcutId: string;
   categoryId: string;
@@ -28,6 +40,9 @@ export interface NavShortcut {
   createdAt: string;
 }
 
+/**
+ * CreateShortcutItem 组件/功能描述
+ */
 export interface CreateShortcutItem {
   name: string;
   url: string;
@@ -36,11 +51,17 @@ export interface CreateShortcutItem {
   iconColor?: string;
 }
 
+/**
+ * BatchCreateRequest 组件/功能描述
+ */
 export interface BatchCreateRequest {
   categoryId: string;
   shortcuts: CreateShortcutItem[];
 }
 
+/**
+ * UpdateShortcutRequest 组件/功能描述
+ */
 export interface UpdateShortcutRequest {
   name: string;
   url: string;
@@ -49,12 +70,18 @@ export interface UpdateShortcutRequest {
   iconColor?: string;
 }
 
+/**
+ * SortItem 组件/功能描述
+ */
 export interface SortItem {
   shortcutId: string;
   sortOrder: number;
 }
 
 // ---- 推荐分类 ----
+/**
+ * RecommendSite 组件/功能描述
+ */
 export interface RecommendSite {
   siteId: string;
   categoryId: string;
@@ -66,6 +93,9 @@ export interface RecommendSite {
   sortOrder: number;
 }
 
+/**
+ * RecommendCategory 组件/功能描述
+ */
 export interface RecommendCategory {
   categoryId: string;
   categoryName: string;
@@ -74,12 +104,18 @@ export interface RecommendCategory {
   sites: RecommendSite[];
 }
 
+/**
+ * RecommendCategoryRequest 组件/功能描述
+ */
 export interface RecommendCategoryRequest {
   name: string;
   icon: string;
   sortOrder: number;
 }
 
+/**
+ * RecommendSiteRequest 组件/功能描述
+ */
 export interface RecommendSiteRequest {
   categoryId: string;
   name: string;
@@ -91,6 +127,9 @@ export interface RecommendSiteRequest {
 }
 
 // ---- Favicon ----
+/**
+ * FaviconResult 组件/功能描述
+ */
 export interface FaviconResult {
   faviconUrl: string;
   sourceUrl: string;

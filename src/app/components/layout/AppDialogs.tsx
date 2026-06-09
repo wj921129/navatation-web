@@ -8,6 +8,9 @@ import { EditShortcutDialog } from '../shortcut/EditShortcutDialog';
 import { ManageHomepageShortcutsDialog } from '../shortcut/ManageHomepageShortcutsDialog';
 import { AiSearchOverlay } from '../search/AiSearchOverlay';
 
+/**
+ * AppDialogsProps 组件/功能描述
+ */
 export interface AppDialogsProps {
   isSettingsOpen: boolean;
   handleCloseSettings: () => void;
@@ -47,6 +50,9 @@ export interface AppDialogsProps {
   aiSearchEngine: string;
 }
 
+/**
+ * AppDialogs 组件/功能描述
+ */
 export function AppDialogs({
   isSettingsOpen, handleCloseSettings, handleSaveSettings, handlePreviewSettings, settings, backgroundImage, theme,
   isLoginOpen, setIsLoginOpen,

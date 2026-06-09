@@ -1,5 +1,8 @@
 import { Video, Cpu, Code, ShoppingBag, Newspaper, Gamepad2, Music as MusicIcon, BookOpen, Briefcase, LucideIcon } from 'lucide-react';
 
+/**
+ * RecommendedSite 组件/功能描述
+ */
 export interface RecommendedSite {
   siteId?: string;
   name: string;
@@ -11,6 +14,9 @@ export interface RecommendedSite {
   dragId?: string;
 }
 
+/**
+ * CategoryGroup 组件/功能描述
+ */
 export interface CategoryGroup {
   categoryId?: string;
   category: string;
