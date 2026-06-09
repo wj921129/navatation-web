@@ -1352,7 +1352,8 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                             </div>
                             <Droppable droppableId={catIdx.toString()} direction="horizontal">
                               {(provided) => (
-                                <div ref={provided.innerRef} {...provided.droppableProps} className="grid grid-cols-8 gap-6">
+                                <div ref={provided.innerRef} {...provided.droppableProps} className="flex flex-row items-center gap-6 overflow-x-auto pb-4 scrollbar-none">
+                                  {/* 将原本的 grid-cols-8 替换为水平 flex 滚动，以适配 @hello-pangea/dnd 的一维水平拖拽，避免折行导致的异常跳跃问题 */}
                                   {category.sites.map((site: any, siteIdx) => (
                                     <Draggable key={site.dragId!} draggableId={site.dragId!} index={siteIdx}>
                                       {(provided) => (
@@ -1360,9 +1361,10 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                           ref={provided.innerRef} 
                                           {...provided.draggableProps} 
                                           {...provided.dragHandleProps}
-                                          className="relative group/item"
+                                          className="relative group/item flex-shrink-0"
                                           style={provided.draggableProps.style}
                                         >
+                                          {/* 使用 flex-shrink-0 保证图标在横向 flex 容器中不被挤压变形 */}
                                           <button
                                             onClick={() => {
                                               handleAddRecommendedToPending(site);
@@ -1419,7 +1421,8 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                     </Draggable>
                                   ))}
                                   {userRole === 'ADMIN' && (
-                                    <div className="relative group/item">
+                                    <div className="relative group/item flex-shrink-0">
+                                      {/* 在水平 flex 容器中，新增网址按钮同样需要 flex-shrink-0 避免缩水 */}
                                       <button
                                       onClick={() => {
                                         if (!category.categoryId) {
