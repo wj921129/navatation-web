@@ -1067,42 +1067,50 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                   <DragDropContext onDragEnd={handleDragEnd}>
                   <div className="p-6 space-y-8 relative">
                     {userRole === 'ADMIN' && (
-                      <div className="absolute top-4 right-4 flex items-center gap-3">
-                        <button
-                          onClick={handleSaveAllCategories}
-                          className="flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-full text-sm font-medium transition-all shadow-sm cursor-pointer"
-                        >
-                          <Check className="w-4 h-4" /> 保存全部更改
-                        </button>
-                        {isBatchMode && (
+                      <>
+                        {/* 左侧：返回预览模式 / 批量管理模式 切换按钮 */}
+                        <div className="absolute top-4 left-6 flex items-center gap-3">
                           <button
-                            onClick={handleBatchRefreshAllIcons}
-                            disabled={isAllRefreshing}
-                            className="flex items-center gap-1.5 px-4 py-2 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-800 rounded-full text-sm font-medium transition-all cursor-pointer disabled:opacity-50"
+                            onClick={() => setIsBatchMode(!isBatchMode)}
+                            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all cursor-pointer ${
+                              isBatchMode
+                                ? 'bg-blue-600 text-white shadow-md'
+                                : 'bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-700 dark:text-gray-300'
+                            }`}
                           >
-                            <RotateCw className={`w-4 h-4 ${isAllRefreshing ? 'animate-spin' : ''}`} />
-                            {isAllRefreshing ? '正在刷新全部图标...' : '一键刷新全部图标'}
+                            {isBatchMode ? '返回预览模式' : '批量管理模式'}
                           </button>
-                        )}
-                        <button
-                          onClick={() => setIsBatchMode(!isBatchMode)}
-                          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all cursor-pointer ${
-                            isBatchMode
-                              ? 'bg-blue-600 text-white shadow-md'
-                              : 'bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-700 dark:text-gray-300'
-                          }`}
-                        >
-                          {isBatchMode ? '返回预览模式' : '批量管理模式'}
-                        </button>
-                        {!isBatchMode && (
-                          <button
-                            onClick={() => setEditingCategory({ category: '', iconValue: 'Folder', sortOrder: categories.length })}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm cursor-pointer"
-                          >
-                            <Plus className="w-4 h-4" /> 新增分类
-                          </button>
-                        )}
-                      </div>
+                        </div>
+
+                        {/* 右侧：保存全部更改 / 刷新 / 新增分类 操作按钮 */}
+                        <div className="absolute top-4 right-6 flex items-center gap-3">
+                          {isBatchMode ? (
+                            <>
+                              <button
+                                onClick={handleSaveAllCategories}
+                                className="flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-full text-sm font-medium transition-all shadow-sm cursor-pointer"
+                              >
+                                <Check className="w-4 h-4" /> 保存全部更改
+                              </button>
+                              <button
+                                onClick={handleBatchRefreshAllIcons}
+                                disabled={isAllRefreshing}
+                                className="flex items-center gap-1.5 px-4 py-2 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-800 rounded-full text-sm font-medium transition-all cursor-pointer disabled:opacity-50"
+                              >
+                                <RotateCw className={`w-4 h-4 ${isAllRefreshing ? 'animate-spin' : ''}`} />
+                                {isAllRefreshing ? '正在刷新全部图标...' : '一键刷新全部图标'}
+                              </button>
+                            </>
+                          ) : (
+                            <button
+                              onClick={() => setEditingCategory({ category: '', iconValue: 'Folder', sortOrder: categories.length })}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm cursor-pointer"
+                            >
+                              <Plus className="w-4 h-4" /> 新增分类
+                            </button>
+                          )}
+                        </div>
+                      </>
                     )}
 
                     {isBatchMode ? (
