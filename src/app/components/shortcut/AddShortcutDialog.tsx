@@ -770,10 +770,10 @@ export function AddShortcutDialog({
         return navService.batchSaveRecommendSites(cat.categoryId, { sites: formattedSites });
       }));
       loadRecommended();
-      onClose();
+      toast('✅ 已保存', { duration: 2000 });
     } catch (err) {
       console.error('Batch save all sites error:', err);
-      toast.warning('保存时发生异常，请重试');
+      toast('❌ 保存失败', { duration: 2000 });
     }
   };
 
@@ -810,13 +810,13 @@ export function AddShortcutDialog({
       const res = await navService.batchSaveRecommendSites(categoryId, { sites: formattedSites });
       if (res.code === 200) {
         loadRecommended();
-        onClose();
+        toast('✅ 已保存', { duration: 2000 });
       } else {
-        toast.warning(res.message || '保存失败');
+        toast('❌ 保存失败', { duration: 2000 });
       }
     } catch (err) {
       console.error('Batch save sites error:', err);
-      toast.warning('批量保存时发生异常，请重试');
+      toast('❌ 保存失败', { duration: 2000 });
     }
   };
 
