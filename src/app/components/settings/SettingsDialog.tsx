@@ -30,7 +30,8 @@ export function SettingsDialog({ isOpen, onClose, onSave, onPreview, settings, b
   const [draftTheme, setDraftTheme] = useState(currentTheme);
   const [urlInput, setUrlInput] = useState('');
 
-  // 每次打开弹窗时，利用最新的全局生效状态重置本地草稿
+  // 仅在弹窗打开的一瞬间，利用最新的全局生效状态重置本地草稿。
+  // 避免在弹窗处于打开状态下（如拖动滑块时）由于外部 settings 重绘导致本地草稿状态被意外覆盖重置。
   useEffect(() => {
     if (isOpen) {
       setDraftSettings(settings);
@@ -38,7 +39,7 @@ export function SettingsDialog({ isOpen, onClose, onSave, onPreview, settings, b
       setDraftTheme(currentTheme);
       setUrlInput('');
     }
-  }, [isOpen, settings, backgroundImage, currentTheme]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

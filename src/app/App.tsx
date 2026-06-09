@@ -122,7 +122,9 @@ export default function App() {
 
   const {
     widgets,
+    setWidgets, // 解构出 setWidgets 供依赖项使用，避免直接依赖整个 widgetsData 对象
     tempWidgets,
+    setTempWidgets, // 解构出 setTempWidgets 供依赖项使用，避免直接依赖整个 widgetsData 对象
     addWidget,
     removeWidget,
     updateWidgetPosition,
@@ -168,6 +170,7 @@ export default function App() {
     backgroundImage,
     setBackgroundImage,
     settings,
+    setSettings, // 解构出 setSettings 供依赖项使用，避免直接依赖整个 settingsData 对象
     isSettingsOpen,
     setIsSettingsOpen,
     handleOpenSettings,
@@ -713,12 +716,12 @@ export default function App() {
               y: Number(w.y),
               meta: w.meta || {},
             }));
-            widgetsData.setWidgets(loadedW);
-            widgetsData.setTempWidgets(loadedW);
+            setWidgets(loadedW);
+            setTempWidgets(loadedW);
           }
 
           if (config.settings) {
-            settingsData.setSettings(config.settings);
+            setSettings(config.settings);
             if (config.settings.backgroundImage) {
               setBackgroundImage(config.settings.backgroundImage);
             }
@@ -728,7 +731,8 @@ export default function App() {
         console.error('Failed to load guest config:', err);
       });
     }
-  }, [authState.isLoggedIn, setShortcuts, setTempShortcuts, widgetsData, settingsData, setBackgroundImage]);
+    // 细化依赖项，不直接依赖 widgetsData 和 settingsData 对象引用，防止每次渲染由于对象引用改变而重复拉取游客配置
+  }, [authState.isLoggedIn, setShortcuts, setTempShortcuts, setWidgets, setTempWidgets, setSettings, setBackgroundImage]);
 
   const handleSearchEngineChange = (engine: string) => {
     setSearchEngine(engine);
