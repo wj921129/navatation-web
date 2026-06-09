@@ -14,7 +14,6 @@ export function useCustomShortcut(
   const [customName, setCustomName] = useState('');
   const [customUrl, setCustomUrl] = useState('');
   const [customIconUrl, setCustomIconUrl] = useState('');
-  const [customIconFile, setCustomIconFile] = useState<File | null>(null);
   const [faviconStatus, setFaviconStatus] = useState<'idle' | 'loading' | 'detected' | 'error' | 'uploading'>('idle');
   const [iconFromUpload, setIconFromUpload] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -60,7 +59,6 @@ export function useCustomShortcut(
         const newIcons = [...prev, iconUrl];
         if (newIcons.length === 1) {
           setCustomIconUrl(iconUrl);
-          setCustomIconFile(null);
           setFaviconStatus('detected');
         }
         return newIcons;
@@ -167,7 +165,6 @@ export function useCustomShortcut(
     setCustomName('');
     setCustomUrl('');
     setCustomIconUrl('');
-    setCustomIconFile(null);
     setFaviconStatus('idle');
     setIconFromUpload(false);
     setUploadError(null);

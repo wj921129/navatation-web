@@ -20,24 +20,6 @@ interface EditShortcutDialogProps {
   };
 }
 
-import { X, Upload, Loader2, Check, Link, RotateCw } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
-import { navService } from '../../services/nav-service';
-import { BaseModal } from '../ui/BaseModal';
-
-interface EditShortcutDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (shortcut: { name: string; url: string; iconType: string; iconValue: string }) => void;
-  shortcut: {
-    id?: number | string;
-    name: string;
-    url: string;
-    iconType?: string;
-    iconValue?: string;
-  };
-}
-
 
 /**
  * 校验输入是否为合法且完整的域名或 URL。

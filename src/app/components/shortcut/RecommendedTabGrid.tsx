@@ -66,12 +66,12 @@ export function RecommendedTabGrid({
       let destCatIdx = -1, destSiteIdx = -1;
       
       for (let i = 0; i < copy.length; i++) {
-        const sIdx = copy[i].sites.findIndex(s => s.dragId === active.id);
+        const sIdx = copy[i].sites.findIndex((s: any) => s.dragId === active.id);
         if (sIdx !== -1) {
           sourceCatIdx = i;
           sourceSiteIdx = sIdx;
         }
-        const oIdx = copy[i].sites.findIndex(s => s.dragId === over.id);
+        const oIdx = copy[i].sites.findIndex((s: any) => s.dragId === over.id);
         if (oIdx !== -1) {
           destCatIdx = i;
           destSiteIdx = oIdx;

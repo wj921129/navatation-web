@@ -11,7 +11,6 @@ import { useFaviconDetector } from '../../hooks/useFaviconDetector';
 
 export function useBatchCategory(
   categories: CategoryGroup[],
-  setCategories: React.Dispatch<React.SetStateAction<CategoryGroup[]>>,
   loadRecommended: () => void
 ) {
   const [isBatchMode, setIsBatchMode] = useState(false);
@@ -190,7 +189,9 @@ export function useBatchCategory(
     batchEditData,
     setBatchEditData,
     rowLoadingStatus,
+    setRowLoadingStatus,
     rowDetectedIcons,
+    setRowDetectedIcons,
     isAllRefreshing,
     rowFileInputRef,
     updateBatchEditSite,

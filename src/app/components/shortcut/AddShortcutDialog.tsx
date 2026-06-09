@@ -92,7 +92,7 @@ export function AddShortcutDialog({
     });
   };
 
-  const batchCategoryControls = useBatchCategory(categories, setCategories, loadRecommended);
+  const batchCategoryControls = useBatchCategory(categories, loadRecommended);
   const { isBatchMode, setIsBatchMode, batchEditData, setBatchEditData } = batchCategoryControls;
 
   useEffect(() => {
