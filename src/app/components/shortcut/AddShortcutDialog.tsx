@@ -1,5 +1,6 @@
 import { X, Link, Upload, Video, Cpu, Code, ShoppingBag, Newspaper, Gamepad2, Music as MusicIcon, BookOpen, Camera, Briefcase, Trash2, Loader2, Check, RotateCw, Plus, Edit3, GripVertical, Grid, List, FolderPlus } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { toast } from 'sonner';
 import { EditShortcutDialog } from './EditShortcutDialog';
 import { IconMap } from '../ui/IconMap';
 import { BaseModal } from '../ui/BaseModal';
@@ -251,7 +252,7 @@ export function AddShortcutDialog({
     const site = batchEditData[catIdx].sites[siteIdx];
     const url = site.url.trim();
     if (!url || !isValidDomainOrUrl(url)) {
-      alert('请输入合法且完整的网址链接再进行检测');
+      toast.warning('请输入合法且完整的网址链接再进行检测');
       return;
     }
     const rowKey = `${catIdx}-${siteIdx}`;
@@ -325,7 +326,7 @@ export function AddShortcutDialog({
     const category = batchEditData[catIdx];
     const validSites = category.sites.filter(site => site.url.trim() && isValidDomainOrUrl(site.url.trim()));
     if (validSites.length === 0) {
-      alert('当前分类下没有需要刷新图标的有效网址（网址域名格式需正确）');
+      toast.warning('当前分类下没有需要刷新图标的有效网址（网址域名格式需正确）');
       return;
     }
 
@@ -455,7 +456,7 @@ export function AddShortcutDialog({
     });
 
     if (tasks.length === 0) {
-      alert('当前批量管理中没有包含有效链接的网址');
+      toast.warning('当前批量管理中没有包含有效链接的网址');
       return;
     }
 
@@ -587,11 +588,11 @@ export function AddShortcutDialog({
         });
         setRowDetectedIcons(prev => ({ ...prev, [rowKey]: [res.data.iconUrl] }));
       } else {
-        alert(res.message || '上传文件失败');
+        toast.warning(res.message || '上传文件失败');
       }
     } catch (err) {
       console.error('Row upload icon error:', err);
-      alert('上传发生异常');
+      toast.warning('上传发生异常');
     } finally {
       setRowLoadingStatus(prev => ({ ...prev, [rowKey]: false }));
       activeUploadRow.current = null;
@@ -667,7 +668,7 @@ export function AddShortcutDialog({
         for (let i = 0; i < cat.sites.length; i++) {
           const site = cat.sites[i];
           if (!site.name.trim() || !site.url.trim()) {
-            alert(`分类【${cat.category}】下的部分网址名称或链接为空，请补充完整再保存。`);
+            toast.warning(`分类【${cat.category}】下的部分网址名称或链接为空，请补充完整再保存。`);
             return;
           }
         }
@@ -689,14 +690,14 @@ export function AddShortcutDialog({
       onClose();
     } catch (err) {
       console.error('Batch save all sites error:', err);
-      alert('保存时发生异常，请重试');
+      toast.warning('保存时发生异常，请重试');
     }
   };
 
   const handleSaveCategorySites = async (categoryGroup: CategoryGroup) => {
     const categoryId = categoryGroup.categoryId;
     if (!categoryId) {
-      alert('分类不存在或未在数据库建立，请先保存该分类。');
+      toast.warning('分类不存在或未在数据库建立，请先保存该分类。');
       return;
     }
     
@@ -704,11 +705,11 @@ export function AddShortcutDialog({
     for (let i = 0; i < sites.length; i++) {
       const site = sites[i];
       if (!site.name.trim()) {
-        alert(`第 ${i + 1} 行网站名称不能为空`);
+        toast.warning(`第 ${i + 1} 行网站名称不能为空`);
         return;
       }
       if (!site.url.trim()) {
-        alert(`第 ${i + 1} 行网址链接不能为空`);
+        toast.warning(`第 ${i + 1} 行网址链接不能为空`);
         return;
       }
     }
@@ -728,11 +729,11 @@ export function AddShortcutDialog({
         loadRecommended();
         onClose();
       } else {
-        alert(res.message || '保存失败');
+        toast.warning(res.message || '保存失败');
       }
     } catch (err) {
       console.error('Batch save sites error:', err);
-      alert('批量保存时发生异常，请重试');
+      toast.warning('批量保存时发生异常，请重试');
     }
   };
 
@@ -1404,7 +1405,7 @@ export function AddShortcutDialog({
                                 <div className="flex items-center gap-2">
                                   <button onClick={() => {
                                     if (!category.categoryId) {
-                                      alert('当前为系统内置推荐分类，不可直接编辑。请先在数据库中建立。');
+                                      toast.warning('当前为系统内置推荐分类，不可直接编辑。请先在数据库中建立。');
                                       return;
                                     }
                                     setEditingCategory({ ...category })
@@ -1415,7 +1416,7 @@ export function AddShortcutDialog({
                                   }} className="p-1 text-gray-400 hover:text-red-500 rounded"><Trash2 className="w-4 h-4" /></button>
                                   <button onClick={() => {
                                     if (!category.categoryId) {
-                                      alert('请先编辑并保存该分类到数据库，然后才能新增网址。');
+                                      toast.warning('请先编辑并保存该分类到数据库，然后才能新增网址。');
                                       return;
                                     }
                                     setEditingSite({ categoryId: category.categoryId, iconType: 'FAVICON', iconColor: '#fff' })
@@ -1459,7 +1460,7 @@ export function AddShortcutDialog({
                                   <button
                                     onClick={() => {
                                       if (!category.categoryId) {
-                                        alert('系统内置推荐分类不可添加网址。请先保存该分类到数据库，或新建自定义分类。');
+                                        toast.warning('系统内置推荐分类不可添加网址。请先保存该分类到数据库，或新建自定义分类。');
                                         return;
                                       }
                                       setEditingSite({ categoryId: category.categoryId, name: '', url: '', iconType: 'FAVICON', iconValue: '', iconColor: '#fff' })
@@ -1750,7 +1751,7 @@ export function AddShortcutDialog({
                   setEditingCategory(null); 
                 }).catch(err => {
                   console.error('保存分类失败', err);
-                  alert('保存分类失败，请重试');
+                  toast.warning('保存分类失败，请重试');
                 });
               }} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">保存</button>
             </div>
@@ -1768,7 +1769,7 @@ export function AddShortcutDialog({
         }}
           onSave={(shortcut) => {
             if (!editingSite.categoryId) {
-              alert('分类ID丢失，请刷新页面重试');
+              toast.warning('分类ID丢失，请刷新页面重试');
               return;
             }
             
@@ -1936,7 +1937,7 @@ function DraggableRecommendSite({
           <button onClick={(e) => { 
             e.stopPropagation(); 
             if (!category.categoryId) {
-              alert('系统内置推荐网址不可直接编辑。请通过右上角"新增分类"建立数据库数据后再添加。');
+              toast.warning('系统内置推荐网址不可直接编辑。请通过右上角"新增分类"建立数据库数据后再添加。');
               return;
             }
             setEditingSite({ ...site, iconColor: site.iconColor || site.color, categoryId: category.categoryId }); 

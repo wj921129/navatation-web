@@ -1,4 +1,5 @@
 import { X, Link, Upload, Shuffle, Sun, Moon, Monitor } from 'lucide-react';
+import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
 import { settingsService } from '../../services/settings-service';
 import { BaseModal } from '../ui/BaseModal';
@@ -70,11 +71,11 @@ export function SettingsDialog({ isOpen, onClose, onSave, onPreview, settings, b
         setDraftBackgroundImage(newBg);
         onPreview?.(draftSettings, newBg, draftTheme);
       } else {
-        alert(res.message || '上传壁纸失败');
+        toast.error(res.message || '上传壁纸失败');
       }
     } catch (err: any) {
       console.error('上传壁纸出错:', err);
-      alert(err.message || '上传壁纸出错，请稍后重试');
+      toast.error(err.message || '上传壁纸出错，请稍后重试');
     }
   };
 
@@ -86,11 +87,11 @@ export function SettingsDialog({ isOpen, onClose, onSave, onPreview, settings, b
         setDraftBackgroundImage(newBg);
         onPreview?.(draftSettings, newBg, draftTheme);
       } else {
-        alert(res.message || '获取随机壁纸失败');
+        toast.error(res.message || '获取随机壁纸失败');
       }
     } catch (err: any) {
       console.error('获取随机壁纸出错:', err);
-      alert(err.message || '获取随机壁纸出错，请稍后重试');
+      toast.error(err.message || '获取随机壁纸出错，请稍后重试');
     }
   };
 

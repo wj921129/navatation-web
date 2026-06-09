@@ -1,6 +1,8 @@
 /** 后端 API 根路径，优先读取环境变量，回退到本地开发地址 */
 const API_BASE = import.meta.env.VITE_API_BASE || '/api/v1';
 
+import { toast } from 'sonner';
+
 interface ApiResponse<T = any> {
   code: number;
   message: string;
@@ -134,7 +136,9 @@ async function request<T = any>(
 
   if (!res.ok) {
     const errorBody = await res.json().catch(() => ({}));
-    throw new Error((errorBody as any).message || `请求失败 (${res.status})`);
+    const errMsg = (errorBody as any).message || `请求失败 (${res.status})`;
+    toast.error(errMsg);
+    throw new Error(errMsg);
   }
 
   const json = await res.json();
@@ -142,7 +146,7 @@ async function request<T = any>(
   // 封装前端处理后端统一响应码逻辑，复用全局
   if (json && typeof json.code === 'number' && json.code !== 200) {
     const errMsg = json.message || `业务异常 (${json.code})`;
-    alert(errMsg); // 页面统一提示异常
+    toast.error(errMsg); // 页面统一提示异常
     throw new Error(errMsg);
   }
 
