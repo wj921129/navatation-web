@@ -2,6 +2,7 @@ import { X, Link, Upload, Video, Cpu, Code, ShoppingBag, Newspaper, Gamepad2, Mu
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { EditShortcutDialog } from './EditShortcutDialog';
 import { IconMap } from '../ui/IconMap';
+import { BaseModal } from '../ui/BaseModal';
 import { useState, useEffect, useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { navService, IconType } from '../../services/nav-service';
@@ -1025,13 +1026,15 @@ export function AddShortcutDialog({
 
   return (
     <>
-      <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
+      <BaseModal
+        isOpen={isOpen}
+        onClose={onClose}
+        animationType="scale"
+        position="center"
+        containerClassName="relative flex items-stretch h-[90%] w-[85%] max-w-[1400px]"
+        overlayClassName="bg-black/50 backdrop-blur-sm"
+        zIndex={50}
       >
-        <div 
-          className="relative flex items-stretch"
-          style={{ width: '85%', height: '90%', maxWidth: '1400px' }}
-        >
           {/* 左侧悬浮功能面板 (Dock) - 仅在推荐页签的管理员模式下显示 */}
           {userRole === 'ADMIN' && activeTab === 'recommended' && (
             <div className="absolute top-1/2 -translate-y-1/2 -left-[80px] bg-card/95 backdrop-blur-xl border border-border/80 rounded-full p-3 flex flex-col items-center gap-4 shadow-2xl z-50 animate-in fade-in slide-in-from-left-8 duration-300">
@@ -1708,14 +1711,19 @@ export function AddShortcutDialog({
             </div>
           </div>
         </div>
-        </div>
-      </div>
+      </BaseModal>
 
       {/* Admin Modals */}
-      {editingCategory && (
-        <div className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm flex items-center justify-center" onClick={() => setEditingCategory(null)}>
-          <div className="bg-card p-6 rounded-2xl w-96 shadow-xl" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-medium mb-4">{editingCategory.categoryId ? '编辑分类' : '新增分类'}</h3>
+      <BaseModal
+        isOpen={!!editingCategory}
+        onClose={() => setEditingCategory(null)}
+        animationType="scale"
+        position="center"
+        containerClassName="bg-card p-6 rounded-2xl w-96 shadow-xl"
+        overlayClassName="bg-black/50 backdrop-blur-sm"
+        zIndex={60}
+      >
+        <h3 className="text-lg font-medium mb-4">{editingCategory?.categoryId ? '编辑分类' : '新增分类'}</h3>
             <div className="space-y-4">
               <div>
                 <label className="text-sm text-gray-500 mb-1 block">分类名称</label>
@@ -1746,9 +1754,7 @@ export function AddShortcutDialog({
                 });
               }} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">保存</button>
             </div>
-          </div>
-        </div>
-      )}
+      </BaseModal>
 
       {editingSite && (
         <EditShortcutDialog

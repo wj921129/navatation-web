@@ -1,6 +1,7 @@
 import { X, Link, Upload, Shuffle, Sun, Moon, Monitor } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { settingsService } from '../../services/settings-service';
+import { BaseModal } from '../ui/BaseModal';
 
 interface SettingsDialogProps {
   isOpen: boolean;
@@ -94,13 +95,16 @@ export function SettingsDialog({ isOpen, onClose, onSave, onPreview, settings, b
   };
 
   return (
-    <>
-      <div
-        className="fixed inset-0 bg-black/20 dark:bg-black/40 z-40"
-        onClick={onClose}
-      />
-      <div className="fixed top-0 right-0 h-full w-96 bg-white/95 dark:bg-card/95 backdrop-blur-xl shadow-2xl z-50 overflow-y-auto text-gray-800 dark:text-gray-100 transition-colors duration-300">
-        <div className="sticky top-0 bg-white/95 dark:bg-card/95 backdrop-blur-xl border-b border-gray-200 dark:border-border px-4 py-3 flex items-center justify-between transition-colors duration-300">
+    <BaseModal
+      isOpen={isOpen}
+      onClose={onClose}
+      animationType="slide-right"
+      position="right"
+      containerClassName="h-full w-96 bg-white/95 dark:bg-card/95 backdrop-blur-xl shadow-2xl overflow-y-auto text-gray-800 dark:text-gray-100 transition-colors duration-300"
+      overlayClassName="bg-black/20 dark:bg-black/40"
+      zIndex={50}
+    >
+      <div className="sticky top-0 bg-white/95 dark:bg-card/95 backdrop-blur-xl border-b border-gray-200 dark:border-border px-4 py-3 flex items-center justify-between transition-colors duration-300 z-10">
           <h2 className="text-base text-gray-800 dark:text-gray-200 font-medium">设置</h2>
           <button
             onClick={onClose}
@@ -381,7 +385,7 @@ export function SettingsDialog({ isOpen, onClose, onSave, onPreview, settings, b
           </div>
         </div>
 
-        <div className="sticky bottom-0 bg-white/95 dark:bg-card/95 backdrop-blur-xl border-t border-gray-200 dark:border-border p-4 transition-colors duration-300">
+        <div className="sticky bottom-0 bg-white/95 dark:bg-card/95 backdrop-blur-xl border-t border-gray-200 dark:border-border p-4 transition-colors duration-300 z-10">
           <button
             onClick={() => onSave(draftSettings, draftBackgroundImage, draftTheme)}
             className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors text-sm font-medium cursor-pointer"
@@ -389,7 +393,6 @@ export function SettingsDialog({ isOpen, onClose, onSave, onPreview, settings, b
             保存
           </button>
         </div>
-      </div>
-    </>
+    </BaseModal>
   );
 }

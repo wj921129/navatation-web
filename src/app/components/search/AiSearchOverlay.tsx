@@ -3,6 +3,7 @@ import {
   X, Sparkles, Send, Copy, RefreshCw, Layers, Layout, ChevronRight, 
   Check, Play, MessageSquare, ArrowRight, Zap, CheckCircle2, ShieldAlert
 } from 'lucide-react';
+import { BaseModal } from '../ui/BaseModal';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -252,7 +253,15 @@ export function AiSearchOverlay({ isOpen, onClose, initialQuery, initialEngine }
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-[#08080f]/90 dark:bg-[#030308]/96 text-slate-200 overflow-hidden font-sans backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-200">
+    <BaseModal
+      isOpen={isOpen}
+      onClose={onClose}
+      animationType="scale"
+      position="center"
+      containerClassName="flex flex-col bg-[#08080f]/90 dark:bg-[#030308]/96 text-slate-200 overflow-hidden font-sans backdrop-blur-2xl w-full h-full"
+      overlayClassName="bg-transparent"
+      zIndex={50}
+    >
       
       {/* 头部导航控制栏 */}
       <header className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-white/5 backdrop-blur-md">
@@ -555,6 +564,6 @@ export function AiSearchOverlay({ isOpen, onClose, initialQuery, initialEngine }
         </form>
       </footer>
 
-    </div>
+    </BaseModal>
   );
 }

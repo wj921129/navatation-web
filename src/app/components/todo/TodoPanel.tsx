@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { TodoItem } from '../../services/todo-service';
 import { authStore } from '../../stores/auth-store';
 import { todoStore } from '../../stores/todo-store';
+import { BaseModal } from '../ui/BaseModal';
 
 interface TodoPanelProps {
   isOpen: boolean;
@@ -156,15 +157,17 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
   const hasCompleted = completedCount > 0;
 
   return (
-    <>
-      {/* 背景遮罩 */}
-      <div
-        className="fixed inset-0 bg-black/20 dark:bg-black/40 z-40"
-        onClick={onClose}
-      />
-
+    <BaseModal
+      isOpen={isOpen}
+      onClose={onClose}
+      animationType="slide-right"
+      position="right"
+      containerClassName="h-full w-96 glass-panel shadow-2xl flex flex-col cursor-default text-text-primary transition-colors duration-300"
+      overlayClassName="bg-black/20 dark:bg-black/40"
+      zIndex={50}
+    >
       {/* 左侧面板 */}
-      <div className="fixed top-0 right-0 h-full w-96 glass-panel shadow-2xl z-50 flex flex-col cursor-default text-text-primary transition-colors duration-300">
+      <>
         {/* 面板头部 */}
         <div className="sticky top-0 bg-widget-bg backdrop-blur-xl border-b border-widget-border px-4 py-3 flex items-center justify-between transition-colors duration-300">
           <h2 className="text-base text-text-primary flex items-center gap-2 font-medium">
@@ -413,7 +416,7 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
             </button>
           </div>
         ) : null}
-      </div>
-    </>
+      </>
+    </BaseModal>
   );
 }
