@@ -1,4 +1,4 @@
-import { X, Link, Upload, Video, Cpu, Code, ShoppingBag, Newspaper, Gamepad2, Music as MusicIcon, BookOpen, Camera, Briefcase, Trash2, Loader2, Check, RotateCw, Plus, Edit3, GripVertical } from 'lucide-react';
+import { X, Link, Upload, Video, Cpu, Code, ShoppingBag, Newspaper, Gamepad2, Music as MusicIcon, BookOpen, Camera, Briefcase, Trash2, Loader2, Check, RotateCw, Plus, Edit3, GripVertical, Grid, List } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { EditShortcutDialog } from './EditShortcutDialog';
 import { IconMap } from '../ui/IconMap';
@@ -1093,17 +1093,27 @@ export function AddShortcutDialog({
                   <div className="p-6 space-y-8 relative">
                     {userRole === 'ADMIN' && (
                       <>
-                        {/* 左侧：返回预览模式 / 批量管理模式 切换按钮 */}
-                        <div className="absolute top-4 left-6 flex items-center gap-3">
+                        {/* 左侧：图标管理 / 列表管理 切换按钮 */}
+                        <div className="absolute top-4 left-6 flex items-center bg-muted/30 p-1 rounded-full border border-border shadow-sm">
                           <button
-                            onClick={() => setIsBatchMode(!isBatchMode)}
-                            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all cursor-pointer ${
-                              isBatchMode
-                                ? 'bg-blue-600 text-white shadow-md'
-                                : 'bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-700 dark:text-gray-300'
+                            onClick={() => setIsBatchMode(false)}
+                            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all cursor-pointer ${
+                              !isBatchMode
+                                ? 'bg-background text-blue-600 shadow-sm border border-border/50'
+                                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 border border-transparent'
                             }`}
                           >
-                            {isBatchMode ? '返回预览模式' : '批量管理模式'}
+                            <Grid className="w-4 h-4" /> 图标管理
+                          </button>
+                          <button
+                            onClick={() => setIsBatchMode(true)}
+                            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all cursor-pointer ${
+                              isBatchMode
+                                ? 'bg-background text-blue-600 shadow-sm border border-border/50'
+                                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 border border-transparent'
+                            }`}
+                          >
+                            <List className="w-4 h-4" /> 列表管理
                           </button>
                         </div>
 
