@@ -1365,7 +1365,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                             </div>
                             <Droppable droppableId={catIdx.toString()} direction="horizontal">
                               {(provided) => (
-                                <div ref={provided.innerRef} {...provided.droppableProps} className="flex flex-row items-center gap-8 overflow-x-auto pb-4 scrollbar-none">
+                                <div ref={provided.innerRef} {...provided.droppableProps} className="flex flex-wrap items-center gap-4 pb-4">
                                   {/* 将原本的 grid-cols-8 替换为水平 flex 滚动，以适配 @hello-pangea/dnd 的一维水平拖拽，避免折行导致的异常跳跃问题 */}
                                   {category.sites.map((site: any, siteIdx) => (
                                     <Draggable key={site.dragId!} draggableId={site.dragId!} index={siteIdx}>
