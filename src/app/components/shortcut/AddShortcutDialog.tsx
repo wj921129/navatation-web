@@ -5,7 +5,10 @@ import { EditShortcutDialog } from './EditShortcutDialog';
 import { IconMap } from '../ui/IconMap';
 import { BaseModal } from '../ui/BaseModal';
 import { useState, useEffect, useRef } from 'react';
-import { useDrag, useDrop } from 'react-dnd';
+import { DndContext, useSensor, useSensors, PointerSensor, closestCenter, DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
+import { SortableGridItem } from '../ui/SortableGridItem';
+import { GridDragOverlay } from '../ui/GridDragOverlay';
 import { navService, IconType } from '../../services/nav-service';
 import { LucideIcon } from 'lucide-react';
 
@@ -207,6 +210,54 @@ export function AddShortcutDialog({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [detectedIcons, setDetectedIcons] = useState<string[]>([]);
   const debounceTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  // dnd-kit state
+  const [activeDragId, setActiveDragId] = useState<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
+
+  const handleDragStartGrid = (event: DragStartEvent) => {
+    setActiveDragId(event.active.id as string);
+  };
+
+  const handleDragEndGrid = (event: DragEndEvent) => {
+    setActiveDragId(null);
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    setCategories(prev => {
+      const copy = prev.map(c => ({ ...c, sites: [...c.sites] }));
+      
+      let sourceCatIdx = -1, sourceSiteIdx = -1;
+      let destCatIdx = -1, destSiteIdx = -1;
+      
+      for (let i = 0; i < copy.length; i++) {
+        const sIdx = copy[i].sites.findIndex(s => s.dragId === active.id);
+        if (sIdx !== -1) {
+          sourceCatIdx = i;
+          sourceSiteIdx = sIdx;
+        }
+        const oIdx = copy[i].sites.findIndex(s => s.dragId === over.id);
+        if (oIdx !== -1) {
+          destCatIdx = i;
+          destSiteIdx = oIdx;
+        }
+      }
+      
+      if (sourceCatIdx !== -1 && destCatIdx !== -1 && sourceCatIdx === destCatIdx) {
+        const [movedSite] = copy[sourceCatIdx].sites.splice(sourceSiteIdx, 1);
+        copy[destCatIdx].sites.splice(destSiteIdx, 0, movedSite);
+      }
+      
+      return copy;
+    });
+  };
+
+  const activeDragShortcut = activeDragId 
+    ? categories.flatMap(c => c.sites).find(s => s.dragId === activeDragId) 
+    : null;
 
   // 管理员编辑状态
   const [editingCategory, setEditingCategory] = useState<any>(null);
@@ -1393,7 +1444,14 @@ export function AddShortcutDialog({
                         ))}
                       </div>
                     ) : (
-                      <div className="space-y-8">
+                      <DndContext
+                          sensors={sensors}
+                          collisionDetection={closestCenter}
+                          onDragStart={handleDragStartGrid}
+                          onDragEnd={handleDragEndGrid}
+                          onDragCancel={() => setActiveDragId(null)}
+                        >
+                        <div className="space-y-8">
                         {categories.map((category, catIdx) => (
                           <div key={category.category}>
                             <div className="flex items-center justify-between mb-4">
@@ -1430,24 +1488,26 @@ export function AddShortcutDialog({
                                 margin: `-${iconSpacingY / 2}px -${iconSpacingX / 2}px`,
                               }}
                             >
-                              {category.sites.map((site: any, siteIdx) => (
-                                <DraggableRecommendSite
-                                  key={site.dragId!}
-                                  site={site}
-                                  siteIdx={siteIdx}
-                                  catIdx={catIdx}
-                                  moveSite={moveSite}
-                                  iconSize={iconSize}
-                                  borderRadius={borderRadius}
-                                  iconTextGap={iconTextGap}
-                                  textSize={textSize}
-                                  userRole={userRole}
-                                  category={category}
-                                  setEditingSite={setEditingSite}
-                                  setCategories={setCategories}
-                                  handleAddRecommendedToPending={handleAddRecommendedToPending}
-                                />
-                              ))}
+                              <SortableContext items={category.sites.map((s: any) => s.dragId!)} strategy={rectSortingStrategy}>
+                                {category.sites.map((site: any, siteIdx) => (
+                                  <SortableGridItem key={site.dragId!} id={site.dragId!}>
+                                    <RecommendSiteItem
+                                      site={site}
+                                      siteIdx={siteIdx}
+                                      catIdx={catIdx}
+                                      iconSize={iconSize}
+                                      borderRadius={borderRadius}
+                                      iconTextGap={iconTextGap}
+                                      textSize={textSize}
+                                      userRole={userRole}
+                                      category={category}
+                                      setEditingSite={setEditingSite}
+                                      setCategories={setCategories}
+                                      handleAddRecommendedToPending={handleAddRecommendedToPending}
+                                    />
+                                  </SortableGridItem>
+                                ))}
+                              </SortableContext>
                               {userRole === 'ADMIN' && (
                                 <div 
                                   className="relative group/item flex-shrink-0" 
@@ -1491,6 +1551,26 @@ export function AddShortcutDialog({
                           </div>
                         ))}
                       </div>
+                      <GridDragOverlay>
+                        {activeDragShortcut ? (
+                          <div className="flex flex-col items-center relative cursor-grabbing" style={{ width: `${iconSize + 32}px` }}>
+                            <div className="bg-card flex items-center justify-center shadow-2xl scale-110 border border-blue-500 overflow-hidden pointer-events-none transition-transform" style={{ width: `${iconSize}px`, height: `${iconSize}px`, borderRadius }}>
+                              {(() => {
+                                if (activeDragShortcut.iconType === 'CUSTOM_URL' || activeDragShortcut.iconType === 'FAVICON' || activeDragShortcut.iconType === 'CUSTOM_UPLOAD') {
+                                  return <img src={activeDragShortcut.iconValue} alt={activeDragShortcut.name} style={{ width: '50%', height: '50%', objectFit: 'contain' }} />;
+                                }
+                                return (
+                                  <activeDragShortcut.icon
+                                    style={{ color: activeDragShortcut.color || '#333', width: `${iconSize * 0.5}px`, height: `${iconSize * 0.5}px` }}
+                                    strokeWidth={2}
+                                  />
+                                );
+                              })()}
+                            </div>
+                          </div>
+                        ) : null}
+                      </GridDragOverlay>
+                      </DndContext>
                     )}
                   </div>
                   </DragDropContext>
@@ -1834,11 +1914,10 @@ interface DraggableRecommendSiteProps {
   handleAddRecommendedToPending: (site: any) => void;
 }
 
-function DraggableRecommendSite({
+function RecommendSiteItem({
   site,
   siteIdx,
   catIdx,
-  moveSite,
   iconSize,
   borderRadius,
   iconTextGap,
@@ -1849,49 +1928,10 @@ function DraggableRecommendSite({
   setCategories,
   handleAddRecommendedToPending,
 }: DraggableRecommendSiteProps) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  const [{ isDragging }, drag] = useDrag({
-    type: RECOMMEND_SITE_DRAG_TYPE,
-    item: { catIdx, siteIdx },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  });
-
-  const [, drop] = useDrop({
-    accept: RECOMMEND_SITE_DRAG_TYPE,
-    hover: (item: { catIdx: number; siteIdx: number }) => {
-      if (!ref.current) return;
-      const dragCatIdx = item.catIdx;
-      const dragSiteIdx = item.siteIdx;
-      const hoverCatIdx = catIdx;
-      const hoverSiteIdx = siteIdx;
-
-      if (dragCatIdx === hoverCatIdx && dragSiteIdx === hoverSiteIdx) {
-        return;
-      }
-
-      // 仅限在同分类内部进行拖动排序以防止跨分类的排版冲突
-      if (dragCatIdx !== hoverCatIdx) {
-        return;
-      }
-
-      moveSite(dragCatIdx, dragSiteIdx, hoverCatIdx, hoverSiteIdx);
-      item.siteIdx = hoverSiteIdx;
-    },
-  });
-
-  drag(drop(ref));
-
   return (
     <div 
-      ref={ref} 
-      className="relative group/item flex-shrink-0 cursor-grab active:cursor-grabbing"
-      style={{
-        width: `${iconSize + 32}px`,
-        opacity: isDragging ? 0.35 : 1,
-      }}
+      className="relative group/item flex-shrink-0"
+      style={{ width: `${iconSize + 32}px` }}
     >
       {/* 使用 flex-shrink-0 保证图标在横向 flex 容器中不被挤压变形 */}
       <div

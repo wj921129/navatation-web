@@ -4,9 +4,10 @@ import { toast } from 'sonner';
 import { IconMap } from '../ui/IconMap';
 import { BaseModal } from '../ui/BaseModal';
 import { useState, useEffect, useRef } from 'react';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy } from '@dnd-kit/sortable';
+import { SortableGridItem } from '../ui/SortableGridItem';
+import { GridDragOverlay } from '../ui/GridDragOverlay';
 import { navService, IconType } from '../../services/nav-service';
 
 const isValidDomainOrUrl = (input: string): boolean => {
@@ -588,20 +589,20 @@ export function ManageHomepageShortcutsDialog({
                     style={{ gap: `${iconSpacingY}px ${iconSpacingX}px` }}
                   >
                     {editData.map((site, idx) => (
-                      <SortableGridItem
-                        key={site.dragId}
-                        id={site.dragId}
-                        site={site}
-                        idx={idx}
-                        handleDeleteRow={handleDeleteRow}
-                        iconSize={iconSize}
-                        borderRadiusCss={borderRadiusCss}
-                        textSize={textSize}
-                      />
+                      <SortableGridItem key={site.dragId} id={site.dragId}>
+                        <GridItemInner
+                          site={site}
+                          idx={idx}
+                          handleDeleteRow={handleDeleteRow}
+                          iconSize={iconSize}
+                          borderRadiusCss={borderRadiusCss}
+                          textSize={textSize}
+                        />
+                      </SortableGridItem>
                     ))}
                   </div>
                 </SortableContext>
-                <DragOverlay dropAnimation={{ duration: 300, easing: 'cubic-bezier(0.25, 1, 0.5, 1)' }}>
+                <GridDragOverlay>
                   {activeDragId ? (
                     <GridItemPreview 
                       site={editData.find(s => s.dragId === activeDragId)} 
@@ -610,7 +611,7 @@ export function ManageHomepageShortcutsDialog({
                       textSize={textSize} 
                     />
                   ) : null}
-                </DragOverlay>
+                </GridDragOverlay>
               </DndContext>
             </div>
           )}
@@ -620,8 +621,7 @@ export function ManageHomepageShortcutsDialog({
   );
 }
 
-interface SortableGridItemProps {
-  id: string;
+interface GridItemInnerProps {
   site: any;
   idx: number;
   handleDeleteRow: (idx: number) => void;
@@ -630,45 +630,16 @@ interface SortableGridItemProps {
   textSize: number;
 }
 
-function SortableGridItem({
-  id,
+function GridItemInner({
   site,
   idx,
   handleDeleteRow,
   iconSize,
   borderRadiusCss,
   textSize,
-}: SortableGridItemProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ 
-    id,
-    transition: {
-      duration: 300,
-      easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
-    }
-  });
-
-  const style = {
-    transform: CSS.Translate.toString(transform),
-    transition,
-    width: `${iconSize + 32}px`,
-    opacity: isDragging ? 0 : 1,
-  };
-
+}: GridItemInnerProps) {
   return (
-    <div 
-      ref={setNodeRef} 
-      style={style}
-      {...attributes}
-      {...listeners}
-      className={`flex flex-col items-center relative group cursor-grab active:cursor-grabbing`} 
-    >
+    <div className={`flex flex-col items-center relative group`} style={{ width: `${iconSize + 32}px` }}>
       <div className="bg-card border border-border flex items-center justify-center shadow-md overflow-hidden pointer-events-none" style={{ width: `${iconSize}px`, height: `${iconSize}px`, borderRadius: borderRadiusCss }}>
         {(() => {
           if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
@@ -682,7 +653,7 @@ function SortableGridItem({
       <button 
         onPointerDown={(e) => e.stopPropagation()} 
         onClick={(e) => { e.stopPropagation(); handleDeleteRow(idx); }} 
-        className={`absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 transition-opacity shadow-md z-10 cursor-pointer ${isDragging ? 'opacity-0' : 'opacity-0 group-hover:opacity-100'}`}
+        className={`absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 transition-opacity shadow-md z-10 cursor-pointer opacity-0 group-hover:opacity-100`}
       >
         <X className="w-3 h-3" />
       </button>

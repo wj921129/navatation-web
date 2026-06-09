@@ -2,6 +2,8 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { navService } from '../services/nav-service';
 import { DEFAULT_SHORTCUTS } from '../../config/app.config';
 
+const ensureDragIds = (list: any[]) => list.map(item => item.dragId ? item : { ...item, dragId: Math.random().toString(36).substring(7) });
+
 export function useShortcuts(authState: any) {
   const [shortcuts, setShortcuts] = useState<any[]>(() => {
     if (authState.isLoggedIn) return [];
@@ -9,12 +11,12 @@ export function useShortcuts(authState: any) {
     const local = localStorage.getItem('navatation_guest_shortcuts');
     if (local) {
       try {
-        return JSON.parse(local);
+        return ensureDragIds(JSON.parse(local));
       } catch {
-        return DEFAULT_SHORTCUTS;
+        return ensureDragIds(DEFAULT_SHORTCUTS);
       }
     }
-    return DEFAULT_SHORTCUTS;
+    return ensureDragIds(DEFAULT_SHORTCUTS);
   });
   const [tempShortcuts, setTempShortcuts] = useState<any[]>(() => {
     if (authState.isLoggedIn) return [];
@@ -22,12 +24,12 @@ export function useShortcuts(authState: any) {
     const local = localStorage.getItem('navatation_guest_shortcuts');
     if (local) {
       try {
-        return JSON.parse(local);
+        return ensureDragIds(JSON.parse(local));
       } catch {
-        return DEFAULT_SHORTCUTS;
+        return ensureDragIds(DEFAULT_SHORTCUTS);
       }
     }
-    return DEFAULT_SHORTCUTS;
+    return ensureDragIds(DEFAULT_SHORTCUTS);
   });
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingShortcut, setEditingShortcut] = useState<{ index: number; shortcut: any } | null>(null);
@@ -56,8 +58,8 @@ export function useShortcuts(authState: any) {
       // 未登录状态下重置登录切换追踪标识以备下次切换
       prevIsLoggedInRef.current = false;
       // 使用默认快捷方式
-      setShortcuts(DEFAULT_SHORTCUTS);
-      setTempShortcuts(DEFAULT_SHORTCUTS);
+      setShortcuts(ensureDragIds(DEFAULT_SHORTCUTS));
+      setTempShortcuts(ensureDragIds(DEFAULT_SHORTCUTS));
       return;
     }
 
@@ -104,7 +106,7 @@ export function useShortcuts(authState: any) {
           // 重新拉取同步后的云端数据
           const newRes = await navService.getShortcuts();
           if (newRes.code === 200) {
-            const loaded = newRes.data.map(item => ({
+            const loaded = ensureDragIds(newRes.data.map((item: any) => ({
               id: item.shortcutId,
               categoryId: item.categoryId,
               name: item.name,
@@ -112,7 +114,7 @@ export function useShortcuts(authState: any) {
               color: item.iconColor || '#fff',
               iconType: item.iconType,
               iconValue: item.iconValue || 'Link'
-            }));
+            })));
             setShortcuts(loaded);
             setTempShortcuts(loaded);
           }
@@ -121,7 +123,7 @@ export function useShortcuts(authState: any) {
       }
 
       // 正常加载并将云端数据转换为前端格式
-      const loaded = res.data.map(item => ({
+      const loaded = ensureDragIds(res.data.map((item: any) => ({
         id: item.shortcutId,
         categoryId: item.categoryId,
         name: item.name,
@@ -129,7 +131,7 @@ export function useShortcuts(authState: any) {
         color: item.iconColor || '#fff',
         iconType: item.iconType,
         iconValue: item.iconValue || 'Link'
-      }));
+      })));
       setShortcuts(loaded);
       setTempShortcuts(loaded);
     } catch (err) {

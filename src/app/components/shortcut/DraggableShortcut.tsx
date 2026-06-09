@@ -1,9 +1,5 @@
-import { useRef } from 'react';
-import { useDrag, useDrop } from 'react-dnd';
 import { X as XIcon } from 'lucide-react';
 import { IconMap } from '../ui/IconMap';
-
-const SHORTCUT_DRAG_TYPE = 'SHORTCUT';
 
 interface DraggableShortcutProps {
   shortcut: any;
@@ -19,13 +15,11 @@ interface DraggableShortcutProps {
 }
 
 /**
- * 可拖拽的捷径卡片组件，仅在编辑模式下使用。
- * 通过 react-dnd 的 useDrag / useDrop 实现拖拽重新排序。
+ * 捷径卡片呈现组件，仅在编辑模式下使用。
+ * 由父组件的 @dnd-kit/sortable 提供拖拽支持。
  */
 export function DraggableShortcut({
   shortcut,
-  index,
-  moveShortcut,
   iconInnerSize,
   iconSize,
   iconRadius,
@@ -33,36 +27,12 @@ export function DraggableShortcut({
   textSize,
   onEdit,
   onDelete,
-}: DraggableShortcutProps) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  const [{ isDragging }, drag] = useDrag({
-    type: SHORTCUT_DRAG_TYPE,
-    item: { index },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  });
-
-  const [, drop] = useDrop({
-    accept: SHORTCUT_DRAG_TYPE,
-    hover: (item: { index: number }) => {
-      if (item.index !== index) {
-        moveShortcut(item.index, index);
-        item.index = index;
-      }
-    },
-  });
-
-  drag(drop(ref));
-
+}: Omit<DraggableShortcutProps, 'index' | 'moveShortcut'>) {
   return (
     <div
-      ref={ref}
-      className="flex flex-col items-center group relative cursor-grab active:cursor-grabbing"
+      className="flex flex-col items-center group relative"
       style={{
         width: `${iconSize + 32}px`,
-        opacity: isDragging ? 0.4 : 1,
       }}
     >
       {/* 删除按钮 */}
