@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { IconMap } from '../ui/IconMap';
 import { BaseModal } from '../ui/BaseModal';
 import { useState, useEffect, useRef } from 'react';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { navService, IconType } from '../../services/nav-service';
@@ -47,6 +47,7 @@ export function ManageHomepageShortcutsDialog({
   const [rowDetectedIcons, setRowDetectedIcons] = useState<Record<string, string[]>>({});
   const rowDetectedIconsRef = useRef<Record<string, string[]>>({});
   const [isAllRefreshing, setIsAllRefreshing] = useState(false);
+  const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const rowFileInputRef = useRef<HTMLInputElement>(null);
   const activeUploadRow = useRef<number | null>(null);
 
@@ -299,7 +300,12 @@ export function ManageHomepageShortcutsDialog({
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
+  const handleDragStartGrid = (event: DragStartEvent) => {
+    setActiveDragId(event.active.id as string);
+  };
+
   const handleDragEndGrid = (event: DragEndEvent) => {
+    setActiveDragId(null);
     const { active, over } = event;
     if (over && active.id !== over.id) {
       setEditData((items) => {
@@ -308,6 +314,10 @@ export function ManageHomepageShortcutsDialog({
         return arrayMove(items, oldIndex, newIndex);
       });
     }
+  };
+
+  const handleDragCancelGrid = () => {
+    setActiveDragId(null);
   };
 
   const handleSaveAll = async () => {
@@ -565,7 +575,13 @@ export function ManageHomepageShortcutsDialog({
             </div>
           ) : (
             <div className="bg-muted/20 border border-border p-6 rounded-3xl shadow-sm min-h-[400px]">
-              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndGrid}>
+              <DndContext 
+                sensors={sensors} 
+                collisionDetection={closestCenter} 
+                onDragStart={handleDragStartGrid}
+                onDragEnd={handleDragEndGrid}
+                onDragCancel={handleDragCancelGrid}
+              >
                 <SortableContext items={editData.map(s => s.dragId)} strategy={rectSortingStrategy}>
                   <div 
                     className="flex flex-wrap"
@@ -585,6 +601,16 @@ export function ManageHomepageShortcutsDialog({
                     ))}
                   </div>
                 </SortableContext>
+                <DragOverlay dropAnimation={{ duration: 300, easing: 'cubic-bezier(0.25, 1, 0.5, 1)' }}>
+                  {activeDragId ? (
+                    <GridItemPreview 
+                      site={editData.find(s => s.dragId === activeDragId)} 
+                      iconSize={iconSize} 
+                      borderRadiusCss={borderRadiusCss} 
+                      textSize={textSize} 
+                    />
+                  ) : null}
+                </DragOverlay>
               </DndContext>
             </div>
           )}
@@ -620,12 +646,19 @@ function SortableGridItem({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id });
+  } = useSortable({ 
+    id,
+    transition: {
+      duration: 300,
+      easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+    }
+  });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Translate.toString(transform),
     transition,
     width: `${iconSize + 32}px`,
+    opacity: isDragging ? 0 : 1,
   };
 
   return (
@@ -634,9 +667,9 @@ function SortableGridItem({
       style={style}
       {...attributes}
       {...listeners}
-      className={`flex flex-col items-center relative group cursor-grab active:cursor-grabbing ${isDragging ? 'opacity-70 scale-105 z-50 shadow-xl' : 'opacity-100 z-0'}`} 
+      className={`flex flex-col items-center relative group cursor-grab active:cursor-grabbing`} 
     >
-      <div className="bg-card border border-border flex items-center justify-center shadow-md transition-all duration-200 overflow-hidden pointer-events-none" style={{ width: `${iconSize}px`, height: `${iconSize}px`, borderRadius: borderRadiusCss }}>
+      <div className="bg-card border border-border flex items-center justify-center shadow-md overflow-hidden pointer-events-none" style={{ width: `${iconSize}px`, height: `${iconSize}px`, borderRadius: borderRadiusCss }}>
         {(() => {
           if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
             return <img src={site.iconValue} alt={site.name} style={{ width: '50%', height: '50%', objectFit: 'contain' }} onError={(e) => { (e.target as any).style.display = 'none'; }} />;
@@ -649,10 +682,28 @@ function SortableGridItem({
       <button 
         onPointerDown={(e) => e.stopPropagation()} 
         onClick={(e) => { e.stopPropagation(); handleDeleteRow(idx); }} 
-        className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-md z-10 cursor-pointer"
+        className={`absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 transition-opacity shadow-md z-10 cursor-pointer ${isDragging ? 'opacity-0' : 'opacity-0 group-hover:opacity-100'}`}
       >
         <X className="w-3 h-3" />
       </button>
+    </div>
+  );
+}
+
+function GridItemPreview({ site, iconSize, borderRadiusCss, textSize }: any) {
+  if (!site) return null;
+  return (
+    <div className="flex flex-col items-center relative group scale-105 shadow-2xl cursor-grabbing" style={{ width: `${iconSize + 32}px` }}>
+      <div className="bg-card border-2 border-blue-500/50 flex items-center justify-center shadow-xl overflow-hidden pointer-events-none" style={{ width: `${iconSize}px`, height: `${iconSize}px`, borderRadius: borderRadiusCss }}>
+        {(() => {
+          if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
+            return <img src={site.iconValue} alt={site.name} style={{ width: '50%', height: '50%', objectFit: 'contain' }} />;
+          }
+          const IconComponent = IconMap[site.iconValue || 'Link'] || Link;
+          return <IconComponent style={{ color: site.color || '#333', width: `${iconSize * 0.5}px`, height: `${iconSize * 0.5}px` }} strokeWidth={2} />;
+        })()}
+      </div>
+      <span className="text-foreground mt-2 font-medium tracking-wide text-center w-full truncate px-1" style={{ fontSize: `${textSize}px` }}>{site.name || '未命名'}</span>
     </div>
   );
 }
