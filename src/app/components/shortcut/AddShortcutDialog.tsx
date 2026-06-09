@@ -192,6 +192,7 @@ export function AddShortcutDialog({
   textSize = 12,
   userRole,
 }: AddShortcutDialogProps) {
+  const [isDraggingSite, setIsDraggingSite] = useState(false);
   const [activeTab, setActiveTab] = useState<'recommended' | 'custom'>('recommended');
   const [customName, setCustomName] = useState('');
   const [customUrl, setCustomUrl] = useState('');
@@ -623,7 +624,12 @@ export function AddShortcutDialog({
     });
   };
 
+  const handleDragStart = () => {
+    setIsDraggingSite(true);
+  };
+
   const handleDragEnd = (result: DropResult) => {
+    setIsDraggingSite(false);
     if (!result.destination) return;
     const { source, destination } = result;
 
@@ -1079,7 +1085,7 @@ export function AddShortcutDialog({
               {/* Left: Tabs Content */}
               <div className={`${isBatchMode ? 'col-span-3' : 'col-span-2'} border-r border-border overflow-y-auto`}>
                 {activeTab === 'recommended' ? (
-                  <DragDropContext onDragEnd={handleDragEnd}>
+                  <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
                   <div className="p-6 space-y-8 relative">
                     {userRole === 'ADMIN' && (
                       <>
@@ -1472,55 +1478,44 @@ export function AddShortcutDialog({
                                       )}
                                     </Draggable>
                                   ))}
-                                  {userRole === 'ADMIN' && (
-                                    <Draggable draggableId={`add-new-site-${category.categoryId || catIdx}`} index={category.sites.length} isDragDisabled={true}>
-                                      {(provided, snapshot) => (
-                                        <div 
-                                          ref={provided.innerRef} 
-                                          {...provided.draggableProps} 
-                                          {...provided.dragHandleProps}
-                                          className="relative group/item flex-shrink-0" 
-                                          style={{ 
-                                            ...provided.draggableProps.style,
-                                            width: `${iconSize + 32}px`,
-                                            margin: `${iconSpacingY / 2}px ${iconSpacingX / 2}px`,
-                                            transition: snapshot.isDropAnimating
-                                              ? 'transform 0.12s cubic-bezier(0.2, 1, 0.1, 1)'
-                                              : provided.draggableProps.style?.transition
+                                  {userRole === 'ADMIN' && !isDraggingSite && (
+                                    <div 
+                                      className="relative group/item flex-shrink-0" 
+                                      style={{ 
+                                        width: `${iconSize + 32}px`,
+                                        margin: `${iconSpacingY / 2}px ${iconSpacingX / 2}px`
+                                      }}
+                                    >
+                                      {/* 在水平 flex 容器中，新增网址按钮同样需要 flex-shrink-0 避免缩水 */}
+                                      <button
+                                        onClick={() => {
+                                          if (!category.categoryId) {
+                                            alert('系统内置推荐分类不可添加网址。请先保存该分类到数据库，或新建自定义分类。');
+                                            return;
+                                          }
+                                          setEditingSite({ categoryId: category.categoryId, name: '', url: '', iconType: 'FAVICON', iconValue: '', iconColor: '#fff' })
+                                        }}
+                                        className="flex flex-col items-center group cursor-pointer w-full"
+                                        style={{ gap: `${iconTextGap}px` }}
+                                      >
+                                        <div
+                                          className="bg-card/50 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/30 transition-all duration-200"
+                                          style={{
+                                            width: `${iconSize}px`,
+                                            height: `${iconSize}px`,
+                                            borderRadius: borderRadius,
                                           }}
                                         >
-                                          {/* 在水平 flex 容器中，新增网址按钮同样需要 flex-shrink-0 避免缩水 */}
-                                          <button
-                                            onClick={() => {
-                                              if (!category.categoryId) {
-                                                alert('系统内置推荐分类不可添加网址。请先保存该分类到数据库，或新建自定义分类。');
-                                                return;
-                                              }
-                                              setEditingSite({ categoryId: category.categoryId, name: '', url: '', iconType: 'FAVICON', iconValue: '', iconColor: '#fff' })
-                                            }}
-                                            className="flex flex-col items-center group cursor-pointer w-full"
-                                            style={{ gap: `${iconTextGap}px` }}
-                                          >
-                                            <div
-                                              className="bg-card/50 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/30 transition-all duration-200"
-                                              style={{
-                                                width: `${iconSize}px`,
-                                                height: `${iconSize}px`,
-                                                borderRadius: borderRadius,
-                                              }}
-                                            >
-                                              <Plus className="w-6 h-6 text-gray-400 group-hover:text-blue-500" />
-                                            </div>
-                                            <span 
-                                              className="text-gray-500 dark:text-gray-400 group-hover:text-blue-500 truncate w-full text-center font-light tracking-wide"
-                                              style={{ fontSize: `${textSize}px` }}
-                                            >
-                                              新增网址
-                                            </span>
-                                          </button>
+                                          <Plus className="w-6 h-6 text-gray-400 group-hover:text-blue-500" />
                                         </div>
-                                      )}
-                                    </Draggable>
+                                        <span 
+                                          className="text-gray-500 dark:text-gray-400 group-hover:text-blue-500 truncate w-full text-center font-light tracking-wide"
+                                          style={{ fontSize: `${textSize}px` }}
+                                        >
+                                          新增网址
+                                        </span>
+                                      </button>
+                                    </div>
                                   )}
                                 {provided.placeholder}
                               </div>
