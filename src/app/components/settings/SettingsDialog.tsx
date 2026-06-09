@@ -70,12 +70,9 @@ export function SettingsDialog({ isOpen, onClose, onSave, onPreview, settings, b
         const newBg = res.data.wallpaperUrl;
         setDraftBackgroundImage(newBg);
         onPreview?.(draftSettings, newBg, draftTheme);
-      } else {
-        toast.error(res.message || '上传壁纸失败');
       }
     } catch (err: any) {
       console.error('上传壁纸出错:', err);
-      toast.error(err.message || '上传壁纸出错，请稍后重试');
     }
   };
 
@@ -86,12 +83,9 @@ export function SettingsDialog({ isOpen, onClose, onSave, onPreview, settings, b
         const newBg = res.data.wallpaperUrl;
         setDraftBackgroundImage(newBg);
         onPreview?.(draftSettings, newBg, draftTheme);
-      } else {
-        toast.error(res.message || '获取随机壁纸失败');
       }
     } catch (err: any) {
       console.error('获取随机壁纸出错:', err);
-      toast.error(err.message || '获取随机壁纸出错，请稍后重试');
     }
   };
 

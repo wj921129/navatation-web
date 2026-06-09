@@ -670,12 +670,9 @@ export function AddShortcutDialog({
           iconValue: res.data.iconUrl
         });
         setRowDetectedIcons(prev => ({ ...prev, [rowKey]: [res.data.iconUrl] }));
-      } else {
-        toast.warning(res.message || '上传文件失败');
       }
     } catch (err) {
       console.error('Row upload icon error:', err);
-      toast.warning('上传发生异常');
     } finally {
       setRowLoadingStatus(prev => ({ ...prev, [rowKey]: false }));
       activeUploadRow.current = null;
@@ -773,7 +770,6 @@ export function AddShortcutDialog({
       toast('✅ 已保存', { duration: 2000 });
     } catch (err) {
       console.error('Batch save all sites error:', err);
-      toast('❌ 保存失败', { duration: 2000 });
     }
   };
 
@@ -811,12 +807,9 @@ export function AddShortcutDialog({
       if (res.code === 200) {
         loadRecommended();
         toast('✅ 已保存', { duration: 2000 });
-      } else {
-        toast('❌ 保存失败', { duration: 2000 });
       }
     } catch (err) {
       console.error('Batch save sites error:', err);
-      toast('❌ 保存失败', { duration: 2000 });
     }
   };
 

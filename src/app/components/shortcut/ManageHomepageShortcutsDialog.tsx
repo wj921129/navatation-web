@@ -253,11 +253,9 @@ export function ManageHomepageShortcutsDialog({
       if (res.code === 200 && res.data?.iconUrl) {
         updateSite(idx, { iconType: 'CUSTOM_UPLOAD', iconValue: res.data.iconUrl });
         setRowDetectedIcons(prev => ({ ...prev, [rowKey]: [res.data.iconUrl] }));
-      } else {
-        toast.warning(res.message || '上传文件失败');
       }
     } catch (err) {
-      toast.warning('上传发生异常');
+      console.error('Row upload icon error:', err);
     } finally {
       setRowLoadingStatus(prev => ({ ...prev, [rowKey]: false }));
       activeUploadRow.current = null;
@@ -398,12 +396,11 @@ export function ManageHomepageShortcutsDialog({
         }
       }
 
-      toast.success('保存成功');
+      toast('✅ 已保存', { duration: 2000 });
       onSaveComplete?.();
       onClose();
     } catch (err) {
       console.error('Failed to save homepage shortcuts', err);
-      toast.warning('保存失败，请重试');
     }
   };
 
