@@ -119,6 +119,7 @@ export function LoginDialog({ isOpen, onClose }: LoginDialogProps) {
             required
             minLength={3}
             maxLength={20}
+            autoComplete="username"
           />
         </div>
 
@@ -135,6 +136,7 @@ export function LoginDialog({ isOpen, onClose }: LoginDialogProps) {
             required
             minLength={6}
             maxLength={32}
+            autoComplete={tab === 'login' ? 'current-password' : 'new-password'}
           />
         </div>
 
