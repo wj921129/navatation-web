@@ -685,7 +685,6 @@ export function AddShortcutDialog({
         }));
         return navService.batchSaveRecommendSites(cat.categoryId, { sites: formattedSites });
       }));
-      alert('所有拖拽排序修改和网址修改均已同步到后端！');
       loadRecommended();
     } catch (err) {
       console.error('Batch save all sites error:', err);
