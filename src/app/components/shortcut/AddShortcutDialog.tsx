@@ -1727,15 +1727,15 @@ export function AddShortcutDialog({
             <div className="space-y-4">
               <div>
                 <label className="text-sm text-gray-500 mb-1 block">分类名称</label>
-                <input type="text" className="w-full px-3 py-2 border rounded-lg bg-background" value={editingCategory.category} onChange={e => setEditingCategory({...editingCategory, category: e.target.value})} />
+                <input type="text" className="w-full px-3 py-2 border rounded-lg bg-background" value={editingCategory?.category || ''} onChange={e => editingCategory && setEditingCategory({...editingCategory, category: e.target.value})} />
               </div>
               <div>
                 <label className="text-sm text-gray-500 mb-1 block">图标 (lucide-react name)</label>
-                <input type="text" className="w-full px-3 py-2 border rounded-lg bg-background" value={editingCategory.iconValue} onChange={e => setEditingCategory({...editingCategory, iconValue: e.target.value})} />
+                <input type="text" className="w-full px-3 py-2 border rounded-lg bg-background" value={editingCategory?.iconValue || ''} onChange={e => editingCategory && setEditingCategory({...editingCategory, iconValue: e.target.value})} />
               </div>
               <div>
                 <label className="text-sm text-gray-500 mb-1 block">排序</label>
-                <input type="number" step="0.01" className="w-full px-3 py-2 border rounded-lg bg-background" value={editingCategory.sortOrder} onChange={e => setEditingCategory({...editingCategory, sortOrder: Number(e.target.value)})} />
+                <input type="number" step="0.01" className="w-full px-3 py-2 border rounded-lg bg-background" value={editingCategory?.sortOrder || 0} onChange={e => editingCategory && setEditingCategory({...editingCategory, sortOrder: Number(e.target.value)})} />
               </div>
             </div>
             <div className="mt-6 flex justify-end gap-3">
@@ -1756,17 +1756,16 @@ export function AddShortcutDialog({
             </div>
       </BaseModal>
 
-      {editingSite && (
-        <EditShortcutDialog
-          isOpen={true}
-          onClose={() => setEditingSite(null)}
-          shortcut={{
-            id: editingSite.siteId,
-            name: editingSite.name || '',
-            url: editingSite.url || '',
-            iconType: editingSite.iconType || 'FAVICON',
-            iconValue: editingSite.iconValue || '',
-          }}
+      <EditShortcutDialog
+        isOpen={!!editingSite}
+        onClose={() => setEditingSite(null)}
+        shortcut={{
+          id: editingSite?.siteId,
+          name: editingSite?.name || '',
+          url: editingSite?.url || '',
+          iconType: editingSite?.iconType || 'FAVICON',
+          iconValue: editingSite?.iconValue || '',
+        }}
           onSave={(shortcut) => {
             if (!editingSite.categoryId) {
               alert('分类ID丢失，请刷新页面重试');
@@ -1812,7 +1811,6 @@ export function AddShortcutDialog({
             setEditingSite(null);
           }}
         />
-      )}
     </>
   );
 }
