@@ -43,16 +43,26 @@ export function useWidgetDrag({ addWidget, updateWidgetPosition, triggerCloseClo
   };
 
   const getWidgetType = (style: WidgetStyle) => {
-    if (style === 'pomodoro') return 'pomodoro';
-    if (style === 'breathe') return 'breathe';
-    if (style === 'month') return 'calendar';
-    if (style === 'simple') return 'weather';
+    if (style === 'pomodoro') {
+      return 'pomodoro';
+    }
+    if (style === 'breathe') {
+      return 'breathe';
+    }
+    if (style === 'month') {
+      return 'calendar';
+    }
+    if (style === 'simple') {
+      return 'weather';
+    }
     return 'clock';
   };
 
   const handleMenuDragMove = useCallback((e: PointerEvent) => {
     const style = menuDraggingStyleRef.current;
-    if (!style) return;
+    if (!style) {
+      return;
+    }
 
     const dx = e.clientX - menuDragStartPosRef.current.x;
     const dy = e.clientY - menuDragStartPosRef.current.y;
@@ -130,7 +140,9 @@ export function useWidgetDrag({ addWidget, updateWidgetPosition, triggerCloseClo
   }, [handleMenuDragMove, handleMenuDragUp]);
 
   const handlePointerMoveGlobal = useCallback((e: PointerEvent) => {
-    if (!activeDraggingId || !activeDraggingStyleRef.current) return;
+    if (!activeDraggingId || !activeDraggingStyleRef.current) {
+      return;
+    }
     const { w, h } = getWidgetDimensions(activeDraggingStyleRef.current);
     let newX = Math.max(0, Math.min(e.clientX - dragOffset.x, window.innerWidth - w));
     let newY = Math.max(0, Math.min(e.clientY - dragOffset.y, window.innerHeight - h));

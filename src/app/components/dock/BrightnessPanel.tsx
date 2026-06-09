@@ -30,7 +30,9 @@ export function BrightnessPanel({
   brightnessTimerRef,
   triggerCloseBrightness
 }: BrightnessPanelProps) {
-  if (!isBrightnessOpen || theme !== 'dark') return null;
+  if (!isBrightnessOpen || theme !== 'dark') {
+    return null;
+  }
 
   return (
     <div
