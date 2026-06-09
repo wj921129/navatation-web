@@ -94,6 +94,7 @@ export default function App() {
   // 3. 解构解耦业务逻辑
   const {
     shortcuts,
+    fetchShortcuts,
     setShortcuts,
     tempShortcuts,
     setTempShortcuts,
