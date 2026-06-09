@@ -1708,6 +1708,7 @@ export function AddShortcutDialog({
             </div>
           </div>
         </div>
+        </div>
       </div>
 
       {/* Admin Modals */}
@@ -1949,7 +1950,6 @@ function DraggableRecommendSite({
           }} className="p-1 text-gray-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
         </div>
       )}
-    </div>
     </div>
   );
 }
