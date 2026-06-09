@@ -70,7 +70,7 @@ const getDebounceDelay = (input: string): number => {
   return 1000;
 };
 
-export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut, showSortOrder }: EditShortcutDialogProps) {
+export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditShortcutDialogProps) {
   const [name, setName] = useState(shortcut.name);
   const [url, setUrl] = useState(shortcut.url);
   const [iconType, setIconType] = useState(shortcut.iconType || 'BUILTIN');

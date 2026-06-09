@@ -1,5 +1,4 @@
-import { X, Link, Upload, Loader2, RotateCw } from 'lucide-react';
-import { IconMap } from '../ui/IconMap';
+import { Link, Upload, Loader2, RotateCw } from 'lucide-react';
 import React from 'react';
 
 interface CustomShortcutTabProps {

@@ -1,4 +1,4 @@
-import { X, Link, Upload, Video, Cpu, Code, ShoppingBag, Newspaper, Gamepad2, Music as MusicIcon, BookOpen, Camera, Briefcase, Trash2, Loader2, Check, RotateCw, Plus, Edit3, GripVertical, Grid, List, FolderPlus } from 'lucide-react';
+import { X, Link, Upload, Trash2, Loader2, Check, RotateCw, Plus, Edit3, GripVertical, Grid, List, FolderPlus } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { toast } from 'sonner';
 import { EditShortcutDialog } from './EditShortcutDialog';
@@ -10,7 +10,6 @@ import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import { SortableGridItem } from '../ui/SortableGridItem';
 import { GridDragOverlay } from '../ui/GridDragOverlay';
 import { navService, IconType } from '../../services/nav-service';
-import { LucideIcon } from 'lucide-react';
 
 interface AddShortcutDialogProps {
   isOpen: boolean;
@@ -50,7 +49,6 @@ export function AddShortcutDialog({
   const [customName, setCustomName] = useState('');
   const [customUrl, setCustomUrl] = useState('');
   const [customIconUrl, setCustomIconUrl] = useState('');
-  const [customIconFile, setCustomIconFile] = useState<string | null>(null);
   const [pendingShortcuts, setPendingShortcuts] = useState<RecommendedSite[]>([]);
   const [categories, setCategories] = useState<CategoryGroup[]>([]);
   const [faviconStatus, setFaviconStatus] = useState<'idle' | 'loading' | 'detected' | 'error' | 'uploading'>('idle');
@@ -234,14 +232,6 @@ export function AddShortcutDialog({
     }
   };
 
-  const moveSite = (sourceCatIdx: number, sourceSiteIdx: number, destCatIdx: number, destSiteIdx: number) => {
-    setCategories(prev => {
-      const copy = prev.map(c => ({ ...c, sites: [...c.sites] }));
-      const [movedSite] = copy[sourceCatIdx].sites.splice(sourceSiteIdx, 1);
-      copy[destCatIdx].sites.splice(destSiteIdx, 0, movedSite);
-      return copy;
-    });
-  };
 
   const handleSaveAllCategories = async () => {
     const dataToSave = isBatchMode ? batchEditData : categories;
@@ -1017,11 +1007,10 @@ export function AddShortcutDialog({
                               }}
                             >
                               <SortableContext items={category.sites.map((s: any) => s.dragId!)} strategy={rectSortingStrategy}>
-                                {category.sites.map((site: any, siteIdx) => (
+                                {category.sites.map((site: any) => (
                                   <SortableGridItem key={site.dragId!} id={site.dragId!}>
                                     <RecommendSiteItem
                                       site={site}
-                                      siteIdx={siteIdx}
                                       catIdx={catIdx}
                                       iconSize={iconSize}
                                       borderRadius={borderRadius}
@@ -1270,7 +1259,6 @@ export function AddShortcutDialog({
                   iconType: (shortcut.iconType || 'FAVICON') as IconType,
                   iconValue: shortcut.iconValue || '',
                   color: '#4285F4',
-                  iconColor: '#4285F4',
                   icon: Link,
                   dragId: Math.random().toString(36).substring(7)
                 });
@@ -1284,13 +1272,9 @@ export function AddShortcutDialog({
   );
 }
 
-const RECOMMEND_SITE_DRAG_TYPE = 'RECOMMEND_SITE';
-
 interface DraggableRecommendSiteProps {
   site: any;
-  siteIdx: number;
   catIdx: number;
-  moveSite: (sourceCatIdx: number, sourceSiteIdx: number, destCatIdx: number, destSiteIdx: number) => void;
   iconSize: number;
   borderRadius: string;
   iconTextGap: number;
@@ -1304,7 +1288,6 @@ interface DraggableRecommendSiteProps {
 
 function RecommendSiteItem({
   site,
-  siteIdx,
   catIdx,
   iconSize,
   borderRadius,
