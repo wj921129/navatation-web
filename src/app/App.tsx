@@ -706,7 +706,8 @@ export default function App() {
               url: item.url,
               color: item.iconColor || '#fff',
               iconType: item.iconType,
-              iconValue: item.iconValue || 'Link'
+              iconValue: item.iconValue || 'Link',
+              dragId: item.shortcutId || Math.random().toString(36).substring(7)
             }));
             setShortcuts(loaded);
             setTempShortcuts(loaded);
