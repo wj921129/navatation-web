@@ -1365,7 +1365,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                             </div>
                             <Droppable droppableId={catIdx.toString()} direction="horizontal">
                               {(provided) => (
-                                <div ref={provided.innerRef} {...provided.droppableProps} className="flex flex-row items-center gap-6 overflow-x-auto pb-4 scrollbar-none">
+                                <div ref={provided.innerRef} {...provided.droppableProps} className="flex flex-row items-center gap-8 overflow-x-auto pb-4 scrollbar-none">
                                   {/* 将原本的 grid-cols-8 替换为水平 flex 滚动，以适配 @hello-pangea/dnd 的一维水平拖拽，避免折行导致的异常跳跃问题 */}
                                   {category.sites.map((site: any, siteIdx) => (
                                     <Draggable key={site.dragId!} draggableId={site.dragId!} index={siteIdx}>
@@ -1377,6 +1377,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                           className="relative group/item flex-shrink-0"
                                           style={{
                                             ...provided.draggableProps.style,
+                                            width: `${iconSize + 24}px`,
                                             transition: snapshot.isDropAnimating
                                               ? 'transform 0.12s cubic-bezier(0.2, 1, 0.1, 1)'
                                               : provided.draggableProps.style?.transition
@@ -1413,7 +1414,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                                 );
                                               })()}
                                             </div>
-                                            <span className="text-xs text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors">
+                                            <span className="text-xs text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors truncate w-full text-center px-1">
                                               {site.name}
                                             </span>
                                           </button>
@@ -1445,7 +1446,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                                     </Draggable>
                                   ))}
                                   {userRole === 'ADMIN' && (
-                                    <div className="relative group/item flex-shrink-0">
+                                    <div className="relative group/item flex-shrink-0" style={{ width: `${iconSize + 24}px` }}>
                                       {/* 在水平 flex 容器中，新增网址按钮同样需要 flex-shrink-0 避免缩水 */}
                                       <button
                                       onClick={() => {
