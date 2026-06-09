@@ -53,13 +53,14 @@
 /* 彻底解决 sonner toast 左右居中与物理自适应宽度问题 */
 /* ============================================================ */
 
-/* 1. 强制 top-center 容器的子项目在主轴/交叉轴上居中对齐 */
+/* 1. 强制 top-center 容器的子项目在主轴/交叉轴上居中对齐，并向下移动一段距离 */
 [data-sonner-toaster][data-x-position="center"] {
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important; /* 强制所有 toast 在中轴线上水平居中 */
   left: 50% !important;
   transform: translateX(-50%) !important;
+  top: 64px !important; /* 向下移动黄金间距 */
 }
 
 /* 2. 气泡整体样式定制：采用中等圆角、毛玻璃与分层高级阴影 */
