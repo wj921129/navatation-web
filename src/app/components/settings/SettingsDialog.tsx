@@ -310,7 +310,7 @@ export function SettingsDialog({ isOpen, onClose, onSave, onPreview, settings, b
               </label>
               <input
                 type="range"
-                min="16"
+                min="10"
                 max="64"
                 value={draftSettings.iconSpacingX}
                 onChange={(e) => handleChange('iconSpacingX', Number(e.target.value))}
