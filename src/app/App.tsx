@@ -1034,9 +1034,9 @@ export default function App() {
                 onDragEnd={handleDragEndGrid}
                 onDragCancel={handleDragCancelGrid}
               >
-                <SortableContext items={displayShortcuts.map(s => s.dragId)} strategy={rectSortingStrategy}>
+                <SortableContext items={displayShortcuts.map((s, idx) => s.dragId || `shortcut-edit-${idx}`)} strategy={rectSortingStrategy}>
                   {displayShortcuts.map((shortcut, globalIndex) => (
-                    <SortableGridItem key={shortcut.dragId} id={shortcut.dragId}>
+                    <SortableGridItem key={shortcut.dragId || `shortcut-edit-${globalIndex}`} id={shortcut.dragId || `shortcut-edit-${globalIndex}`}>
                       <DraggableShortcut
                         shortcut={shortcut}
                         iconInnerSize={iconInnerSize}
@@ -1071,7 +1071,7 @@ export default function App() {
               <>
                 {displayShortcuts.map((shortcut, globalIndex) => (
                   <div
-                    key={shortcut.dragId}
+                    key={shortcut.dragId || `shortcut-${globalIndex}`}
                     className="flex flex-col items-center group relative"
                     style={{ width: `${settings.iconSize + 32}px` }}
                   >
