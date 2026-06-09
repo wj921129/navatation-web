@@ -63,7 +63,7 @@
   top: 64px !important; /* 向下移动黄金间距 */
 }
 
-/* 2. 气泡整体样式定制：采用中等圆角、毛玻璃与分层高级阴影 */
+/* 2. 气泡整体样式定制：采用极致圆角、毛玻璃与分层高级阴影 */
 [data-sonner-toaster] [data-sonner-toast] {
   width: fit-content !important;
   min-width: 140px !important;
@@ -73,18 +73,20 @@
   border-radius: 12px !important; /* 高级感中等圆角 */
   font-size: 13.5px !important;
   font-weight: 500 !important;
-  letter-spacing: 0.02em !important;
+  letter-spacing: 0.015em !important;
   
-  /* 毛玻璃与软阴影 */
-  background: rgba(255, 255, 255, 0.86) !important;
-  border: 1px solid rgba(0, 0, 0, 0.06) !important;
-  color: #1f2937 !important; /* 亮色默认深色字 */
-  backdrop-filter: blur(18px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(180%) !important;
+  /* 亮色模式默认毛玻璃与软阴影 */
+  background: rgba(255, 255, 255, 0.82) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  color: #111827 !important; /* 经典深色字 */
+  backdrop-filter: blur(20px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(190%) !important;
+  
+  /* 双层极致细羽化软阴影 */
   box-shadow: 
-    0 4px 6px -1px rgba(0, 0, 0, 0.04), 
-    0 10px 20px -3px rgba(0, 0, 0, 0.06), 
-    0 0 0 1px rgba(0, 0, 0, 0.01) !important;
+    0 4px 6px -1px rgba(0, 0, 0, 0.02), 
+    0 10px 20px -3px rgba(0, 0, 0, 0.04), 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.6) !important;
   
   position: relative !important;
   overflow: hidden !important;
@@ -92,18 +94,18 @@
   align-items: center !important;
   justify-content: center !important;
   gap: 8px !important;
-  transition: all 0.25s ease !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-/* 3. 暗色模式适配 */
+/* 3. 深色模式（Dark Theme）下的沉浸式毛玻璃 */
 .dark [data-sonner-toaster] [data-sonner-toast] {
-  background: rgba(23, 23, 23, 0.82) !important;
-  border: 1px solid rgba(255, 255, 255, 0.09) !important;
-  color: #f3f4f6 !important; /* 暗色默认亮色字 */
+  background: rgba(18, 18, 18, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #f9fafb !important; /* 经典亮色字 */
   box-shadow: 
-    0 4px 6px -1px rgba(0, 0, 0, 0.2), 
-    0 10px 20px -3px rgba(0, 0, 0, 0.3), 
-    0 0 0 1px rgba(255, 255, 255, 0.02) !important;
+    0 10px 30px -10px rgba(0, 0, 0, 0.5), 
+    0 1px 0 0 rgba(255, 255, 255, 0.03),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08) !important;
 }
 
 /* 4. 左侧微发光彩色立柱装饰 */
@@ -113,45 +115,73 @@
   left: 0 !important;
   top: 0 !important;
   bottom: 0 !important;
-  width: 4.5px !important;
+  width: 4px !important;
   border-radius: 12px 0 0 12px !important;
 }
 
-/* 5. 针对成功、错误、警告的立柱配色与微亮背景色 */
+/* 5. 针对成功、错误、警告的霓虹发光与微亮背景色 */
+
+/* SUCCESS 状态 */
 [data-sonner-toast][data-type="success"]::before {
   background: linear-gradient(180deg, #10b981 0%, #059669 100%) !important;
 }
 [data-sonner-toast][data-type="success"] {
-  background: rgba(240, 253, 244, 0.88) !important; /* 微带绿背景 */
-  border-color: rgba(187, 247, 208, 0.5) !important;
+  background: rgba(240, 253, 244, 0.85) !important; /* 浅绿底 */
+  border-color: rgba(16, 185, 129, 0.26) !important;
+  box-shadow: 
+    0 4px 6px -1px rgba(16, 185, 129, 0.02), 
+    0 10px 20px -3px rgba(16, 185, 129, 0.05), 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.6) !important;
 }
 .dark [data-sonner-toast][data-type="success"] {
-  background: rgba(6, 78, 59, 0.3) !important; /* 暗色下极弱深绿 */
-  border-color: rgba(52, 211, 153, 0.15) !important;
+  background: rgba(6, 78, 59, 0.28) !important; /* 暗色下极弱深绿 */
+  border-color: rgba(52, 211, 153, 0.2) !important;
+  box-shadow: 
+    0 8px 30px -8px rgba(0, 0, 0, 0.4), 
+    0 0 12px rgba(16, 185, 129, 0.06),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.06) !important;
 }
 
+/* ERROR 状态 */
 [data-sonner-toast][data-type="error"]::before {
   background: linear-gradient(180deg, #f87171 0%, #dc2626 100%) !important;
 }
 [data-sonner-toast][data-type="error"] {
-  background: rgba(254, 242, 242, 0.88) !important; /* 微带红背景 */
-  border-color: rgba(254, 226, 226, 0.5) !important;
+  background: rgba(254, 242, 242, 0.85) !important; /* 浅红底 */
+  border-color: rgba(239, 68, 68, 0.26) !important;
+  box-shadow: 
+    0 4px 6px -1px rgba(239, 68, 68, 0.02), 
+    0 10px 20px -3px rgba(239, 68, 68, 0.05), 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.6) !important;
 }
 .dark [data-sonner-toast][data-type="error"] {
-  background: rgba(153, 27, 27, 0.25) !important; /* 暗色下极弱深红 */
-  border-color: rgba(248, 113, 113, 0.15) !important;
+  background: rgba(153, 27, 27, 0.22) !important; /* 暗色下极弱深红 */
+  border-color: rgba(248, 113, 113, 0.2) !important;
+  box-shadow: 
+    0 8px 30px -8px rgba(0, 0, 0, 0.4), 
+    0 0 12px rgba(239, 68, 68, 0.06),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.06) !important;
 }
 
+/* WARNING 状态 */
 [data-sonner-toast][data-type="warning"]::before {
   background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%) !important;
 }
 [data-sonner-toast][data-type="warning"] {
-  background: rgba(255, 251, 235, 0.88) !important; /* 微带黄背景 */
-  border-color: rgba(253, 230, 138, 0.5) !important;
+  background: rgba(255, 251, 235, 0.85) !important; /* 浅黄底 */
+  border-color: rgba(245, 158, 11, 0.26) !important;
+  box-shadow: 
+    0 4px 6px -1px rgba(245, 158, 11, 0.02), 
+    0 10px 20px -3px rgba(245, 158, 11, 0.05), 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.6) !important;
 }
 .dark [data-sonner-toast][data-type="warning"] {
-  background: rgba(146, 64, 14, 0.22) !important; /* 暗色下极弱深黄 */
-  border-color: rgba(251, 191, 36, 0.15) !important;
+  background: rgba(146, 64, 14, 0.2) !important; /* 暗色下极弱深黄 */
+  border-color: rgba(251, 191, 36, 0.2) !important;
+  box-shadow: 
+    0 8px 30px -8px rgba(0, 0, 0, 0.4), 
+    0 0 12px rgba(245, 158, 11, 0.06),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.06) !important;
 }
 
 /* 6. 图标与文字在气泡内的彻底居中与间距 */
