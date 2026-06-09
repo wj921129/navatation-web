@@ -4,7 +4,7 @@
  */
 import { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
-import { navService } from '../../services/nav-service';
+import { navService } from '../services/nav-service';
 
 const isValidDomainOrUrl = (input: string): boolean => {
   const url = input.trim();
