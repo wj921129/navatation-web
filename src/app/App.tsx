@@ -1,4 +1,4 @@
-import { Plus, Edit3, Save, Settings, User, Clock, Calendar, Timer, Flower2, CloudSun } from 'lucide-react';
+import { Plus, Edit3, Save, Settings, User, Clock, Calendar, Timer, Flower2, CloudSun, LayoutGrid } from 'lucide-react';
 import { IconMap } from './components/ui/IconMap';
 import { useState, useEffect, useCallback } from 'react';
 import { SettingsDialog } from './components/settings/SettingsDialog';
@@ -1125,7 +1125,7 @@ export default function App() {
                   onClick={() => setIsManageHomepageOpen(true)}
                   className="w-12 h-12 rounded-full glass-button flex items-center justify-center hover:scale-110 shadow-lg relative group"
                 >
-                  <IconMap.LayoutGrid className="w-5 h-5 text-white" />
+                  <LayoutGrid className="w-5 h-5 text-white" />
                   <div className="absolute bottom-full mb-2 px-3 py-1.5 bg-black/80 backdrop-blur-sm text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-all shadow-xl translate-y-2 group-hover:translate-y-0">
                     一键管理首页图标
                     <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 border-x-4 border-x-transparent border-t-4 border-t-black/80" />
