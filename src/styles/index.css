@@ -48,3 +48,36 @@
     transform: translateY(0);
   }
 }
+
+/* ============================================================ */
+/* 彻底解决 sonner toast 左右居中与物理自适应宽度问题 */
+/* ============================================================ */
+
+/* 1. 强制 top-center 容器的子项目在主轴/交叉轴上居中对齐 */
+[data-sonner-toaster][data-x-position="center"] {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important; /* 强制所有 toast 在中轴线上水平居中 */
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+}
+
+/* 2. 强制每个 toast 气泡的宽度自适应其内容，不再撑大，并实现容器内居中 */
+[data-sonner-toaster] [data-sonner-toast] {
+  width: fit-content !important;
+  min-width: unset !important;
+  max-width: 90vw !important; /* 防止超长文本在移动端溢出 */
+  margin-left: auto !important;
+  margin-right: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* 3. 强制 toast 内部的内容容器也进行居中对齐 */
+[data-sonner-toast] [data-content] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
