@@ -1473,44 +1473,55 @@ export function AddShortcutDialog({
                                     </Draggable>
                                   ))}
                                   {userRole === 'ADMIN' && (
-                                    <div 
-                                      className="relative group/item flex-shrink-0" 
-                                      style={{ 
-                                        width: `${iconSize + 32}px`,
-                                        margin: `${iconSpacingY / 2}px ${iconSpacingX / 2}px`
-                                      }}
-                                    >
-                                      {/* 在水平 flex 容器中，新增网址按钮同样需要 flex-shrink-0 避免缩水 */}
-                                      <button
-                                      onClick={() => {
-                                        if (!category.categoryId) {
-                                          alert('系统内置推荐分类不可添加网址。请先保存该分类到数据库，或新建自定义分类。');
-                                          return;
-                                        }
-                                        setEditingSite({ categoryId: category.categoryId, name: '', url: '', iconType: 'FAVICON', iconValue: '', iconColor: '#fff' })
-                                      }}
-                                      className="flex flex-col items-center group cursor-pointer w-full"
-                                      style={{ gap: `${iconTextGap}px` }}
-                                    >
-                                      <div
-                                        className="bg-card/50 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/30 transition-all duration-200"
-                                        style={{
-                                          width: `${iconSize}px`,
-                                          height: `${iconSize}px`,
-                                          borderRadius: borderRadius,
-                                        }}
-                                      >
-                                        <Plus className="w-6 h-6 text-gray-400 group-hover:text-blue-500" />
-                                      </div>
-                                      <span 
-                                        className="text-gray-500 dark:text-gray-400 group-hover:text-blue-500 truncate w-full text-center font-light tracking-wide"
-                                        style={{ fontSize: `${textSize}px` }}
-                                      >
-                                        新增网址
-                                      </span>
-                                    </button>
-                                  </div>
-                                )}
+                                    <Draggable draggableId={`add-new-site-${category.categoryId || catIdx}`} index={category.sites.length} isDragDisabled={true}>
+                                      {(provided, snapshot) => (
+                                        <div 
+                                          ref={provided.innerRef} 
+                                          {...provided.draggableProps} 
+                                          {...provided.dragHandleProps}
+                                          className="relative group/item flex-shrink-0" 
+                                          style={{ 
+                                            ...provided.draggableProps.style,
+                                            width: `${iconSize + 32}px`,
+                                            margin: `${iconSpacingY / 2}px ${iconSpacingX / 2}px`,
+                                            transition: snapshot.isDropAnimating
+                                              ? 'transform 0.12s cubic-bezier(0.2, 1, 0.1, 1)'
+                                              : provided.draggableProps.style?.transition
+                                          }}
+                                        >
+                                          {/* 在水平 flex 容器中，新增网址按钮同样需要 flex-shrink-0 避免缩水 */}
+                                          <button
+                                            onClick={() => {
+                                              if (!category.categoryId) {
+                                                alert('系统内置推荐分类不可添加网址。请先保存该分类到数据库，或新建自定义分类。');
+                                                return;
+                                              }
+                                              setEditingSite({ categoryId: category.categoryId, name: '', url: '', iconType: 'FAVICON', iconValue: '', iconColor: '#fff' })
+                                            }}
+                                            className="flex flex-col items-center group cursor-pointer w-full"
+                                            style={{ gap: `${iconTextGap}px` }}
+                                          >
+                                            <div
+                                              className="bg-card/50 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/30 transition-all duration-200"
+                                              style={{
+                                                width: `${iconSize}px`,
+                                                height: `${iconSize}px`,
+                                                borderRadius: borderRadius,
+                                              }}
+                                            >
+                                              <Plus className="w-6 h-6 text-gray-400 group-hover:text-blue-500" />
+                                            </div>
+                                            <span 
+                                              className="text-gray-500 dark:text-gray-400 group-hover:text-blue-500 truncate w-full text-center font-light tracking-wide"
+                                              style={{ fontSize: `${textSize}px` }}
+                                            >
+                                              新增网址
+                                            </span>
+                                          </button>
+                                        </div>
+                                      )}
+                                    </Draggable>
+                                  )}
                                 {provided.placeholder}
                               </div>
                             )}
