@@ -767,7 +767,7 @@ export function AddShortcutDialog({
         return navService.batchSaveRecommendSites(cat.categoryId, { sites: formattedSites });
       }));
       loadRecommended();
-      toast('✅ 已保存', { duration: 2000 });
+      toast.success('已保存', { duration: 2000 });
     } catch (err) {
       console.error('Batch save all sites error:', err);
     }
@@ -806,7 +806,7 @@ export function AddShortcutDialog({
       const res = await navService.batchSaveRecommendSites(categoryId, { sites: formattedSites });
       if (res.code === 200) {
         loadRecommended();
-        toast('✅ 已保存', { duration: 2000 });
+        toast.success('已保存', { duration: 2000 });
       }
     } catch (err) {
       console.error('Batch save sites error:', err);

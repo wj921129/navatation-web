@@ -396,7 +396,7 @@ export function ManageHomepageShortcutsDialog({
         }
       }
 
-      toast('✅ 已保存', { duration: 2000 });
+      toast.success('已保存', { duration: 2000 });
       onSaveComplete?.();
       onClose();
     } catch (err) {
