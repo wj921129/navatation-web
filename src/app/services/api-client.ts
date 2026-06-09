@@ -137,7 +137,16 @@ async function request<T = any>(
     throw new Error((errorBody as any).message || `请求失败 (${res.status})`);
   }
 
-  return res.json();
+  const json = await res.json();
+
+  // 封装前端处理后端统一响应码逻辑，复用全局
+  if (json && typeof json.code === 'number' && json.code !== 200) {
+    const errMsg = json.message || `业务异常 (${json.code})`;
+    alert(errMsg); // 页面统一提示异常
+    throw new Error(errMsg);
+  }
+
+  return json;
 }
 
 /** 便捷 HTTP 方法封装，统一调用核心 request 函数 */
