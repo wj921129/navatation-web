@@ -19,14 +19,24 @@ interface CalendarWidgetProps {
 export default function CalendarWidget({ id, style, x, y, isEditMode, onStartDrag, onDelete, isDragging = false }: CalendarWidgetProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
+  /**
+   * 处理指针按下事件，用于拖拽
+   * @param e 指针事件对象
+   */
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isEditMode) return;
+    if (!isEditMode) {
+      return;
+    }
     const target = e.target as HTMLElement;
-    if (target.closest('.delete-btn')) return;
+    if (target.closest('.delete-btn')) {
+      return;
+    }
 
     e.preventDefault();
     const container = containerRef.current;
-    if (!container) return;
+    if (!container) {
+      return;
+    }
 
     const rect = container.getBoundingClientRect();
     const offsetX = e.clientX - rect.left;
@@ -35,6 +45,10 @@ export default function CalendarWidget({ id, style, x, y, isEditMode, onStartDra
     onStartDrag(id, 'calendar', style, offsetX, offsetY);
   };
 
+  /**
+   * 根据样式渲染日历组件
+   * @returns 渲染的日历组件
+   */
   const renderStyle = () => {
     switch (style) {
       case 'month':

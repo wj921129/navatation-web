@@ -1,3 +1,7 @@
+/**
+ * @description 前端UI组件：ManageHomepageShortcutsDialog.tsx
+ * @date 2026-06-10
+ */
 import { X, Link, Upload, Trash2, Loader2, Check, RotateCw, Plus, GripVertical, Grid, List } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { toast } from 'sonner';

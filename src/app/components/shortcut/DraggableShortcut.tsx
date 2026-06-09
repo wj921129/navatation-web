@@ -1,3 +1,7 @@
+/**
+ * @description 可拖拽快捷方式组件
+ * @date 2026-06-09
+ */
 import { X as XIcon } from 'lucide-react';
 import { IconMap } from '../ui/IconMap';
 
@@ -15,8 +19,10 @@ interface DraggableShortcutProps {
 }
 
 /**
- * 捷径卡片呈现组件，仅在编辑模式下使用。
- * 由父组件的 @dnd-kit/sortable 提供拖拽支持。
+ * 可拖拽的快捷方式展示组件
+ * 支持在编辑模式下的拖拽排序以及快捷方式信息的编辑和删除操作
+ *
+ * @param props 组件属性
  */
 export function DraggableShortcut({
   shortcut,

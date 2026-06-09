@@ -1,5 +1,10 @@
+﻿/**
+ * @description 顶部停靠栏组件
+ * @date 2026-06-09
+ */
 import { CheckSquare, Shuffle, Sun, Moon, Loader2, LayoutGrid } from 'lucide-react';
 import { useState, useRef } from 'react';
+import { toast } from 'sonner';
 import { Tooltip } from '../ui/Tooltip';
 
 interface TopDockProps {
@@ -52,9 +57,14 @@ export function TopDock({
   const item3Ref = useRef<HTMLDivElement>(null);
   const item4Ref = useRef<HTMLDivElement>(null);
 
+  /**
+   * 处理鼠标在 Dock 上移动的特效计算
+   */
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const container = containerRef.current;
-    if (!container) return;
+    if (!container) {
+      return;
+    }
 
     const mouseX = e.clientX;
     const items = [
@@ -65,7 +75,9 @@ export function TopDock({
     ].filter(Boolean);
 
     items.forEach((item) => {
-      if (!item) return;
+      if (!item) {
+        return;
+      }
       const rect = item.getBoundingClientRect();
       const itemCenterX = rect.left + rect.width / 2;
       const distance = Math.abs(mouseX - itemCenterX);
@@ -88,6 +100,9 @@ export function TopDock({
     });
   };
 
+  /**
+   * 处理鼠标离开 Dock 的恢复特效
+   */
   const handleMouseLeave = () => {
     const items = [
       item1Ref.current,
@@ -96,7 +111,9 @@ export function TopDock({
       item4Ref.current
     ].filter(Boolean);
     items.forEach((item) => {
-      if (!item) return;
+      if (!item) {
+        return;
+      }
       const iconWrapper = item.querySelector('.dock-icon-wrapper') as HTMLElement;
       if (iconWrapper) {
         iconWrapper.style.transform = 'scale(1)';
@@ -104,12 +121,18 @@ export function TopDock({
     });
   };
 
-  // 随机壁纸触发处理器
+  /**
+   * 处理随机壁纸点击事件
+   */
   const handleRandomWallpaperClick = async () => {
-    if (shuffling) return;
+    if (shuffling) {
+      return;
+    }
     setShuffling(true);
     try {
       await onRandomWallpaper();
+    } catch (error: any) {
+      toast.error(error?.message ?? '获取随机壁纸失败');
     } finally {
       // 保持旋转动画至少 800ms，以防接口速度过快没有视觉动效
       setTimeout(() => setShuffling(false), 800);
@@ -218,3 +241,4 @@ export function TopDock({
     </div>
   );
 }
+

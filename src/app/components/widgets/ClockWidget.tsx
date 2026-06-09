@@ -1,3 +1,7 @@
+/**
+ * @description 前端UI组件：ClockWidget.tsx
+ * @date 2026-06-10
+ */
 import { X } from 'lucide-react';
 import { useRef } from 'react';
 import AnalogClock from './AnalogClock';
@@ -32,16 +36,25 @@ export default function ClockWidget({
 }: ClockWidgetProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // 指针按下开始拖动处理器
+  /**
+   * 指针按下开始拖动处理器
+   * @param e 指针事件对象
+   */
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     // 仅在编辑模式下允许拖拽，并且避开删除按钮的触发
-    if (!isEditMode) return;
+    if (!isEditMode) {
+      return;
+    }
     const target = e.target as HTMLElement;
-    if (target.closest('.delete-clock-btn')) return;
+    if (target.closest('.delete-clock-btn')) {
+      return;
+    }
 
     e.preventDefault();
     const container = containerRef.current;
-    if (!container) return;
+    if (!container) {
+      return;
+    }
 
     // 记录初始按下时指针坐标及组件边框尺寸
     const rect = container.getBoundingClientRect();
@@ -54,6 +67,10 @@ export default function ClockWidget({
     onStartDrag(id, style, offsetX, offsetY);
   };
 
+  /**
+   * 根据样式渲染具体时钟组件
+   * @returns 渲染的时钟组件
+   */
   const renderClockStyle = () => {
     switch (style) {
       case 'analog':

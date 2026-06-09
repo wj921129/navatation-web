@@ -1,4 +1,9 @@
+/**
+ * @description 亮度控制 Hook
+ * @date 2026-06-09
+ */
 import { useState, useRef, useCallback } from 'react';
+import { toast } from 'sonner';
 import { settingsService } from '../services/settings-service';
 
 export function useBrightness(
@@ -9,7 +14,9 @@ export function useBrightness(
   // 屏幕背景亮度控制小功能 (仅在深色模式下支持变暗调节，且暂存在本地浏览器缓存中)
   const [bgBrightness, setBgBrightness] = useState(() => {
     const saved = localStorage.getItem('navatation_bg_brightness');
-    if (saved !== null) return Number(saved);
+    if (saved !== null) {
+      return Number(saved);
+    }
     return 80; // 默认深色模式亮度为 80%
   });
   const [isBrightnessOpen, setIsBrightnessOpen] = useState(false);
@@ -47,7 +54,10 @@ export function useBrightness(
     }, 280);
   }, [clearBrightnessTimer]);
 
-  const handleToggleTheme = useCallback(() => {
+  /**
+   * 切换主题
+   */
+  const handleToggleTheme = useCallback(async () => {
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(nextTheme);
 
@@ -59,11 +69,21 @@ export function useBrightness(
       resetBrightnessState();
     }
 
-    if (authState.isLoggedIn) {
-      settingsService.patchSettings({ theme: nextTheme }).catch(console.error);
+    if (!authState.isLoggedIn) {
+      return;
+    }
+
+    try {
+      await settingsService.patchSettings({ theme: nextTheme });
+    } catch (err) {
+      console.error('Toggle theme error:', err);
+      toast.error('保存主题设置失败');
     }
   }, [theme, authState.isLoggedIn, clearBrightnessTimer, resetBrightnessState, setTheme]);
 
+  /**
+   * 鼠标进入主题按钮
+   */
   const handleMouseEnterTheme = useCallback(() => {
     if (theme === 'dark') {
       setIsBrightnessOpen(true);
@@ -72,6 +92,9 @@ export function useBrightness(
     }
   }, [theme, clearBrightnessTimer]);
 
+  /**
+   * 鼠标离开主题按钮
+   */
   const handleMouseLeaveTheme = useCallback(() => {
     if (theme === 'dark' && isBrightnessOpen && !isBrightnessClosing) {
       setIsHoveringBrightness(false);
@@ -82,6 +105,9 @@ export function useBrightness(
     }
   }, [theme, isBrightnessOpen, isBrightnessClosing, clearBrightnessTimer, triggerCloseBrightness]);
 
+  /**
+   * 鼠标进入其他组件
+   */
   const handleMouseEnterOtherWidget = useCallback(() => {
     resetBrightnessState();
   }, [resetBrightnessState]);

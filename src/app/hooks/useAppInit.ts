@@ -1,4 +1,9 @@
+/**
+ * @description 应用初始化 Hook
+ * @date 2026-06-09
+ */
 import { useEffect } from 'react';
+import { toast } from 'sonner';
 import { publicService } from '../services/public-service';
 import { authStore } from '../stores/auth-store';
 import { DEFAULT_SHORTCUTS, DEFAULT_WALLPAPER } from '../../config/app.config';
@@ -39,57 +44,67 @@ export function useAppInit(
 
   // 游客模式下自动拉取超级管理员的配置
   useEffect(() => {
-    if (!authState.isLoggedIn) {
-      publicService.getGuestConfig().then(res => {
-        if (res.code === 200 && res.data) {
-          const config = res.data;
-          
-          if (config.shortcuts && config.shortcuts.length > 0) {
-            const loaded = config.shortcuts.map(item => ({
-              id: item.shortcutId,
-              categoryId: item.categoryId,
-              name: item.name,
-              url: item.url,
-              color: item.iconColor || '#fff',
-              iconType: item.iconType,
-              iconValue: item.iconValue || 'Link',
-              dragId: item.shortcutId || Math.random().toString(36).substring(7)
-            }));
-            setShortcuts(loaded);
-            setTempShortcuts(loaded);
-            // 写入本地游客快捷方式缓存，防止首屏加载闪跃
-            localStorage.setItem('navatation_guest_shortcuts', JSON.stringify(loaded));
-          }
+    if (authState.isLoggedIn) {
+      return;
+    }
 
-          if (config.widgets && config.widgets.length > 0) {
-            const loadedW = config.widgets.map((w: any) => ({
-              id: w.widgetId || `clock-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-              type: w.type,
-              style: w.style,
-              x: Number(w.x),
-              y: Number(w.y),
-              meta: w.meta || {},
-            }));
-            setWidgets(loadedW);
-            setTempWidgets(loadedW);
-            // 写入小组件物理位置本地缓存，消灭首屏浮现跳跃 Bug
-            localStorage.setItem('navatation_widgets', JSON.stringify(loadedW));
-          }
+    const fetchGuestConfig = async () => {
+      try {
+        const res = await publicService.getGuestConfig();
+        if (res.code !== 200 || !res.data) {
+          return;
+        }
 
-          if (config.settings) {
-            setSettings(config.settings);
-            // 写入设置本地缓存
-            localStorage.setItem('navatation_settings', JSON.stringify(config.settings));
-            if (config.settings.backgroundImage) {
-              setBackgroundImage(config.settings.backgroundImage);
-              // 写入壁纸本地缓存，避免壁纸闪烁
-              localStorage.setItem('navatation_wallpaper', config.settings.backgroundImage);
-            }
+        const config = res.data;
+
+        if (config.shortcuts?.length > 0) {
+          const loaded = config.shortcuts.map((item: any) => ({
+            id: item.shortcutId,
+            categoryId: item.categoryId,
+            name: item.name,
+            url: item.url,
+            color: item.iconColor ?? '#fff',
+            iconType: item.iconType,
+            iconValue: item.iconValue ?? 'Link',
+            dragId: item.shortcutId ?? Math.random().toString(36).substring(7)
+          }));
+          setShortcuts(loaded);
+          setTempShortcuts(loaded);
+          // 写入本地游客快捷方式缓存，防止首屏加载闪跃
+          localStorage.setItem('navatation_guest_shortcuts', JSON.stringify(loaded));
+        }
+
+        if (config.widgets?.length > 0) {
+          const loadedW = config.widgets.map((w: any) => ({
+            id: w.widgetId ?? `clock-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+            type: w.type,
+            style: w.style,
+            x: Number(w.x),
+            y: Number(w.y),
+            meta: w.meta ?? {},
+          }));
+          setWidgets(loadedW);
+          setTempWidgets(loadedW);
+          // 写入小组件物理位置本地缓存，消灭首屏浮现跳跃 Bug
+          localStorage.setItem('navatation_widgets', JSON.stringify(loadedW));
+        }
+
+        if (config.settings) {
+          setSettings(config.settings);
+          // 写入设置本地缓存
+          localStorage.setItem('navatation_settings', JSON.stringify(config.settings));
+          if (config.settings.backgroundImage) {
+            setBackgroundImage(config.settings.backgroundImage);
+            // 写入壁纸本地缓存，避免壁纸闪烁
+            localStorage.setItem('navatation_wallpaper', config.settings.backgroundImage);
           }
         }
-      }).catch(err => {
+      } catch (err) {
         console.error('Failed to load guest config:', err);
-      });
-    }
+        toast.error('拉取游客配置失败');
+      }
+    };
+
+    fetchGuestConfig();
   }, [authState.isLoggedIn, setShortcuts, setTempShortcuts, setWidgets, setTempWidgets, setSettings, setBackgroundImage]);
 }

@@ -1,3 +1,7 @@
+/**
+ * @description 工具提示组件
+ * @date 2026-06-09
+ */
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import React from 'react';
 

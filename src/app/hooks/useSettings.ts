@@ -1,4 +1,9 @@
+/**
+ * @description 前端自定义钩子：useSettings.ts
+ * @date 2026-06-10
+ */
 import { useState, useCallback, useEffect } from 'react';
+import { toast } from 'sonner';
 import { settingsService } from '../services/settings-service';
 import { DEFAULT_SETTINGS, DEFAULT_WALLPAPER } from '../../config/app.config';
 
@@ -10,7 +15,7 @@ export function useSettings(
   setSearchEngine: (engine: string) => void
 ) {
   const [backgroundImage, setBackgroundImage] = useState(() => {
-    return localStorage.getItem('navatation_wallpaper') || DEFAULT_WALLPAPER;
+    return localStorage.getItem('navatation_wallpaper') ?? DEFAULT_WALLPAPER;
   });
   
   const [settings, setSettings] = useState(() => {
@@ -37,42 +42,47 @@ export function useSettings(
    * 仅在已登录状态下从后端 API 加载，包括搜索框大小、图标间距、背景图及搜索引擎等。
    */
   const fetchSettings = useCallback(async () => {
-    if (authState.isLoggedIn) {
-      try {
-        // 请求用户个性化配置接口
-        const res = await settingsService.getSettings();
-        if (res.code === 200 && res.data) {
-          const data = res.data;
-          const serverSettings = {
-            searchBoxWidth: data.searchBoxWidth,
-            searchBoxHeight: data.searchBoxHeight,
-            searchBoxMarginTop: data.searchBoxMarginTop,
-            iconSize: data.iconSize,
-            iconRadius: data.iconRadius,
-            iconSpacingX: data.iconSpacingX,
-            iconSpacingY: data.iconSpacingY,
-            iconTextGap: data.iconTextGap,
-            textSize: data.textSize,
-            iconsMarginTop: data.iconsMarginTop,
-            iconsMarginX: data.iconsMarginX || 0,
-          };
-          // 更新前端对应的主题与尺寸配置并缓存至本地
-          setSettings(serverSettings);
-          localStorage.setItem('navatation_settings', JSON.stringify(serverSettings));
-          
-          // 单独更新背景图和默认搜索引擎
-          if (data.backgroundImage) {
-            setBackgroundImage(data.backgroundImage);
-            localStorage.setItem('navatation_wallpaper', data.backgroundImage);
-          }
-          if (data.searchEngine) {
-            setSearchEngine(data.searchEngine);
-            localStorage.setItem('navatation_search_engine', data.searchEngine);
-          }
-        }
-      } catch (err) {
-        console.error('Failed to fetch settings', err);
+    if (!authState.isLoggedIn) {
+      return;
+    }
+    
+    try {
+      // 请求用户个性化配置接口
+      const res = await settingsService.getSettings();
+      if (res.code !== 200 || !res.data) {
+        return;
       }
+      
+      const data = res.data;
+      const serverSettings = {
+        searchBoxWidth: data.searchBoxWidth,
+        searchBoxHeight: data.searchBoxHeight,
+        searchBoxMarginTop: data.searchBoxMarginTop,
+        iconSize: data.iconSize,
+        iconRadius: data.iconRadius,
+        iconSpacingX: data.iconSpacingX,
+        iconSpacingY: data.iconSpacingY,
+        iconTextGap: data.iconTextGap,
+        textSize: data.textSize,
+        iconsMarginTop: data.iconsMarginTop,
+        iconsMarginX: data.iconsMarginX ?? 0,
+      };
+      // 更新前端对应的主题与尺寸配置并缓存至本地
+      setSettings(serverSettings);
+      localStorage.setItem('navatation_settings', JSON.stringify(serverSettings));
+      
+      // 单独更新背景图和默认搜索引擎
+      if (data.backgroundImage) {
+        setBackgroundImage(data.backgroundImage);
+        localStorage.setItem('navatation_wallpaper', data.backgroundImage);
+      }
+      if (data.searchEngine) {
+        setSearchEngine(data.searchEngine);
+        localStorage.setItem('navatation_search_engine', data.searchEngine);
+      }
+    } catch (err) {
+      console.error('Failed to fetch settings', err);
+      toast.error('拉取个性化设置失败');
     }
   }, [authState.isLoggedIn, setSearchEngine]);
 
@@ -110,9 +120,9 @@ export function useSettings(
    * 关闭设置面板（不保存），回滚所有预览配置。
    */
   const handleCloseSettings = useCallback(() => {
-    if (backupSettings !== null) setSettings(backupSettings);
-    if (backupBackgroundImage) setBackgroundImage(backupBackgroundImage);
-    if (backupTheme) setTheme(backupTheme);
+    if (backupSettings !== null) { setSettings(backupSettings); }
+    if (backupBackgroundImage) { setBackgroundImage(backupBackgroundImage); }
+    if (backupTheme) { setTheme(backupTheme); }
     setIsSettingsOpen(false);
   }, [backupSettings, backupBackgroundImage, backupTheme, setTheme]);
 
@@ -129,7 +139,7 @@ export function useSettings(
    * 保存个性化设置。
    * 支持本地草稿批量保存及后端持久化。
    */
-  const handleSaveSettings = useCallback((draftSettings: any, draftBackgroundImage: string, draftTheme: string) => {
+  const handleSaveSettings = useCallback(async (draftSettings: any, draftBackgroundImage: string, draftTheme: string) => {
     // 1. 同步更新前端生效状态与本地缓存
     setSettings(draftSettings);
     localStorage.setItem('navatation_settings', JSON.stringify(draftSettings));
@@ -139,13 +149,18 @@ export function useSettings(
 
     // 2. 异步保存至后端数据库 (若登录)
     if (authState.isLoggedIn) {
-      settingsService.saveSettings({
-        ...draftSettings,
-        backgroundImage: draftBackgroundImage,
-        backgroundType: 'URL',
-        searchEngine: searchEngine,
-        theme: draftTheme
-      }).catch(console.error);
+      try {
+        await settingsService.saveSettings({
+          ...draftSettings,
+          backgroundImage: draftBackgroundImage,
+          backgroundType: 'URL',
+          searchEngine: searchEngine,
+          theme: draftTheme
+        });
+      } catch (err) {
+        console.error('Save settings error:', err);
+        toast.error('保存个性化设置失败');
+      }
     }
 
     // 3. 清除备份数据并关闭对话框
@@ -155,19 +170,25 @@ export function useSettings(
     setIsSettingsOpen(false);
   }, [authState.isLoggedIn, searchEngine, setTheme]);
 
+  /**
+   * 随机更换壁纸
+   */
   const handleRandomWallpaper = useCallback(async () => {
     try {
       const res = await settingsService.getRandomWallpaper();
-      if (res && res.code === 200 && res.data) {
-        const newBg = res.data.wallpaperUrl;
-        setBackgroundImage(newBg);
-        localStorage.setItem('navatation_wallpaper', newBg);
-        if (authState.isLoggedIn) {
-          await settingsService.patchSettings({ backgroundImage: newBg });
-        }
+      if (res?.code !== 200 || !res.data) {
+        return;
+      }
+      
+      const newBg = res.data.wallpaperUrl;
+      setBackgroundImage(newBg);
+      localStorage.setItem('navatation_wallpaper', newBg);
+      if (authState.isLoggedIn) {
+        await settingsService.patchSettings({ backgroundImage: newBg });
       }
     } catch (err) {
       console.error('Failed to trigger random wallpaper', err);
+      toast.error('随机更换壁纸失败');
     }
   }, [authState.isLoggedIn]);
 

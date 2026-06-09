@@ -1,3 +1,7 @@
+/**
+ * @description 自定义快捷方式选项卡组件
+ * @date 2026-06-09
+ */
 import { Link, Upload, Loader2, RotateCw } from 'lucide-react';
 import React from 'react';
 
@@ -17,9 +21,6 @@ interface CustomShortcutTabProps {
   iconRadius: number;
 }
 
-/**
- * CustomShortcutTab 组件/功能描述
- */
 export function CustomShortcutTab({
   customName,
   setCustomName,

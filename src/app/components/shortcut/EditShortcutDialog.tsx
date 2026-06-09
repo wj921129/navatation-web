@@ -1,3 +1,25 @@
+/**
+ * @description 编辑快捷方式对话框
+ * @date 2026-06-09
+ */
+import { X, Upload, Loader2, Check, Link, RotateCw } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { navService } from '../../services/nav-service';
+import { BaseModal } from '../ui/BaseModal';
+
+interface EditShortcutDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (shortcut: { name: string; url: string; iconType: string; iconValue: string }) => void;
+  shortcut: {
+    id?: number | string;
+    name: string;
+    url: string;
+    iconType?: string;
+    iconValue?: string;
+  };
+}
+
 import { X, Upload, Loader2, Check, Link, RotateCw } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { navService } from '../../services/nav-service';
@@ -23,7 +45,9 @@ interface EditShortcutDialogProps {
  */
 const isValidDomainOrUrl = (input: string): boolean => {
   const url = input.trim();
-  if (!url) return false;
+  if (!url) {
+    return false;
+  }
   // 匹配常见域名结构，要求包含 dot 且顶级域名(TLD)至少为 2 位字母，排除以 dot 结尾
   const domainRegex = /^(https?:\/\/)?([a-zA-Z0-9][-a-zA-Z0-9]{0,62}\.)+[a-zA-Z]{2,63}(\/.*)?$/;
   return domainRegex.test(url);
@@ -34,7 +58,9 @@ const isValidDomainOrUrl = (input: string): boolean => {
  */
 const getDebounceDelay = (input: string): number => {
   const url = input.trim();
-  if (!url) return 500;
+  if (!url) {
+    return 500;
+  }
   
   let host = '';
   try {
@@ -46,7 +72,9 @@ const getDebounceDelay = (input: string): number => {
   }
   
   const parts = host.split('.');
-  if (parts.length < 2) return 500;
+  if (parts.length < 2) {
+    return 500;
+  }
   
   const tld = parts[parts.length - 1].toLowerCase();
   
@@ -71,7 +99,9 @@ const getDebounceDelay = (input: string): number => {
 };
 
 /**
- * EditShortcutDialog 组件/功能描述
+ * 编辑快捷方式对话框组件
+ * 用于修改已存在的快捷方式的网址、名称和图标
+ * @param props 包含弹窗状态、保存回调和快捷方式数据等
  */
 export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditShortcutDialogProps) {
   const [name, setName] = useState(shortcut.name);
@@ -94,7 +124,11 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
     setDetectedIcons([]);
   }, [shortcut]);
 
-  // 触发网址图标搜索的核心逻辑
+  /**
+   * 触发网址图标搜索的核心逻辑
+   * @param currentUrl 当前输入的网址
+   * @param force 是否强制触发搜索
+   */
   const triggerSearch = (currentUrl: string, force: boolean = false) => {
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
@@ -129,9 +163,13 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
     setDetectedIcons([]);
 
     const handleIconResult = (iconUrl: string) => {
-      if (!iconUrl) return;
+      if (!iconUrl) {
+        return;
+      }
       setDetectedIcons(prev => {
-        if (prev.includes(iconUrl)) return prev;
+        if (prev.includes(iconUrl)) {
+          return prev;
+        }
         const newIcons = [...prev, iconUrl];
         if (newIcons.length === 1) {
           setIconValue(iconUrl);
@@ -154,10 +192,13 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
 
     // 3. 后端抓取
     navService.fetchFavicon(fullUrl).then(res => {
-      if (res.code === 200 && res.data?.faviconUrl) {
+      if (res?.code === 200 && res?.data?.faviconUrl) {
         handleIconResult(res.data.faviconUrl);
       }
-    }).catch(() => {});
+    }).catch(e => {
+      // 忽略后台抓取失败，不影响主流程
+      console.error('获取图标失败', e);
+    });
   };
 
   // 当网址链接改变且不等于原网址时，防抖并并行多路检测网站图标
@@ -190,23 +231,32 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
     }, delay);
 
     return () => {
-      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
     };
   }, [url, shortcut.url, iconType]);
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
-  // 上传自定义图标并更新图标的值与类型
+  /**
+   * 上传自定义图标并更新图标的值与类型
+   * @param e 文件上传事件
+   */
   const handleIconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      return;
+    }
     // 重置 input 的 value，确保同名文件可再次上传触发 onChange
     e.target.value = '';
     setFaviconStatus('uploading');
     setUploadError(null);
     try {
       const res = await navService.uploadIcon(file);
-      if (res.code === 200 && res.data?.iconUrl) {
+      if (res?.code === 200 && res?.data?.iconUrl) {
         const url = res.data.iconUrl;
         setIconValue(url);
         setIconType('CUSTOM_UPLOAD');
@@ -214,15 +264,19 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
         setDetectedIcons([url]);
         setFaviconStatus('detected');
       } else {
-        setUploadError(res.message || '上传失败');
+        setUploadError(res?.message ?? '上传失败');
         setFaviconStatus('error');
       }
     } catch (e) {
-      setUploadError(String(e));
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      setUploadError(errorMessage);
       setFaviconStatus('error');
     }
   };
 
+  /**
+   * 保存修改并关闭弹窗
+   */
   const handleSave = () => {
     if (name.trim() && url.trim()) {
       onSave({

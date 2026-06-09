@@ -1,3 +1,7 @@
+/**
+ * @description 前端UI组件：AppDialogs.tsx
+ * @date 2026-06-10
+ */
 import React from 'react';
 import { SettingsDialog } from '../settings/SettingsDialog';
 import { LoginDialog } from '../auth/LoginDialog';

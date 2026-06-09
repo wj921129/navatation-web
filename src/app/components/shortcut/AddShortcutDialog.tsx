@@ -1,3 +1,7 @@
+/**
+ * @description 前端UI组件：AddShortcutDialog.tsx
+ * @date 2026-06-10
+ */
 import { X, Link, Upload, Trash2, Loader2, Check, RotateCw, Plus, Edit3, GripVertical, Grid, List, FolderPlus } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { toast } from 'sonner';
@@ -28,10 +32,16 @@ import { recommendedCategories, RecommendedSite, CategoryGroup } from '../../con
 
 import { isValidDomainOrUrl, getDebounceDelay, useFaviconDetector } from '../../hooks/useFaviconDetector';
 import { CustomShortcutTab } from './CustomShortcutTab';
+import { RecommendSiteItem } from './RecommendSiteItem';
+import { AdminDock } from './AdminDock';
+import { PendingShortcutsList } from './PendingShortcutsList';
+import { AdminCategoryModal } from './AdminCategoryModal';
+import { BatchCategoryList } from './BatchCategoryList';
 
 /**
  * 添加捷径对话框组件。
  * 支持浏览并选择推荐网站，以及输入链接与图标来自定义创建捷径。
+ * 创建日期: 2026-06-09
  */
 export function AddShortcutDialog({
   isOpen,
@@ -607,76 +617,15 @@ export function AddShortcutDialog({
       >
           {/* 左侧悬浮功能面板 (Dock) - 仅在推荐页签的管理员模式下显示 */}
           {userRole === 'ADMIN' && activeTab === 'recommended' && (
-            <div className="absolute top-1/2 -translate-y-1/2 -left-[80px] bg-card/95 backdrop-blur-xl border border-border/80 rounded-full p-3 flex flex-col items-center gap-4 shadow-2xl z-50 animate-in fade-in slide-in-from-left-8 duration-300">
-              
-              {/* 模式切换 (图标/列表) */}
-              <div className="group relative flex items-center justify-center">
-                <button
-                  onClick={() => setIsBatchMode(!isBatchMode)}
-                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm border cursor-pointer ${
-                    !isBatchMode 
-                      ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-400' 
-                      : 'bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-900/30 dark:border-indigo-800 dark:text-indigo-400'
-                  }`}
-                >
-                  {!isBatchMode ? <Grid className="w-5 h-5" /> : <List className="w-5 h-5" />}
-                </button>
-                <div className="absolute left-full ml-4 px-3 py-2 bg-gray-800/95 backdrop-blur-sm text-white text-sm font-medium rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-all shadow-xl z-50 translate-x-[-10px] group-hover:translate-x-0">
-                  切换为{!isBatchMode ? '列表管理' : '图标管理'}
-                  <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 border-y-4 border-y-transparent border-r-4 border-r-gray-800/95" />
-                </div>
-              </div>
-
-              <div className="w-8 h-[1px] bg-border/60" />
-
-              {/* 保存全部更改 */}
-              <div className="group relative flex items-center justify-center">
-                <button
-                  onClick={handleSaveAllCategories}
-                  className="w-12 h-12 rounded-full flex items-center justify-center bg-green-50 text-green-600 border border-green-200 hover:bg-green-100 hover:scale-105 dark:bg-green-900/30 dark:border-green-800 dark:text-green-400 dark:hover:bg-green-900/50 transition-all duration-300 shadow-sm cursor-pointer"
-                >
-                  <Check className="w-5 h-5" />
-                </button>
-                <div className="absolute left-full ml-4 px-3 py-2 bg-gray-800/95 backdrop-blur-sm text-white text-sm font-medium rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-all shadow-xl z-50 translate-x-[-10px] group-hover:translate-x-0">
-                  保存全部更改
-                  <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 border-y-4 border-y-transparent border-r-4 border-r-gray-800/95" />
-                </div>
-              </div>
-
-              {/* 新增分类 */}
-              {!isBatchMode && (
-                <div className="group relative flex items-center justify-center">
-                  <button
-                    onClick={() => setEditingCategory({ category: '', iconValue: 'Folder', sortOrder: categories.length })}
-                    className="w-12 h-12 rounded-full flex items-center justify-center bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100 hover:scale-105 dark:bg-amber-900/30 dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-900/50 transition-all duration-300 shadow-sm cursor-pointer"
-                  >
-                    <FolderPlus className="w-5 h-5" />
-                  </button>
-                  <div className="absolute left-full ml-4 px-3 py-2 bg-gray-800/95 backdrop-blur-sm text-white text-sm font-medium rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-all shadow-xl z-50 translate-x-[-10px] group-hover:translate-x-0">
-                    新增分类
-                    <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 border-y-4 border-y-transparent border-r-4 border-r-gray-800/95" />
-                  </div>
-                </div>
-              )}
-
-              {/* 一键刷新全部图标 */}
-              {isBatchMode && (
-                <div className="group relative flex items-center justify-center">
-                  <button
-                    onClick={handleBatchRefreshAllIcons}
-                    disabled={isAllRefreshing}
-                    className="w-12 h-12 rounded-full flex items-center justify-center bg-purple-50 text-purple-600 border border-purple-200 hover:bg-purple-100 hover:scale-105 dark:bg-purple-900/30 dark:border-purple-800 dark:text-purple-400 dark:hover:bg-purple-900/50 transition-all duration-300 shadow-sm disabled:opacity-50 disabled:hover:scale-100 cursor-pointer"
-                  >
-                    <RotateCw className={`w-5 h-5 ${isAllRefreshing ? 'animate-spin' : ''}`} />
-                  </button>
-                  <div className="absolute left-full ml-4 px-3 py-2 bg-gray-800/95 backdrop-blur-sm text-white text-sm font-medium rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-all shadow-xl z-50 translate-x-[-10px] group-hover:translate-x-0">
-                    {isAllRefreshing ? '正在刷新...' : '一键刷新图标'}
-                    <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 border-y-4 border-y-transparent border-r-4 border-r-gray-800/95" />
-                  </div>
-                </div>
-              )}
-
-            </div>
+            <AdminDock
+              isBatchMode={isBatchMode}
+              setIsBatchMode={setIsBatchMode}
+              handleSaveAllCategories={handleSaveAllCategories}
+              setEditingCategory={setEditingCategory}
+              categoriesLength={categories.length}
+              handleBatchRefreshAllIcons={handleBatchRefreshAllIcons}
+              isAllRefreshing={isAllRefreshing}
+            />
           )}
 
           <div
@@ -746,220 +695,19 @@ export function AddShortcutDialog({
                     {isBatchMode ? (
                       <div className="space-y-8">
                         <input type="file" ref={rowFileInputRef} onChange={handleRowIconUpload} className="hidden" accept="image/*" />
-                        {batchEditData.map((category, catIdx) => (
-                          <div key={category.categoryId || catIdx} className="bg-muted/40 border border-border p-6 rounded-3xl shadow-sm space-y-4">
-                            <div className="flex items-center justify-between border-b border-border pb-3">
-                              <div className="flex items-center gap-2">
-                                <category.icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                                <h3 className="text-base font-medium">{category.category}</h3>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <button
-                                  onClick={() => handleBatchRefreshCategoryIcons(catIdx)}
-                                  className="flex items-center gap-1 px-3 py-1.5 bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-lg text-xs cursor-pointer transition-colors"
-                                  title="批量刷新当前分类下所有网址的图标"
-                                >
-                                  <RotateCw className="w-3.5 h-3.5" /> 一键刷新图标
-                                </button>
-                                <button
-                                  onClick={() => handleAddEmptyRow(catIdx)}
-                                  className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg text-xs cursor-pointer transition-colors"
-                                >
-                                  <Plus className="w-3.5 h-3.5" /> 新增网址
-                                </button>
-                                <button
-                                  onClick={() => handleSaveCategorySites(category)}
-                                  className="flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs cursor-pointer transition-colors"
-                                >
-                                  保存修改
-                                </button>
-                              </div>
-                            </div>
-
-                            <div className="space-y-3">
-                              {category.sites.length === 0 ? (
-                                <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-6">暂无网址，请点击右上方“新增网址”</p>
-                              ) : (
-                                <>
-                                  <Droppable droppableId={catIdx.toString()} direction="vertical">
-                                    {(provided) => (
-                                      <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-1.5">
-                                        {/* 卡片列表式 */}
-                                        {category.sites.map((site, siteIdx) => {
-                                          const rowKey = `${catIdx}-${siteIdx}`;
-                                          const isLoading = !!rowLoadingStatus[rowKey];
-                                          const detectedIcons = rowDetectedIcons[rowKey] || [];
-                                          
-                                          return (
-                                            <Draggable key={site.dragId!} draggableId={site.dragId!} index={siteIdx}>
-                                              {(provided, snapshot) => (
-                                                <div 
-                                                  ref={provided.innerRef} 
-                                                  {...provided.draggableProps} 
-                                                  {...provided.dragHandleProps}
-                                                  className="bg-background border border-border/60 hover:border-border/100 rounded-xl p-2 flex flex-col gap-2 shadow-sm hover:shadow-md transition-shadow transition-colors duration-200"
-                                                  style={{
-                                                    ...provided.draggableProps.style,
-                                                    transition: snapshot.isDropAnimating
-                                                      ? 'transform 0.12s cubic-bezier(0.2, 1, 0.1, 1)'
-                                                      : provided.draggableProps.style?.transition
-                                                  }}
-                                                >
-                                                  <div className="flex items-center gap-2 w-full">
-                                          {/* 拖拽把手 */}
-                                          <div className="flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-400 hover:text-blue-500">
-                                            <GripVertical className="w-5 h-5" />
-                                          </div>
-                                          {/* 图标展示区 */}
-                                          <div className="flex-shrink-0 flex items-center justify-center bg-card shadow-inner border border-border overflow-hidden w-10 h-10 rounded-full relative">
-                                            {isLoading ? (
-                                              <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
-                                            ) : (
-                                              (() => {
-                                                if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
-                                                  return <img src={site.iconValue} alt={site.name} className="w-[24px] h-[24px] object-contain" onError={(e) => {
-                                                    (e.target as any).style.display = 'none';
-                                                  }} />;
-                                                }
-                                                const IconComponent = IconMap[site.iconValue || ''] || Link;
-                                                return (
-                                                  <IconComponent
-                                                    style={{
-                                                      color: site.color || '#333',
-                                                      width: `24px`,
-                                                      height: `24px`,
-                                                    }}
-                                                    strokeWidth={2}
-                                                  />
-                                                );
-                                              })()
-                                            )}
-                                          </div>
-                                          
-                                          {/* 输入区域 - 单行紧凑排列 */}
-                                          <div className="flex items-center gap-2">
-                                            <div className="w-48 flex-shrink-0">
-                                              <input
-                                                type="text"
-                                                value={site.name}
-                                                onChange={(e) => updateBatchEditSite(catIdx, siteIdx, { name: e.target.value })}
-                                                className="w-full px-2 py-2 text-sm bg-card border border-border rounded-lg outline-none focus:border-blue-500 focus:bg-background transition-colors"
-                                                placeholder="名称"
-                                                title="网站名称"
-                                              />
-                                            </div>
-                                            <div className="w-80 flex-shrink-0">
-                                              <input
-                                                type="text"
-                                                value={site.url}
-                                                onChange={(e) => updateBatchEditSite(catIdx, siteIdx, { url: e.target.value })}
-                                                className="w-full px-2 py-2 text-sm bg-card border border-border rounded-lg outline-none focus:border-blue-500 focus:bg-background transition-colors"
-                                                placeholder="https://..."
-                                                title="网址链接"
-                                              />
-                                            </div>
-                                          </div>
-
-                                          {/* 多图标选择区域 - 直接放在同一行 */}
-                                          {detectedIcons.length > 0 && (
-                                            <div className="flex items-center gap-1.5 border-l border-border/50 pl-2 flex-1 overflow-x-auto scrollbar-none">
-                                              {detectedIcons.map((url, idx) => (
-                                                <button
-                                                  key={idx}
-                                                  onClick={(e) => {
-                                                    e.preventDefault();
-                                                    updateBatchEditSite(catIdx, siteIdx, {
-                                                      iconType: 'FAVICON',
-                                                      iconValue: url
-                                                    });
-                                                  }}
-                                                  className={`w-9 h-9 flex-shrink-0 bg-card shadow-sm border rounded-lg flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
-                                                    site.iconValue === url ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-border hover:border-gray-400 dark:hover:border-gray-500'
-                                                  }`}
-                                                  title="点击使用此图标"
-                                                >
-                                                  <img
-                                                    src={url}
-                                                    alt="Icon"
-                                                    className="w-5 h-5 object-contain"
-                                                  />
-                                                </button>
-                                              ))}
-                                              <input
-                                                type="text"
-                                                value={site.iconValue || ''}
-                                                readOnly={site.iconType === 'FAVICON'}
-                                                onChange={(e) => updateBatchEditSite(catIdx, siteIdx, { iconValue: e.target.value, iconType: 'CUSTOM_URL' })}
-                                                className={`w-56 px-2 py-1.5 text-xs bg-card border border-border rounded-md outline-none transition-colors ml-2 flex-shrink-0 ${site.iconType === 'FAVICON' ? 'text-gray-400 cursor-text' : 'text-foreground focus:border-blue-500'}`}
-                                                placeholder="手动输入自定义图标URL"
-                                                title={site.iconType === 'FAVICON' ? "搜索结果不可编辑，可双击复制" : "手动输入自定义图标URL"}
-                                              />
-                                              <button
-                                                onClick={(e) => {
-                                                  e.preventDefault();
-                                                  setRowDetectedIcons(prev => ({ ...prev, [rowKey]: [] }));
-                                                }}
-                                                className="w-9 h-9 flex-shrink-0 text-gray-400 hover:text-red-500 rounded-lg flex items-center justify-center transition-colors cursor-pointer ml-1"
-                                                title="清除多余图标选项"
-                                              >
-                                                <Trash2 className="w-4 h-4" />
-                                              </button>
-                                            </div>
-                                          )}
-                                          {!detectedIcons.length && <div className="flex-1"></div>}
-
-                                          {/* 操作按钮区 */}
-                                          <div className="flex-shrink-0 flex items-center gap-1">
-                                            <button
-                                              onClick={() => handleDetectRowIcon(catIdx, siteIdx)}
-                                              disabled={isLoading}
-                                              className="p-2 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
-                                              title="自动刷新并检测网站图标"
-                                            >
-                                              <RotateCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-                                            </button>
-                                            <button
-                                              onClick={() => handleTriggerRowUpload(catIdx, siteIdx)}
-                                              disabled={isLoading}
-                                              className="p-2 bg-card border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-700 dark:text-gray-300 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
-                                              title="上传本地图片"
-                                            >
-                                              <Upload className="w-3.5 h-3.5" />
-                                            </button>
-                                            <button
-                                              onClick={() => handleDeleteRow(catIdx, siteIdx)}
-                                              className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors cursor-pointer"
-                                              title="移除此行"
-                                            >
-                                              <Trash2 className="w-3.5 h-3.5" />
-                                            </button>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    )}
-                                  </Draggable>
-                                          );
-                                        })}
-                                        {provided.placeholder}
-                                      </div>
-                                    )}
-                                  </Droppable>
-                                  
-                                  {/* Beautiful + button to add new site */}
-                                  <button
-                                    onClick={() => handleAddEmptyRow(catIdx)}
-                                    className="w-full mt-2 py-3 border-2 border-dashed border-border hover:border-blue-400 hover:bg-blue-50/50 dark:hover:border-blue-500/50 dark:hover:bg-blue-900/10 rounded-xl flex items-center justify-center gap-2 text-gray-400 hover:text-blue-500 transition-all cursor-pointer group"
-                                  >
-                                    <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-neutral-800 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 flex items-center justify-center transition-colors">
-                                      <Plus className="w-4 h-4" />
-                                    </div>
-                                    <span className="text-xs font-medium">添加新网址</span>
-                                  </button>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        ))}
+                        <BatchCategoryList
+                          batchEditData={batchEditData}
+                          rowLoadingStatus={rowLoadingStatus}
+                          rowDetectedIcons={rowDetectedIcons}
+                          handleBatchRefreshCategoryIcons={handleBatchRefreshCategoryIcons}
+                          handleAddEmptyRow={handleAddEmptyRow}
+                          handleSaveCategorySites={handleSaveCategorySites}
+                          updateBatchEditSite={updateBatchEditSite}
+                          setRowDetectedIcons={setRowDetectedIcons}
+                          handleDetectRowIcon={handleDetectRowIcon}
+                          handleTriggerRowUpload={handleTriggerRowUpload}
+                          handleDeleteRow={handleDeleteRow}
+                        />
                       </div>
                     ) : (
                       <DndContext
@@ -1112,59 +860,11 @@ export function AddShortcutDialog({
 
               {/* Right: Pending Shortcuts */}
               {!isBatchMode && (
-                <div className="col-span-1 bg-background border-l border-border overflow-y-auto transition-colors duration-300">
-                  <div className="p-4">
-                  <h3 className="text-sm font-medium mb-4">本次添加 ({pendingShortcuts.length})</h3>
-                  {pendingShortcuts.length === 0 ? (
-                    <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-8">暂无选择</p>
-                  ) : (
-                    <div className="space-y-3">
-                      {pendingShortcuts.map((shortcut, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center gap-3 bg-card p-3 rounded-lg border border-border group transition-all duration-200"
-                        >
-                          <div
-                            className="flex-shrink-0 bg-background flex items-center justify-center shadow-sm border border-border"
-                            style={{
-                              width: '40px',
-                              height: '40px',
-                              borderRadius: `${iconRadius}%`,
-                            }}
-                          >
-                            {(shortcut as any).iconType === 'FAVICON' || (shortcut as any).iconType === 'CUSTOM_URL' || (shortcut as any).iconType === 'CUSTOM_UPLOAD' ? (
-                              <img
-                                src={(shortcut as any).iconValue}
-                                alt={shortcut.name}
-                                style={{ width: '50%', height: '50%', objectFit: 'contain' }}
-                              />
-                            ) : (
-                              <shortcut.icon
-                                style={{
-                                  color: shortcut.color,
-                                  width: '20px',
-                                  height: '20px',
-                                }}
-                                strokeWidth={2}
-                              />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm text-gray-700 dark:text-gray-300 truncate">{shortcut.name}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{shortcut.url}</p>
-                          </div>
-                          <button
-                            onClick={() => handleRemoveFromPending(index)}
-                            className="flex-shrink-0 p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-950/30 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
+                <PendingShortcutsList
+                  pendingShortcuts={pendingShortcuts}
+                  iconRadius={iconRadius}
+                  handleRemoveFromPending={handleRemoveFromPending}
+                />
               )}
             </div>
           </div>
@@ -1172,47 +872,11 @@ export function AddShortcutDialog({
       </BaseModal>
 
       {/* Admin Modals */}
-      <BaseModal
-        isOpen={!!editingCategory}
-        onClose={() => setEditingCategory(null)}
-        animationType="scale"
-        position="center"
-        containerClassName="bg-card p-6 rounded-2xl w-96 shadow-xl"
-        overlayClassName="bg-black/50 backdrop-blur-sm"
-        zIndex={60}
-      >
-        <h3 className="text-lg font-medium mb-4">{editingCategory?.categoryId ? '编辑分类' : '新增分类'}</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm text-gray-500 mb-1 block">分类名称</label>
-                <input type="text" className="w-full px-3 py-2 border rounded-lg bg-background" value={editingCategory?.category || ''} onChange={e => editingCategory && setEditingCategory({...editingCategory, category: e.target.value})} />
-              </div>
-              <div>
-                <label className="text-sm text-gray-500 mb-1 block">图标 (lucide-react name)</label>
-                <input type="text" className="w-full px-3 py-2 border rounded-lg bg-background" value={editingCategory?.iconValue || ''} onChange={e => editingCategory && setEditingCategory({...editingCategory, iconValue: e.target.value})} />
-              </div>
-              <div>
-                <label className="text-sm text-gray-500 mb-1 block">排序</label>
-                <input type="number" step="0.01" className="w-full px-3 py-2 border rounded-lg bg-background" value={editingCategory?.sortOrder || 0} onChange={e => editingCategory && setEditingCategory({...editingCategory, sortOrder: Number(e.target.value)})} />
-              </div>
-            </div>
-            <div className="mt-6 flex justify-end gap-3">
-              <button onClick={() => setEditingCategory(null)} className="px-4 py-2 border rounded-lg hover:bg-gray-50">取消</button>
-              <button onClick={() => {
-                const req = { name: editingCategory.category, icon: editingCategory.iconValue, sortOrder: editingCategory.sortOrder };
-                const p = editingCategory.categoryId 
-                  ? navService.updateRecommendCategory(editingCategory.categoryId, req)
-                  : navService.addRecommendCategory(req);
-                p.then(() => { 
-                  loadRecommended(); 
-                  setEditingCategory(null); 
-                }).catch(err => {
-                  console.error('保存分类失败', err);
-                  toast.warning('保存分类失败，请重试');
-                });
-              }} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">保存</button>
-            </div>
-      </BaseModal>
+      <AdminCategoryModal
+        editingCategory={editingCategory}
+        setEditingCategory={setEditingCategory}
+        loadRecommended={loadRecommended}
+      />
 
       <EditShortcutDialog
         isOpen={!!editingSite}
@@ -1269,103 +933,5 @@ export function AddShortcutDialog({
           }}
         />
     </>
-  );
-}
-
-interface DraggableRecommendSiteProps {
-  site: any;
-  catIdx: number;
-  iconSize: number;
-  borderRadius: string;
-  iconTextGap: number;
-  textSize: number;
-  userRole?: string;
-  category: any;
-  setEditingSite: (site: any) => void;
-  setCategories: React.Dispatch<React.SetStateAction<CategoryGroup[]>>;
-  handleAddRecommendedToPending: (site: any) => void;
-}
-
-function RecommendSiteItem({
-  site,
-  catIdx,
-  iconSize,
-  borderRadius,
-  iconTextGap,
-  textSize,
-  userRole,
-  category,
-  setEditingSite,
-  setCategories,
-  handleAddRecommendedToPending,
-}: DraggableRecommendSiteProps) {
-  return (
-    <div 
-      className="relative group/item flex-shrink-0"
-      style={{ width: `${iconSize + 32}px` }}
-    >
-      {/* 使用 flex-shrink-0 保证图标在横向 flex 容器中不被挤压变形 */}
-      <div
-        onClick={() => {
-          handleAddRecommendedToPending(site);
-        }}
-        className="flex flex-col items-center group cursor-pointer w-full"
-        style={{ gap: `${iconTextGap}px` }}
-      >
-        <div
-          className="bg-card flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all duration-200 border border-border overflow-hidden"
-          style={{
-            width: `${iconSize}px`,
-            height: `${iconSize}px`,
-            borderRadius: borderRadius,
-          }}
-        >
-          {(() => {
-            if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
-              return <img src={site.iconValue} alt={site.name} style={{ width: '50%', height: '50%', objectFit: 'contain' }} />;
-            }
-            return (
-              <site.icon
-                style={{
-                  color: site.color,
-                  width: `${iconSize * 0.5}px`,
-                  height: `${iconSize * 0.5}px`,
-                }}
-                strokeWidth={2}
-              />
-            );
-          })()}
-        </div>
-        <span 
-          className="text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors truncate w-full text-center px-1 font-light tracking-wide"
-          style={{ fontSize: `${textSize}px` }}
-        >
-          {site.name}
-        </span>
-      </div>
-      {userRole === 'ADMIN' && (
-        <div className="absolute -top-2 -right-2 hidden group-hover/item:flex items-center gap-1 bg-background border border-border rounded shadow-sm p-0.5 z-10">
-          <button onClick={(e) => { 
-            e.stopPropagation(); 
-            if (!category.categoryId) {
-              toast.warning('系统内置推荐网址不可直接编辑。请通过右上角"新增分类"建立数据库数据后再添加。');
-              return;
-            }
-            setEditingSite({ ...site, iconColor: site.iconColor || site.color, categoryId: category.categoryId }); 
-          }} className="p-1 text-gray-400 hover:text-blue-500"><Edit3 className="w-3 h-3" /></button>
-          <button onClick={(e) => { 
-            e.stopPropagation(); 
-            setCategories(prev => {
-              const copy = [...prev];
-              copy[catIdx] = {
-                ...copy[catIdx],
-                sites: copy[catIdx].sites.filter((s: any) => s.dragId !== site.dragId)
-              };
-              return copy;
-            });
-          }} className="p-1 text-gray-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
-        </div>
-      )}
-    </div>
   );
 }

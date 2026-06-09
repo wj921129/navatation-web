@@ -1,3 +1,7 @@
+/**
+ * @description 网站图标检测 Hook
+ * @date 2026-06-09
+ */
 import { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import { navService } from '../services/nav-service';

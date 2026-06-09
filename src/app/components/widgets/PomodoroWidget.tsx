@@ -30,15 +30,24 @@ export default function PomodoroWidget({
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  /**
+   * 切换计时器运行状态
+   */
   const toggleTimer = useCallback(() => {
     setIsRunning(prev => !prev);
   }, []);
 
+  /**
+   * 重置计时器
+   */
   const resetTimer = useCallback(() => {
     setIsRunning(false);
     setTimeLeft(mode === 'work' ? 25 * 60 : 5 * 60);
   }, [mode]);
 
+  /**
+   * 切换工作/休息模式
+   */
   const switchMode = useCallback(() => {
     const newMode = mode === 'work' ? 'break' : 'work';
     setMode(newMode);
@@ -62,18 +71,30 @@ export default function PomodoroWidget({
       clearInterval(timerRef.current);
     }
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
     };
   }, [isRunning]);
 
+  /**
+   * 处理指针按下事件，用于拖拽
+   * @param e 指针事件对象
+   */
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isEditMode) return;
+    if (!isEditMode) {
+      return;
+    }
     const target = e.target as HTMLElement;
-    if (target.closest('.no-drag')) return;
+    if (target.closest('.no-drag')) {
+      return;
+    }
 
     e.preventDefault();
     const container = containerRef.current;
-    if (!container) return;
+    if (!container) {
+      return;
+    }
 
     const rect = container.getBoundingClientRect();
     const offsetX = e.clientX - rect.left;
@@ -82,6 +103,11 @@ export default function PomodoroWidget({
     onStartDrag(id, 'pomodoro', offsetX, offsetY);
   };
 
+  /**
+   * 格式化时间为 mm:ss
+   * @param seconds 秒数
+   * @returns 格式化后的字符串
+   */
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;

@@ -1,3 +1,7 @@
+﻿/**
+ * @description 搜索框组件
+ * @date 2026-06-09
+ */
 import { Search } from 'lucide-react';
 import { useState } from 'react';
 import { SearchEngineSelect, searchEngines } from './SearchEngineSelect';
@@ -20,17 +24,25 @@ interface SearchBoxProps {
 export function SearchBox({ searchEngine, onSearchEngineChange, onAiSearch, settings }: SearchBoxProps) {
   const [query, setQuery] = useState('');
 
+  /**
+   * 处理搜索提交事件
+   */
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (query.trim()) {
-      const engine = searchEngines.find(ev => ev.value === searchEngine);
-      if (engine) {
-        if (engine.url.startsWith('ai://')) {
-          onAiSearch?.(query, engine.value);
-        } else {
-          window.open(`${engine.url}${encodeURIComponent(query)}`, '_blank');
-        }
-      }
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) {
+      return;
+    }
+
+    const engine = searchEngines.find(ev => ev.value === searchEngine);
+    if (!engine) {
+      return;
+    }
+
+    if (engine.url.startsWith('ai://')) {
+      onAiSearch?.(trimmedQuery, engine.value);
+    } else {
+      window.open(`${engine.url}${encodeURIComponent(trimmedQuery)}`, '_blank');
     }
   };
 
@@ -64,3 +76,4 @@ export function SearchBox({ searchEngine, onSearchEngineChange, onAiSearch, sett
     </form>
   );
 }
+

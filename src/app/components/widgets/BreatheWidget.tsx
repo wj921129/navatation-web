@@ -27,8 +27,11 @@ export default function BreatheWidget({
   const containerRef = useRef<HTMLDivElement>(null);
   const [phase, setPhase] = useState<'idle' | 'inhale' | 'hold' | 'exhale'>('idle');
 
+  // 在副作用中处理呼吸状态切换
   useEffect(() => {
-    if (phase === 'idle') return;
+    if (phase === 'idle') {
+      return;
+    }
 
     let timeout: NodeJS.Timeout;
     if (phase === 'inhale') {
@@ -39,9 +42,14 @@ export default function BreatheWidget({
       timeout = setTimeout(() => setPhase('inhale'), 4000); // 呼气 4 秒
     }
 
-    return () => clearTimeout(timeout);
+    return () => {
+      clearTimeout(timeout);
+    };
   }, [phase]);
 
+  /**
+   * 切换呼吸状态
+   */
   const toggleBreathe = () => {
     if (phase === 'idle') {
       setPhase('inhale');
@@ -50,14 +58,24 @@ export default function BreatheWidget({
     }
   };
 
+  /**
+   * 处理指针按下事件，用于拖拽
+   * @param e 指针事件对象
+   */
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isEditMode) return;
+    if (!isEditMode) {
+      return;
+    }
     const target = e.target as HTMLElement;
-    if (target.closest('.no-drag')) return;
+    if (target.closest('.no-drag')) {
+      return;
+    }
 
     e.preventDefault();
     const container = containerRef.current;
-    if (!container) return;
+    if (!container) {
+      return;
+    }
 
     const rect = container.getBoundingClientRect();
     const offsetX = e.clientX - rect.left;
@@ -66,13 +84,22 @@ export default function BreatheWidget({
     onStartDrag(id, 'breathe', offsetX, offsetY);
   };
 
+  /**
+   * 获取当前呼吸阶段提示文本
+   * @returns 提示文本
+   */
   const getPhaseText = () => {
     switch (phase) {
-      case 'idle': return '点击开始';
-      case 'inhale': return '吸气...';
-      case 'hold': return '屏气...';
-      case 'exhale': return '呼气...';
-      default: return '';
+      case 'idle': 
+        return '点击开始';
+      case 'inhale': 
+        return '吸气...';
+      case 'hold': 
+        return '屏气...';
+      case 'exhale': 
+        return '呼气...';
+      default: 
+        return '';
     }
   };
 

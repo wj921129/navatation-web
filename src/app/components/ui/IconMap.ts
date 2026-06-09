@@ -1,3 +1,7 @@
+/**
+ * @description 图标映射配置
+ * @date 2026-06-09
+ */
 import {
   // Common Navigation / Action icons
   Link, Folder, Search, Settings, User, Plus, Edit3, X, Save, XCircle, CheckSquare, 
@@ -12,7 +16,8 @@ import {
 } from 'lucide-react';
 
 /**
- * IconMap 组件/功能描述
+ * 统一图标映射字典
+ * 集中管理系统内支持的所有图标组件，方便按名称动态渲染图标
  */
 export const IconMap: Record<string, any> = {
   // Action/UI

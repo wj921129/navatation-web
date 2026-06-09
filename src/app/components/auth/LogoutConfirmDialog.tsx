@@ -1,3 +1,7 @@
+﻿/**
+ * @description 退出登录确认对话框组件
+ * @date 2026-06-09
+ */
 import { LogOut, X, Key } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { authStore } from '../../stores/auth-store';
@@ -37,11 +41,18 @@ export function LogoutConfirmDialog({ isOpen, onClose, onConfirm, username }: Lo
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
+  /**
+   * 处理密码修改逻辑
+   */
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!oldPassword.trim() || !newPassword.trim() || !confirmPassword.trim()) return;
+    if (!oldPassword.trim() || !newPassword.trim() || !confirmPassword.trim()) {
+      return;
+    }
 
     if (newPassword !== confirmPassword) {
       setError('两次输入新密码不一致');
@@ -63,7 +74,7 @@ export function LogoutConfirmDialog({ isOpen, onClose, onConfirm, username }: Lo
         setSuccess('');
       }, 1500);
     } catch (err: any) {
-      setError(err.message || '原密码错误或修改失败');
+      setError(err?.message ?? '原密码错误或修改失败');
     } finally {
       setLoading(false);
     }
@@ -208,3 +219,4 @@ export function LogoutConfirmDialog({ isOpen, onClose, onConfirm, username }: Lo
     </BaseModal>
   );
 }
+

@@ -1,3 +1,7 @@
+﻿/**
+ * @description 设置对话框组件
+ * @date 2026-06-09
+ */
 import { X, Link, Upload, Shuffle, Sun, Moon, Monitor, Check, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState, useEffect } from 'react';
@@ -47,48 +51,73 @@ export function SettingsDialog({ isOpen, onClose, onSave, onPreview, settings, b
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
+  /**
+   * 处理设置项变更
+   */
   const handleChange = (key: string, value: number) => {
     const updated = { ...draftSettings, [key]: value };
     setDraftSettings(updated);
     onPreview?.(updated, draftBackgroundImage, draftTheme);
   };
 
+  /**
+   * 处理壁纸链接提交
+   */
   const handleUrlSubmit = () => {
-    if (urlInput.trim()) {
-      const newBg = urlInput.trim();
-      setDraftBackgroundImage(newBg);
-      onPreview?.(draftSettings, newBg, draftTheme);
-      setUrlInput('');
+    const newBg = urlInput.trim();
+    if (!newBg) {
+      return;
     }
+    setDraftBackgroundImage(newBg);
+    onPreview?.(draftSettings, newBg, draftTheme);
+    setUrlInput('');
   };
 
+  /**
+   * 处理本地壁纸上传
+   */
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     try {
       const res = await settingsService.uploadWallpaper(file);
-      if (res && res.code === 200 && res.data) {
+      if (res?.code === 200 && res?.data) {
         const newBg = res.data.wallpaperUrl;
         setDraftBackgroundImage(newBg);
         onPreview?.(draftSettings, newBg, draftTheme);
+        toast.success('壁纸上传成功');
+      } else {
+        toast.error(res?.message ?? '上传壁纸失败');
       }
     } catch (err: any) {
+      toast.error(err?.message ?? '上传壁纸出错');
       console.error('上传壁纸出错:', err);
     }
   };
 
+  /**
+   * 处理随机壁纸获取
+   */
   const handleRandomWallpaper = async () => {
     try {
       const res = await settingsService.getRandomWallpaper();
-      if (res && res.code === 200 && res.data) {
+      if (res?.code === 200 && res?.data) {
         const newBg = res.data.wallpaperUrl;
         setDraftBackgroundImage(newBg);
         onPreview?.(draftSettings, newBg, draftTheme);
+        toast.success('获取随机壁纸成功');
+      } else {
+        toast.error(res?.message ?? '获取随机壁纸失败');
       }
     } catch (err: any) {
+      toast.error(err?.message ?? '获取随机壁纸出错');
       console.error('获取随机壁纸出错:', err);
     }
   };
@@ -405,3 +434,4 @@ export function SettingsDialog({ isOpen, onClose, onSave, onPreview, settings, b
     </BaseModal>
   );
 }
+

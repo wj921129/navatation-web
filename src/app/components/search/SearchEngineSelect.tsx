@@ -1,3 +1,7 @@
+﻿/**
+ * @description 搜索引擎选择器组件
+ * @date 2026-06-09
+ */
 import { Check } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { Tooltip } from '../ui/Tooltip';
@@ -30,17 +34,22 @@ interface SearchEngineSelectProps {
 export function SearchEngineSelect({ value, onChange }: SearchEngineSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const currentEngine = searchEngines.find(e => e.value === value) || searchEngines[0];
+  const currentEngine = searchEngines.find(e => e.value === value) ?? searchEngines[0];
 
   useEffect(() => {
+    /**
+     * 处理点击外部区域关闭下拉框
+     */
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     }
+
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -86,3 +95,4 @@ export function SearchEngineSelect({ value, onChange }: SearchEngineSelectProps)
 }
 
 export { searchEngines };
+
