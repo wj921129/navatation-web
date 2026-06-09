@@ -1004,7 +1004,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
         className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
       >
         <div
-          className="bg-card/95 border border-border backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden flex flex-col text-foreground transition-all duration-300"
+          className="bg-card border border-border rounded-3xl shadow-2xl overflow-hidden flex flex-col text-foreground transition-all duration-300"
           style={{ width: '85%', height: '90%', maxWidth: '1400px' }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -1117,7 +1117,7 @@ export function AddShortcutDialog({ isOpen, onClose, onAdd, iconSize, iconRadius
                       <div className="space-y-8 mt-12">
                         <input type="file" ref={rowFileInputRef} onChange={handleRowIconUpload} className="hidden" accept="image/*" />
                         {batchEditData.map((category, catIdx) => (
-                          <div key={category.categoryId || catIdx} className="bg-card/45 border border-border p-6 rounded-3xl backdrop-blur-md shadow-sm space-y-4">
+                          <div key={category.categoryId || catIdx} className="bg-muted/40 border border-border p-6 rounded-3xl shadow-sm space-y-4">
                             <div className="flex items-center justify-between border-b border-border pb-3">
                               <div className="flex items-center gap-2">
                                 <category.icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
