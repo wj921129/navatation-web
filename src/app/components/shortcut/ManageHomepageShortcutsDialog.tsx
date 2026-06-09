@@ -4,8 +4,9 @@ import { toast } from 'sonner';
 import { IconMap } from '../ui/IconMap';
 import { BaseModal } from '../ui/BaseModal';
 import { useState, useEffect, useRef } from 'react';
-import { useDrag, useDrop } from 'react-dnd';
-import { motion } from 'framer-motion';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { navService, IconType } from '../../services/nav-service';
 
 const isValidDomainOrUrl = (input: string): boolean => {
@@ -293,13 +294,20 @@ export function ManageHomepageShortcutsDialog({
     });
   };
 
-  const moveSiteGrid = (sourceIdx: number, destIdx: number) => {
-    setEditData((prev) => {
-      const copy = [...prev];
-      const [moved] = copy.splice(sourceIdx, 1);
-      copy.splice(destIdx, 0, moved);
-      return copy;
-    });
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEndGrid = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setEditData((items) => {
+        const oldIndex = items.findIndex(item => item.dragId === active.id);
+        const newIndex = items.findIndex(item => item.dragId === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
   };
 
   const handleSaveAll = async () => {
@@ -557,23 +565,27 @@ export function ManageHomepageShortcutsDialog({
             </div>
           ) : (
             <div className="bg-muted/20 border border-border p-6 rounded-3xl shadow-sm min-h-[400px]">
-              <div 
-                className="flex flex-wrap"
-                style={{ gap: `${iconSpacingY}px ${iconSpacingX}px` }}
-              >
-                {editData.map((site, idx) => (
-                  <DraggableGridItem
-                    key={site.dragId}
-                    site={site}
-                    idx={idx}
-                    moveSite={moveSiteGrid}
-                    handleDeleteRow={handleDeleteRow}
-                    iconSize={iconSize}
-                    borderRadiusCss={borderRadiusCss}
-                    textSize={textSize}
-                  />
-                ))}
-              </div>
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndGrid}>
+                <SortableContext items={editData.map(s => s.dragId)} strategy={rectSortingStrategy}>
+                  <div 
+                    className="flex flex-wrap"
+                    style={{ gap: `${iconSpacingY}px ${iconSpacingX}px` }}
+                  >
+                    {editData.map((site, idx) => (
+                      <SortableGridItem
+                        key={site.dragId}
+                        id={site.dragId}
+                        site={site}
+                        idx={idx}
+                        handleDeleteRow={handleDeleteRow}
+                        iconSize={iconSize}
+                        borderRadiusCss={borderRadiusCss}
+                        textSize={textSize}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
             </div>
           )}
         </div>
@@ -582,61 +594,49 @@ export function ManageHomepageShortcutsDialog({
   );
 }
 
-const GRID_DRAG_TYPE = 'HOMEPAGE_GRID_SITE';
-
-interface DraggableGridItemProps {
+interface SortableGridItemProps {
+  id: string;
   site: any;
   idx: number;
-  moveSite: (sourceIdx: number, destIdx: number) => void;
   handleDeleteRow: (idx: number) => void;
   iconSize: number;
   borderRadiusCss: string;
   textSize: number;
 }
 
-function DraggableGridItem({
+function SortableGridItem({
+  id,
   site,
   idx,
-  moveSite,
   handleDeleteRow,
   iconSize,
   borderRadiusCss,
   textSize,
-}: DraggableGridItemProps) {
-  const ref = useRef<HTMLDivElement>(null);
+}: SortableGridItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
 
-  const [{ isDragging }, drag] = useDrag({
-    type: GRID_DRAG_TYPE,
-    item: { idx },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  });
-
-  const [, drop] = useDrop({
-    accept: GRID_DRAG_TYPE,
-    hover: (item: { idx: number }) => {
-      if (!ref.current) return;
-      const dragIdx = item.idx;
-      const hoverIdx = idx;
-
-      if (dragIdx === hoverIdx) return;
-      moveSite(dragIdx, hoverIdx);
-      item.idx = hoverIdx;
-    },
-  });
-
-  drag(drop(ref));
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    width: `${iconSize + 32}px`,
+  };
 
   return (
-    <motion.div 
-      ref={ref} 
-      layout
-      transition={{ type: 'spring', stiffness: 500, damping: 30, mass: 1 }}
-      className={`flex flex-col items-center relative group cursor-grab active:cursor-grabbing ${isDragging ? 'opacity-50 scale-105 z-50' : 'opacity-100 z-0'}`} 
-      style={{ width: `${iconSize + 32}px` }}
+    <div 
+      ref={setNodeRef} 
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={`flex flex-col items-center relative group cursor-grab active:cursor-grabbing ${isDragging ? 'opacity-70 scale-105 z-50 shadow-xl' : 'opacity-100 z-0'}`} 
     >
-      <div className="bg-card border border-border flex items-center justify-center shadow-lg transition-all duration-200 overflow-hidden pointer-events-none" style={{ width: `${iconSize}px`, height: `${iconSize}px`, borderRadius: borderRadiusCss }}>
+      <div className="bg-card border border-border flex items-center justify-center shadow-md transition-all duration-200 overflow-hidden pointer-events-none" style={{ width: `${iconSize}px`, height: `${iconSize}px`, borderRadius: borderRadiusCss }}>
         {(() => {
           if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
             return <img src={site.iconValue} alt={site.name} style={{ width: '50%', height: '50%', objectFit: 'contain' }} onError={(e) => { (e.target as any).style.display = 'none'; }} />;
@@ -646,9 +646,13 @@ function DraggableGridItem({
         })()}
       </div>
       <span className="text-foreground mt-2 font-light tracking-wide text-center w-full truncate px-1" style={{ fontSize: `${textSize}px` }}>{site.name || '未命名'}</span>
-      <button onClick={() => handleDeleteRow(idx)} className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-md z-10">
+      <button 
+        onPointerDown={(e) => e.stopPropagation()} 
+        onClick={(e) => { e.stopPropagation(); handleDeleteRow(idx); }} 
+        className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-md z-10 cursor-pointer"
+      >
         <X className="w-3 h-3" />
       </button>
-    </motion.div>
+    </div>
   );
 }
