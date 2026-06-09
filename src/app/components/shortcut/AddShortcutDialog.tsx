@@ -1,4 +1,4 @@
-import { X, Link, Upload, Video, Cpu, Code, ShoppingBag, Newspaper, Gamepad2, Music as MusicIcon, BookOpen, Camera, Briefcase, Trash2, Loader2, Check, RotateCw, Plus, Edit3, GripVertical, Grid, List } from 'lucide-react';
+import { X, Link, Upload, Video, Cpu, Code, ShoppingBag, Newspaper, Gamepad2, Music as MusicIcon, BookOpen, Camera, Briefcase, Trash2, Loader2, Check, RotateCw, Plus, Edit3, GripVertical, Grid, List, FolderPlus } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { EditShortcutDialog } from './EditShortcutDialog';
 import { IconMap } from '../ui/IconMap';
@@ -1028,11 +1028,88 @@ export function AddShortcutDialog({
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
       >
-        <div
-          className="bg-card border border-border rounded-3xl shadow-2xl overflow-hidden flex flex-col text-foreground transition-all duration-300"
+        <div 
+          className="relative flex items-stretch"
           style={{ width: '85%', height: '90%', maxWidth: '1400px' }}
-          onClick={(e) => e.stopPropagation()}
         >
+          {/* 左侧悬浮功能面板 (Dock) - 仅在推荐页签的管理员模式下显示 */}
+          {userRole === 'ADMIN' && activeTab === 'recommended' && (
+            <div className="absolute top-1/2 -translate-y-1/2 -left-[80px] bg-card/95 backdrop-blur-xl border border-border/80 rounded-full p-3 flex flex-col items-center gap-4 shadow-2xl z-50 animate-in fade-in slide-in-from-left-8 duration-300">
+              
+              {/* 模式切换 (图标/列表) */}
+              <div className="group relative flex items-center justify-center">
+                <button
+                  onClick={() => setIsBatchMode(!isBatchMode)}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm border cursor-pointer ${
+                    !isBatchMode 
+                      ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-400' 
+                      : 'bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-900/30 dark:border-indigo-800 dark:text-indigo-400'
+                  }`}
+                >
+                  {!isBatchMode ? <Grid className="w-5 h-5" /> : <List className="w-5 h-5" />}
+                </button>
+                <div className="absolute left-full ml-4 px-3 py-2 bg-gray-800/95 backdrop-blur-sm text-white text-sm font-medium rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-all shadow-xl z-50 translate-x-[-10px] group-hover:translate-x-0">
+                  切换为{!isBatchMode ? '列表管理' : '图标管理'}
+                  <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 border-y-4 border-y-transparent border-r-4 border-r-gray-800/95" />
+                </div>
+              </div>
+
+              <div className="w-8 h-[1px] bg-border/60" />
+
+              {/* 保存全部更改 */}
+              <div className="group relative flex items-center justify-center">
+                <button
+                  onClick={handleSaveAllCategories}
+                  className="w-12 h-12 rounded-full flex items-center justify-center bg-green-50 text-green-600 border border-green-200 hover:bg-green-100 hover:scale-105 dark:bg-green-900/30 dark:border-green-800 dark:text-green-400 dark:hover:bg-green-900/50 transition-all duration-300 shadow-sm cursor-pointer"
+                >
+                  <Check className="w-5 h-5" />
+                </button>
+                <div className="absolute left-full ml-4 px-3 py-2 bg-gray-800/95 backdrop-blur-sm text-white text-sm font-medium rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-all shadow-xl z-50 translate-x-[-10px] group-hover:translate-x-0">
+                  保存全部更改
+                  <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 border-y-4 border-y-transparent border-r-4 border-r-gray-800/95" />
+                </div>
+              </div>
+
+              {/* 新增分类 */}
+              {!isBatchMode && (
+                <div className="group relative flex items-center justify-center">
+                  <button
+                    onClick={() => setEditingCategory({ category: '', iconValue: 'Folder', sortOrder: categories.length })}
+                    className="w-12 h-12 rounded-full flex items-center justify-center bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100 hover:scale-105 dark:bg-amber-900/30 dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-900/50 transition-all duration-300 shadow-sm cursor-pointer"
+                  >
+                    <FolderPlus className="w-5 h-5" />
+                  </button>
+                  <div className="absolute left-full ml-4 px-3 py-2 bg-gray-800/95 backdrop-blur-sm text-white text-sm font-medium rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-all shadow-xl z-50 translate-x-[-10px] group-hover:translate-x-0">
+                    新增分类
+                    <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 border-y-4 border-y-transparent border-r-4 border-r-gray-800/95" />
+                  </div>
+                </div>
+              )}
+
+              {/* 一键刷新全部图标 */}
+              {isBatchMode && (
+                <div className="group relative flex items-center justify-center">
+                  <button
+                    onClick={handleBatchRefreshAllIcons}
+                    disabled={isAllRefreshing}
+                    className="w-12 h-12 rounded-full flex items-center justify-center bg-purple-50 text-purple-600 border border-purple-200 hover:bg-purple-100 hover:scale-105 dark:bg-purple-900/30 dark:border-purple-800 dark:text-purple-400 dark:hover:bg-purple-900/50 transition-all duration-300 shadow-sm disabled:opacity-50 disabled:hover:scale-100 cursor-pointer"
+                  >
+                    <RotateCw className={`w-5 h-5 ${isAllRefreshing ? 'animate-spin' : ''}`} />
+                  </button>
+                  <div className="absolute left-full ml-4 px-3 py-2 bg-gray-800/95 backdrop-blur-sm text-white text-sm font-medium rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-all shadow-xl z-50 translate-x-[-10px] group-hover:translate-x-0">
+                    {isAllRefreshing ? '正在刷新...' : '一键刷新图标'}
+                    <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 border-y-4 border-y-transparent border-r-4 border-r-gray-800/95" />
+                  </div>
+                </div>
+              )}
+
+            </div>
+          )}
+
+          <div
+            className="w-full h-full bg-card border border-border rounded-3xl shadow-2xl overflow-hidden flex flex-col text-foreground transition-all duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
           {/* Header */}
           <div className="bg-card/95 border-b border-border px-6 py-4 flex items-center justify-between transition-colors duration-300">
             <h2 className="text-xl font-medium">添加网址</h2>
@@ -1091,63 +1168,10 @@ export function AddShortcutDialog({
                 {activeTab === 'recommended' ? (
                   <DragDropContext onDragEnd={handleDragEnd}>
                   <div className="p-6 space-y-8 relative">
-                    {userRole === 'ADMIN' && (
-                      <>
-                        {/* 左侧：图标管理 / 列表管理 切换按钮 */}
-                        <div className="absolute top-4 left-6 flex items-center bg-muted/30 p-1 rounded-full border border-border shadow-sm">
-                          <button
-                            onClick={() => setIsBatchMode(false)}
-                            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all cursor-pointer ${
-                              !isBatchMode
-                                ? 'bg-background text-blue-600 shadow-sm border border-border/50'
-                                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 border border-transparent'
-                            }`}
-                          >
-                            <Grid className="w-4 h-4" /> 图标管理
-                          </button>
-                          <button
-                            onClick={() => setIsBatchMode(true)}
-                            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all cursor-pointer ${
-                              isBatchMode
-                                ? 'bg-background text-blue-600 shadow-sm border border-border/50'
-                                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5 border border-transparent'
-                            }`}
-                          >
-                            <List className="w-4 h-4" /> 列表管理
-                          </button>
-                        </div>
 
-                        {/* 右侧：保存全部更改 / 刷新 / 新增分类 操作按钮 */}
-                        <div className="absolute top-4 right-6 flex items-center gap-3">
-                          <button
-                            onClick={handleSaveAllCategories}
-                            className="flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-full text-sm font-medium transition-all shadow-sm cursor-pointer"
-                          >
-                            <Check className="w-4 h-4" /> 保存全部更改
-                          </button>
-                          {isBatchMode ? (
-                            <button
-                              onClick={handleBatchRefreshAllIcons}
-                              disabled={isAllRefreshing}
-                              className="flex items-center gap-1.5 px-4 py-2 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-800 rounded-full text-sm font-medium transition-all cursor-pointer disabled:opacity-50"
-                            >
-                              <RotateCw className={`w-4 h-4 ${isAllRefreshing ? 'animate-spin' : ''}`} />
-                              {isAllRefreshing ? '正在刷新全部图标...' : '一键刷新全部图标'}
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => setEditingCategory({ category: '', iconValue: 'Folder', sortOrder: categories.length })}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm cursor-pointer"
-                            >
-                              <Plus className="w-4 h-4" /> 新增分类
-                            </button>
-                          )}
-                        </div>
-                      </>
-                    )}
 
                     {isBatchMode ? (
-                      <div className="space-y-8 mt-12">
+                      <div className="space-y-8">
                         <input type="file" ref={rowFileInputRef} onChange={handleRowIconUpload} className="hidden" accept="image/*" />
                         {batchEditData.map((category, catIdx) => (
                           <div key={category.categoryId || catIdx} className="bg-muted/40 border border-border p-6 rounded-3xl shadow-sm space-y-4">
@@ -1365,7 +1389,7 @@ export function AddShortcutDialog({
                         ))}
                       </div>
                     ) : (
-                      <div className="space-y-8 mt-12">
+                      <div className="space-y-8">
                         {categories.map((category, catIdx) => (
                           <div key={category.category}>
                             <div className="flex items-center justify-between mb-4">
@@ -1925,6 +1949,7 @@ function DraggableRecommendSite({
           }} className="p-1 text-gray-400 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>
         </div>
       )}
+    </div>
     </div>
   );
 }
