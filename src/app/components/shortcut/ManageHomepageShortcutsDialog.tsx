@@ -693,8 +693,8 @@ function SortableGridItem({
 function GridItemPreview({ site, iconSize, borderRadiusCss, textSize }: any) {
   if (!site) return null;
   return (
-    <div className="flex flex-col items-center relative group scale-105 shadow-2xl cursor-grabbing" style={{ width: `${iconSize + 32}px` }}>
-      <div className="bg-card border-2 border-blue-500/50 flex items-center justify-center shadow-xl overflow-hidden pointer-events-none" style={{ width: `${iconSize}px`, height: `${iconSize}px`, borderRadius: borderRadiusCss }}>
+    <div className="flex flex-col items-center relative cursor-grabbing" style={{ width: `${iconSize + 32}px` }}>
+      <div className="bg-card border-2 border-blue-500/60 flex items-center justify-center shadow-2xl scale-110 overflow-hidden pointer-events-none transition-transform" style={{ width: `${iconSize}px`, height: `${iconSize}px`, borderRadius: borderRadiusCss }}>
         {(() => {
           if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
             return <img src={site.iconValue} alt={site.name} style={{ width: '50%', height: '50%', objectFit: 'contain' }} />;
@@ -703,7 +703,7 @@ function GridItemPreview({ site, iconSize, borderRadiusCss, textSize }: any) {
           return <IconComponent style={{ color: site.color || '#333', width: `${iconSize * 0.5}px`, height: `${iconSize * 0.5}px` }} strokeWidth={2} />;
         })()}
       </div>
-      <span className="text-foreground mt-2 font-medium tracking-wide text-center w-full truncate px-1" style={{ fontSize: `${textSize}px` }}>{site.name || '未命名'}</span>
+      <span className="mt-2 font-medium tracking-wide text-center w-full truncate px-1 opacity-0 pointer-events-none" style={{ fontSize: `${textSize}px` }}>{site.name || '未命名'}</span>
     </div>
   );
 }
