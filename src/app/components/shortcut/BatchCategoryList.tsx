@@ -1,5 +1,5 @@
 import React from 'react';
-import { Droppable, Draggable } from '@hello-pangea/dnd';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Loader2, Link as LinkIcon, RotateCw, Upload, Trash2, Plus, GripVertical } from 'lucide-react';
 import { IconMap } from '../ui/IconMap';
 
@@ -19,6 +19,7 @@ interface BatchCategoryListProps {
   handleDetectRowIcon: (catIdx: number, siteIdx: number) => void;
   handleTriggerRowUpload: (catIdx: number, siteIdx: number) => void;
   handleDeleteRow: (catIdx: number, siteIdx: number) => void;
+  setBatchEditData: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
 export function BatchCategoryList({
@@ -33,9 +34,38 @@ export function BatchCategoryList({
   handleDetectRowIcon,
   handleTriggerRowUpload,
   handleDeleteRow,
+  setBatchEditData,
 }: BatchCategoryListProps) {
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+    const sourceCatIdx = parseInt(result.source.droppableId);
+    const destCatIdx = parseInt(result.destination.droppableId);
+    const sourceIdx = result.source.index;
+    const destIdx = result.destination.index;
+    
+    if (sourceCatIdx === destCatIdx && sourceIdx === destIdx) return;
+
+    setBatchEditData(prev => {
+      const copy = [...prev];
+      if (sourceCatIdx === destCatIdx) {
+        const sites = [...copy[sourceCatIdx].sites];
+        const [moved] = sites.splice(sourceIdx, 1);
+        sites.splice(destIdx, 0, moved);
+        copy[sourceCatIdx].sites = sites;
+      } else {
+        const sourceSites = [...copy[sourceCatIdx].sites];
+        const destSites = [...copy[destCatIdx].sites];
+        const [moved] = sourceSites.splice(sourceIdx, 1);
+        destSites.splice(destIdx, 0, moved);
+        copy[sourceCatIdx].sites = sourceSites;
+        copy[destCatIdx].sites = destSites;
+      }
+      return copy;
+    });
+  };
+
   return (
-    <>
+    <DragDropContext onDragEnd={handleDragEnd}>
       {batchEditData.map((category, catIdx) => (
         <div key={category.categoryId || catIdx} className="bg-muted/40 border border-border p-6 rounded-3xl shadow-sm space-y-4">
           <div className="flex items-center justify-between border-b border-border pb-3">
@@ -248,6 +278,6 @@ export function BatchCategoryList({
           </div>
         </div>
       ))}
-    </>
+    </DragDropContext>
   );
 }
