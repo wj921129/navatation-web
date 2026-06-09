@@ -57,6 +57,14 @@ export function ManageHomepageShortcutsDialog({
   const [editData, setEditData] = useState<any[]>([]);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
 
+  const updateSite = (idx: number, fields: Partial<any>) => {
+    setEditData(prev => {
+      const copy = [...prev];
+      copy[idx] = { ...copy[idx], ...fields };
+      return copy;
+    });
+  };
+
   const {
     rowLoadingStatus,
     rowDetectedIcons,
@@ -76,16 +84,6 @@ export function ManageHomepageShortcutsDialog({
       resetIconsState();
     }
   }, [isOpen, shortcuts]);
-
-  const updateSite = (idx: number, fields: Partial<any>) => {
-    setEditData(prev => {
-      const copy = [...prev];
-      copy[idx] = { ...copy[idx], ...fields };
-      return copy;
-    });
-  };
-
-
 
   const handleAddEmptyRow = () => {
     setEditData(prev => [
