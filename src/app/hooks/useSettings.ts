@@ -49,7 +49,7 @@ export function useSettings(
     try {
       // 请求用户个性化配置接口
       const res = await settingsService.getSettings();
-      if (res.code !== 200 || !res.data) {
+      if (res?.code !== 200 || !res?.data) {
         return;
       }
       
@@ -176,7 +176,7 @@ export function useSettings(
   const handleRandomWallpaper = useCallback(async () => {
     try {
       const res = await settingsService.getRandomWallpaper();
-      if (res?.code !== 200 || !res.data) {
+      if (res?.code !== 200 || !res?.data) {
         return;
       }
       
