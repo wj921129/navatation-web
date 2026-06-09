@@ -5,6 +5,7 @@ import { IconMap } from '../ui/IconMap';
 import { BaseModal } from '../ui/BaseModal';
 import { useState, useEffect, useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
+import { motion } from 'framer-motion';
 import { navService, IconType } from '../../services/nav-service';
 
 const isValidDomainOrUrl = (input: string): boolean => {
@@ -628,9 +629,11 @@ function DraggableGridItem({
   drag(drop(ref));
 
   return (
-    <div 
+    <motion.div 
       ref={ref} 
-      className={`flex flex-col items-center relative group cursor-grab active:cursor-grabbing ${isDragging ? 'opacity-50 scale-105' : 'opacity-100'}`} 
+      layout
+      transition={{ type: 'spring', stiffness: 500, damping: 30, mass: 1 }}
+      className={`flex flex-col items-center relative group cursor-grab active:cursor-grabbing ${isDragging ? 'opacity-50 scale-105 z-50' : 'opacity-100 z-0'}`} 
       style={{ width: `${iconSize + 32}px` }}
     >
       <div className="bg-card border border-border flex items-center justify-center shadow-lg transition-all duration-200 overflow-hidden pointer-events-none" style={{ width: `${iconSize}px`, height: `${iconSize}px`, borderRadius: borderRadiusCss }}>
@@ -646,6 +649,6 @@ function DraggableGridItem({
       <button onClick={() => handleDeleteRow(idx)} className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-md z-10">
         <X className="w-3 h-3" />
       </button>
-    </div>
+    </motion.div>
   );
 }
