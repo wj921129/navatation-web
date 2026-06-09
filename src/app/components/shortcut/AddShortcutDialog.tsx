@@ -686,6 +686,7 @@ export function AddShortcutDialog({
         return navService.batchSaveRecommendSites(cat.categoryId, { sites: formattedSites });
       }));
       loadRecommended();
+      onClose();
     } catch (err) {
       console.error('Batch save all sites error:', err);
       alert('保存时发生异常，请重试');
@@ -724,8 +725,8 @@ export function AddShortcutDialog({
     try {
       const res = await navService.batchSaveRecommendSites(categoryId, { sites: formattedSites });
       if (res.code === 200) {
-        alert('该分类下的网址批量保存成功！');
         loadRecommended();
+        onClose();
       } else {
         alert(res.message || '保存失败');
       }
