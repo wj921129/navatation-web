@@ -36,6 +36,8 @@ import SimpleWeather from './components/widgets/SimpleWeather';
 import { SearchBox } from './components/search/SearchBox';
 import { ShortcutGrid } from './components/shortcut/ShortcutGrid';
 import { AiSearchOverlay } from './components/search/AiSearchOverlay';
+import { BottomRightDock } from './components/dock/BottomRightDock';
+import { BrightnessPanel } from './components/dock/BrightnessPanel';
 
 import { useBrightness } from './hooks/useBrightness';
 import { useSettings } from './hooks/useSettings';
@@ -425,46 +427,18 @@ export default function App() {
             clocksVisible={clocksVisible}
             onToggleClockVisibility={handleToggleClockVisibility}
             brightnessPanel={
-              isBrightnessOpen && theme === 'dark' && (
-                <div
-                  onMouseEnter={() => {
-                    setIsHoveringBrightness(true);
-                    setIsBrightnessClosing(false);
-                    clearBrightnessTimer();
-                  }}
-                  onMouseLeave={() => {
-                    setIsHoveringBrightness(false);
-                    clearBrightnessTimer();
-                    brightnessTimerRef.current = setTimeout(() => {
-                      triggerCloseBrightness();
-                    }, 1000);
-                  }}
-                  className={`absolute top-[71px] left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 px-4 py-2.5 rounded-full bg-black/45 border border-white/10 shadow-xl backdrop-blur-md text-white select-none cursor-default whitespace-nowrap ${
-                    isBrightnessClosing ? 'brightness-panel-exit' : 'brightness-panel-enter'
-                  }`}
-                >
-                  <span className="text-[11px] font-medium tracking-wide text-neutral-200">屏幕亮度</span>
-                  <input
-                    type="range"
-                    min="30"
-                    max="100"
-                    value={bgBrightness}
-                    onChange={(e) => {
-                      const val = Number(e.target.value);
-                      setBgBrightness(val);
-                      localStorage.setItem('navatation_bg_brightness', val.toString());
-                    }}
-                    className="w-24 h-1 rounded-lg appearance-none cursor-pointer bg-white/20 accent-white outline-none focus:outline-none"
-                    style={{
-                      WebkitAppearance: 'none',
-                      background: `linear-gradient(to right, #fff 0%, #fff ${(bgBrightness - 30) / 70 * 100}%, rgba(255, 255, 255, 0.2) ${(bgBrightness - 30) / 70 * 100}%, rgba(255, 255, 255, 0.2) 100%)`
-                    }}
-                  />
-                  <span className="text-[10px] font-mono font-semibold text-neutral-300 min-w-[28px] text-right">
-                    {bgBrightness}%
-                  </span>
-                </div>
-              )
+              <BrightnessPanel
+                isBrightnessOpen={isBrightnessOpen}
+                isBrightnessClosing={isBrightnessClosing}
+                theme={theme || 'light'}
+                bgBrightness={bgBrightness}
+                setBgBrightness={setBgBrightness}
+                setIsHoveringBrightness={setIsHoveringBrightness}
+                setIsBrightnessClosing={setIsBrightnessClosing}
+                clearBrightnessTimer={clearBrightnessTimer}
+                brightnessTimerRef={brightnessTimerRef}
+                triggerCloseBrightness={triggerCloseBrightness}
+              />
             }
           />
         </div>
@@ -496,85 +470,17 @@ export default function App() {
         </div>
 
         {/* Bottom Right Controls */}
-        <div className="fixed bottom-8 right-8 flex items-center gap-4 z-30">
-          {/* Edit Mode Buttons */}
-          {isEditMode ? (
-            <>
-              {/* Cancel Button */}
-              <Tooltip content="取消编辑" side="top">
-                <button
-                  onClick={handleCancelEdits}
-                  className="w-12 h-12 rounded-full glass-button flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-lg hover:shadow-xl"
-                >
-                  <Plus className="w-5 h-5 text-white rotate-45" />
-                </button>
-              </Tooltip>
-
-              {/* Save Button */}
-              <Tooltip content="保存布局" side="top">
-                <button
-                  onClick={handleSaveEdits}
-                  className="w-12 h-12 rounded-full bg-green-500/80 backdrop-blur-xl border border-green-400/50 flex items-center justify-center hover:bg-green-600 hover:scale-110 active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl"
-                >
-                  <Save className="w-5 h-5 text-white" />
-                </button>
-              </Tooltip>
-            </>
-          ) : (
-            <>
-              {/* Manage Homepage Shortcuts Button (Admin only) */}
-              {authState.isLoggedIn && authState.user?.role === 'ADMIN' ? (
-                <Tooltip content="管理首页图标" side="top">
-                  <button
-                    onClick={() => setIsManageHomepageOpen(true)}
-                    className="w-12 h-12 rounded-full glass-button flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-lg hover:shadow-xl"
-                  >
-                    <LayoutGrid className="w-5 h-5 text-white" />
-                  </button>
-                </Tooltip>
-              ) : null}
-
-              {/* Edit Button */}
-              {authState.isLoggedIn ? (
-                <Tooltip content="编辑布局" side="top">
-                  <button
-                    onClick={handleStartEdit}
-                    className="w-12 h-12 rounded-full glass-button flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-lg hover:shadow-xl"
-                  >
-                    <Edit3 className="w-5 h-5 text-white" />
-                  </button>
-                </Tooltip>
-              ) : null}
-
-              {/* Settings Button */}
-              <Tooltip content="个性化设置" side="top">
-                <button
-                  onClick={handleOpenSettings}
-                  className="w-12 h-12 rounded-full glass-button flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-lg hover:shadow-xl"
-                >
-                  <Settings className="w-5 h-5 text-white" />
-                </button>
-              </Tooltip>
-
-              {/* Account Button */}
-              <Tooltip content={authState.isLoggedIn ? "账号设置" : "登录/注册"} side="top">
-                <button
-                  onClick={() => authState.isLoggedIn ? setIsLogoutConfirmOpen(true) : setIsLoginOpen(true)}
-                  className="w-12 h-12 rounded-full glass-button flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-lg hover:shadow-xl relative"
-                >
-                  {authState.isLoggedIn && authState.user ? (
-                    <span className="text-white text-sm font-medium">{authState.user.username.charAt(0).toUpperCase()}</span>
-                  ) : (
-                    <User className="w-5 h-5 text-white" />
-                  )}
-                  {authState.isLoggedIn ? (
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-neutral-900" />
-                  ) : null}
-                </button>
-              </Tooltip>
-            </>
-          )}
-        </div>
+        <BottomRightDock
+          isEditMode={isEditMode}
+          authState={authState}
+          handleCancelEdits={handleCancelEdits}
+          handleSaveEdits={handleSaveEdits}
+          handleStartEdit={handleStartEdit}
+          handleOpenSettings={handleOpenSettings}
+          setIsLogoutConfirmOpen={setIsLogoutConfirmOpen}
+          setIsLoginOpen={setIsLoginOpen}
+          setIsManageHomepageOpen={setIsManageHomepageOpen}
+        />
 
         {/* Dialogs */}
         <AppDialogs

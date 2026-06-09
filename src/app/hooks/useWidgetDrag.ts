@@ -1,6 +1,6 @@
 /**
  * 文件名：useWidgetDrag.ts
- * 描述：处理组件从菜单栏拖拽以及全局拖拽位置更新的自定义 Hook。
+ * 描述：负责统一处理桌面小组件（时钟、日历等）的拖拽逻辑，包括从菜单栏拖拽出新组件以及在桌面上移动已有组件。
  * 创建时间：2026-06-09
  */
 import { useState, useRef, useCallback, useEffect } from 'react';
@@ -9,15 +9,16 @@ type WidgetStyle = 'analog' | 'digital' | 'flip' | 'traditional' | 'pomodoro' | 
 
 interface UseWidgetDragProps {
   addWidget: (type: string, style: string, xPercent: number, yPercent: number) => void;
-  updateWidgetPosition: (id: string, xPercent: number, yPercent: number) => void;
+  updateWidgetPosition: (id: string, x: number, y: number) => void;
   triggerCloseClock: () => void;
 }
 
-export const useWidgetDrag = ({ addWidget, updateWidgetPosition, triggerCloseClock }: UseWidgetDragProps) => {
+export function useWidgetDrag({ addWidget, updateWidgetPosition, triggerCloseClock }: UseWidgetDragProps) {
   const [activeDraggingId, setActiveDraggingId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const activeDraggingStyleRef = useRef<WidgetStyle>(null);
 
+  // Menu drag-and-drop state & refs
   const [menuDraggingStyle, setMenuDraggingStyle] = useState<WidgetStyle>(null);
   const [menuDragPos, setMenuDragPos] = useState({ x: 0, y: 0 });
   const [menuDragHasMoved, setMenuDragHasMoved] = useState(false);
@@ -25,50 +26,33 @@ export const useWidgetDrag = ({ addWidget, updateWidgetPosition, triggerCloseClo
   const menuDragHasMovedRef = useRef(false);
   const menuDraggingStyleRef = useRef<WidgetStyle>(null);
 
-  /**
-   * 获取组件宽高
-   */
-  const getWidgetDimensions = useCallback((style: string) => {
-    switch (style) {
-      case 'analog':
-      case 'traditional':
-        return { width: 160, height: 160 };
-      case 'flip':
-        return { width: 200, height: 100 };
-      case 'pomodoro':
-        return { width: 180, height: 220 };
-      case 'breathe':
-        return { width: 160, height: 160 };
-      case 'month':
-        return { width: 200, height: 220 };
-      case 'simple':
-        return { width: 140, height: 140 };
-      default:
-        return { width: 220, height: 100 };
+  const getWidgetDimensions = (style: WidgetStyle) => {
+    let w = 220, h = 100;
+    if (style === 'analog' || style === 'traditional' || style === 'breathe') {
+      w = 160; h = 160;
+    } else if (style === 'flip') {
+      w = 200; h = 100;
+    } else if (style === 'pomodoro') {
+      w = 180; h = 220;
+    } else if (style === 'month') {
+      w = 200; h = 220;
+    } else if (style === 'simple') {
+      w = 140; h = 140;
     }
-  }, []);
+    return { w, h };
+  };
 
-  /**
-   * 获取组件类型
-   */
-  const getWidgetType = useCallback((style: string) => {
-    switch (style) {
-      case 'pomodoro': return 'pomodoro';
-      case 'breathe': return 'breathe';
-      case 'month': return 'calendar';
-      case 'simple': return 'weather';
-      default: return 'clock';
-    }
-  }, []);
+  const getWidgetType = (style: WidgetStyle) => {
+    if (style === 'pomodoro') return 'pomodoro';
+    if (style === 'breathe') return 'breathe';
+    if (style === 'month') return 'calendar';
+    if (style === 'simple') return 'weather';
+    return 'clock';
+  };
 
-  /**
-   * 处理菜单项拖拽移动
-   */
   const handleMenuDragMove = useCallback((e: PointerEvent) => {
     const style = menuDraggingStyleRef.current;
-    if (!style) {
-      return;
-    }
+    if (!style) return;
 
     const dx = e.clientX - menuDragStartPosRef.current.x;
     const dy = e.clientY - menuDragStartPosRef.current.y;
@@ -79,25 +63,15 @@ export const useWidgetDrag = ({ addWidget, updateWidgetPosition, triggerCloseClo
       setMenuDragHasMoved(true);
     }
 
-    const { width: clockWidth, height: clockHeight } = getWidgetDimensions(style);
-    const ox = clockWidth / 2;
-    const oy = clockHeight / 2;
-
-    let newX = e.clientX - ox;
-    let newY = e.clientY - oy;
-
-    const maxX = window.innerWidth - clockWidth;
-    const maxY = window.innerHeight - clockHeight;
-
-    newX = Math.max(0, Math.min(newX, maxX));
-    newY = Math.max(0, Math.min(newY, maxY));
+    const { w, h } = getWidgetDimensions(style);
+    let newX = e.clientX - w / 2;
+    let newY = e.clientY - h / 2;
+    newX = Math.max(0, Math.min(newX, window.innerWidth - w));
+    newY = Math.max(0, Math.min(newY, window.innerHeight - h));
 
     setMenuDragPos({ x: newX, y: newY });
-  }, [getWidgetDimensions]);
+  }, []);
 
-  /**
-   * 处理菜单项拖拽结束
-   */
   const handleMenuDragUp = useCallback((e: PointerEvent) => {
     const style = menuDraggingStyleRef.current;
     if (style) {
@@ -106,24 +80,17 @@ export const useWidgetDrag = ({ addWidget, updateWidgetPosition, triggerCloseClo
       const distance = Math.sqrt(dx * dx + dy * dy);
 
       if (distance > 5 || menuDragHasMovedRef.current) {
-        const { width: clockWidth, height: clockHeight } = getWidgetDimensions(style);
-        const ox = clockWidth / 2;
-        const oy = clockHeight / 2;
-
-        let newX = e.clientX - ox;
-        let newY = e.clientY - oy;
-        const maxX = window.innerWidth - clockWidth;
-        const maxY = window.innerHeight - clockHeight;
-        newX = Math.max(0, Math.min(newX, maxX));
-        newY = Math.max(0, Math.min(newY, maxY));
+        const { w, h } = getWidgetDimensions(style);
+        let newX = e.clientX - w / 2;
+        let newY = e.clientY - h / 2;
+        newX = Math.max(0, Math.min(newX, window.innerWidth - w));
+        newY = Math.max(0, Math.min(newY, window.innerHeight - h));
 
         const xPercent = (newX / window.innerWidth) * 100;
         const yPercent = (newY / window.innerHeight) * 100;
-        const type = getWidgetType(style);
-        addWidget(type, style, xPercent, yPercent);
+        addWidget(getWidgetType(style), style, xPercent, yPercent);
       } else {
-        const type = getWidgetType(style);
-        addWidget(type, style, 40, 30);
+        addWidget(getWidgetType(style), style, 40, 30);
       }
     }
 
@@ -135,15 +102,9 @@ export const useWidgetDrag = ({ addWidget, updateWidgetPosition, triggerCloseClo
 
     window.removeEventListener('pointermove', handleMenuDragMove);
     window.removeEventListener('pointerup', handleMenuDragUp);
-  }, [addWidget, triggerCloseClock, handleMenuDragMove, getWidgetDimensions, getWidgetType]);
+  }, [addWidget, triggerCloseClock, handleMenuDragMove]);
 
-  /**
-   * 处理从菜单开始拖拽
-   */
-  const handleDragStartFromMenu = useCallback((e: React.PointerEvent<HTMLButtonElement>, style: WidgetStyle) => {
-    if (!style) {
-      return;
-    }
+  const handleDragStartFromMenu = useCallback((e: React.PointerEvent<HTMLButtonElement>, style: NonNullable<WidgetStyle>) => {
     e.preventDefault();
     menuDragStartPosRef.current = { x: e.clientX, y: e.clientY };
     menuDraggingStyleRef.current = style;
@@ -151,22 +112,15 @@ export const useWidgetDrag = ({ addWidget, updateWidgetPosition, triggerCloseClo
     menuDragHasMovedRef.current = false;
     setMenuDragHasMoved(false);
 
-    const { width: clockWidth, height: clockHeight } = getWidgetDimensions(style);
-    const ox = clockWidth / 2;
-    const oy = clockHeight / 2;
-
-    let newX = e.clientX - ox;
-    let newY = e.clientY - oy;
-    const maxX = window.innerWidth - clockWidth;
-    const maxY = window.innerHeight - clockHeight;
-    newX = Math.max(0, Math.min(newX, maxX));
-    newY = Math.max(0, Math.min(newY, maxY));
+    const { w, h } = getWidgetDimensions(style);
+    let newX = Math.max(0, Math.min(e.clientX - w / 2, window.innerWidth - w));
+    let newY = Math.max(0, Math.min(e.clientY - h / 2, window.innerHeight - h));
 
     setMenuDragPos({ x: newX, y: newY });
 
     window.addEventListener('pointermove', handleMenuDragMove);
     window.addEventListener('pointerup', handleMenuDragUp);
-  }, [handleMenuDragMove, handleMenuDragUp, getWidgetDimensions]);
+  }, [handleMenuDragMove, handleMenuDragUp]);
 
   useEffect(() => {
     return () => {
@@ -175,49 +129,41 @@ export const useWidgetDrag = ({ addWidget, updateWidgetPosition, triggerCloseClo
     };
   }, [handleMenuDragMove, handleMenuDragUp]);
 
-  /**
-   * 处理全局指针移动
-   */
   const handlePointerMoveGlobal = useCallback((e: PointerEvent) => {
-    if (!activeDraggingId || !activeDraggingStyleRef.current) {
-      return;
-    }
+    if (!activeDraggingId || !activeDraggingStyleRef.current) return;
+    const { w, h } = getWidgetDimensions(activeDraggingStyleRef.current);
+    let newX = Math.max(0, Math.min(e.clientX - dragOffset.x, window.innerWidth - w));
+    let newY = Math.max(0, Math.min(e.clientY - dragOffset.y, window.innerHeight - h));
 
-    let newX = e.clientX - dragOffset.x;
-    let newY = e.clientY - dragOffset.y;
+    updateWidgetPosition(activeDraggingId, (newX / window.innerWidth) * 100, (newY / window.innerHeight) * 100);
+  }, [activeDraggingId, dragOffset, updateWidgetPosition]);
 
-    const { width: clockWidth, height: clockHeight } = getWidgetDimensions(activeDraggingStyleRef.current);
-
-    const maxX = window.innerWidth - clockWidth;
-    const maxY = window.innerHeight - clockHeight;
-
-    newX = Math.max(0, Math.min(newX, maxX));
-    newY = Math.max(0, Math.min(newY, maxY));
-
-    const xPercent = (newX / window.innerWidth) * 100;
-    const yPercent = (newY / window.innerHeight) * 100;
-
-    updateWidgetPosition(activeDraggingId, xPercent, yPercent);
-  }, [activeDraggingId, dragOffset, updateWidgetPosition, getWidgetDimensions]);
-
-  /**
-   * 处理全局指针松开
-   */
   const handlePointerUpGlobal = useCallback(() => {
     setActiveDraggingId(null);
     activeDraggingStyleRef.current = null;
-  }, []);
+    window.removeEventListener('pointermove', handlePointerMoveGlobal);
+    window.removeEventListener('pointerup', handlePointerUpGlobal);
+  }, [handlePointerMoveGlobal]);
+
+  const handlePointerDownClock = useCallback((e: React.PointerEvent<HTMLDivElement>, id: string, style: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setActiveDraggingId(id);
+    activeDraggingStyleRef.current = style as any;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    setDragOffset({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+
+    window.addEventListener('pointermove', handlePointerMoveGlobal);
+    window.addEventListener('pointerup', handlePointerUpGlobal);
+  }, [handlePointerMoveGlobal, handlePointerUpGlobal]);
 
   useEffect(() => {
-    if (activeDraggingId) {
-      window.addEventListener('pointermove', handlePointerMoveGlobal);
-      window.addEventListener('pointerup', handlePointerUpGlobal);
-    }
     return () => {
       window.removeEventListener('pointermove', handlePointerMoveGlobal);
       window.removeEventListener('pointerup', handlePointerUpGlobal);
     };
-  }, [activeDraggingId, handlePointerMoveGlobal, handlePointerUpGlobal]);
+  }, [handlePointerMoveGlobal, handlePointerUpGlobal]);
 
   return {
     activeDraggingId,
@@ -228,6 +174,7 @@ export const useWidgetDrag = ({ addWidget, updateWidgetPosition, triggerCloseClo
     menuDraggingStyle,
     menuDragPos,
     menuDragHasMoved,
-    handleDragStartFromMenu
+    handleDragStartFromMenu,
+    handlePointerDownClock
   };
-};
+}
