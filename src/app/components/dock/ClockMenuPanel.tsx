@@ -1,7 +1,6 @@
 /**
- * ÎÄ¼şÃû£ºClockMenuPanel.tsx
- * ÃèÊö£º¶¥²¿ Dock À¸µÄ×é¼şÍÏ×§²Ëµ¥Ãæ°å
- * ´´½¨Ê±¼ä£º2026-06-09
+ * @description å‰ç«¯UIç»„ä»¶ï¼šClockMenuPanel.tsx
+ * @date 2026-06-10
  */
 import React from 'react';
 import { Clock, Calendar, Timer, Flower2, CloudSun } from 'lucide-react';
@@ -115,7 +114,7 @@ export const ClockMenuPanel: React.FC<ClockMenuPanelProps> = ({
             className={getCategoryBtnClass(isEditMode ? activeCategory === 'timer' : timerVisible)}
           >
             <Timer className="w-3.5 h-3.5" />
-            <span>è®¡æ—¶å™?/span>
+            <span>è®¡æ—¶å™¨</span>
           </button>
 
           <button
@@ -142,44 +141,6 @@ export const ClockMenuPanel: React.FC<ClockMenuPanelProps> = ({
         <div className="relative w-fit bg-widget-bg/95 border border-widget-border shadow-xl backdrop-blur-xl rounded-2xl p-3 flex items-center justify-center min-h-[82px] transition-all duration-300">
         {activeCategory === 'clock' && (
           <div className="flex items-center gap-3 animate-fade-in">
-            <button
-              onPointerDown={(e) => handleDragStartFromMenu(e, 'analog')}
-              className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/50 transition-colors cursor-grab active:cursor-grabbing group/btn"
-            >
-              <div className="w-12 h-12 rounded-full border border-widget-border group-hover/btn:border-text-primary flex items-center justify-center relative bg-input-bg/20 shadow-sm transition-all">
-                <div className="w-0.5 h-4 bg-text-primary absolute top-2 rounded-full" />
-                <div className="w-3 h-0.5 bg-text-primary absolute top-6 left-6 rounded-full" />
-                <div className="w-1 h-1 rounded-full bg-red-500 absolute top-[23px] left-[23px]" />
-              </div>
-              <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">æ¨¡æ‹Ÿ</span>
-            </button>
-
-            <button
-              onPointerDown={(e) => handleDragStartFromMenu(e, 'traditional')}
-              className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/50 transition-colors cursor-grab active:cursor-grabbing group/btn"
-            >
-              <div className="w-12 h-12 rounded-full border border-widget-border group-hover/btn:border-text-primary flex items-center justify-center relative bg-input-bg/20 shadow-sm transition-all">
-                <span className="text-[8px] font-bold text-text-secondary group-hover/btn:text-text-primary absolute top-0.5">12</span>
-                <span className="text-[8px] font-bold text-text-secondary group-hover/btn:text-text-primary absolute bottom-0.5">6</span>
-                <span className="text-[8px] font-bold text-text-secondary group-hover/btn:text-text-primary absolute left-0.5">9</span>
-                <span className="text-[8px] font-bold text-text-secondary group-hover/btn:text-text-primary absolute right-0.5">3</span>
-                <div className="w-0.5 h-3 bg-text-secondary group-hover/btn:bg-text-primary absolute top-[16px] left-[23px] origin-bottom transform rotate-45" />
-                <div className="w-0.5 h-4 bg-text-secondary group-hover/btn:bg-text-primary absolute top-[12px] left-[23px] origin-bottom transform -rotate-12" />
-              </div>
-              <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">ä¼ ç»Ÿ</span>
-            </button>
-
-            <button
-              onPointerDown={(e) => handleDragStartFromMenu(e, 'digital')}
-              className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/50 transition-colors cursor-grab active:cursor-grabbing group/btn"
-            >
-              <div className="w-16 h-12 rounded-xl border border-widget-border group-hover/btn:border-text-secondary flex flex-col items-center justify-center bg-input-bg">
-                <span className="text-[10px] font-mono tracking-tight">12:00:00</span>
-                <span className="text-[6px] text-text-secondary scale-90">6æœ?æ—?/span>
-              </div>
-              <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">æ•°å­—</span>
-            </button>
-
             <button
               onPointerDown={(e) => handleDragStartFromMenu(e, 'flip')}
               className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/50 transition-colors cursor-grab active:cursor-grabbing group/btn"
@@ -226,7 +187,7 @@ export const ClockMenuPanel: React.FC<ClockMenuPanelProps> = ({
                   <div className="w-1 h-3 bg-blue-500/60 group-hover/btn:bg-blue-500 absolute top-2" />
                 </div>
               </div>
-              <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">ç•ªèŒ„é’?/span>
+              <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">ç•ªèŒ„é’Ÿ</span>
             </button>
           </div>
         )}
