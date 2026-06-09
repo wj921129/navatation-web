@@ -1384,7 +1384,9 @@ export function AddShortcutDialog({
                                   ref={provided.innerRef} 
                                   {...provided.droppableProps} 
                                   className="flex flex-wrap items-center pb-4"
-                                  style={{ gap: `${iconSpacingY}px ${iconSpacingX}px` }}
+                                  style={{ 
+                                    margin: `-${iconSpacingY / 2}px -${iconSpacingX / 2}px`,
+                                  }}
                                 >
                                   {/* 将原本的 grid-cols-8 替换为水平 flex 滚动，以适配 @hello-pangea/dnd 的一维水平拖拽，避免折行导致的异常跳跃问题 */}
                                   {category.sites.map((site: any, siteIdx) => (
@@ -1398,6 +1400,7 @@ export function AddShortcutDialog({
                                           style={{
                                             ...provided.draggableProps.style,
                                             width: `${iconSize + 32}px`,
+                                            margin: `${iconSpacingY / 2}px ${iconSpacingX / 2}px`,
                                             transition: snapshot.isDropAnimating
                                               ? 'transform 0.12s cubic-bezier(0.2, 1, 0.1, 1)'
                                               : provided.draggableProps.style?.transition
@@ -1470,7 +1473,13 @@ export function AddShortcutDialog({
                                     </Draggable>
                                   ))}
                                   {userRole === 'ADMIN' && (
-                                    <div className="relative group/item flex-shrink-0" style={{ width: `${iconSize + 32}px` }}>
+                                    <div 
+                                      className="relative group/item flex-shrink-0" 
+                                      style={{ 
+                                        width: `${iconSize + 32}px`,
+                                        margin: `${iconSpacingY / 2}px ${iconSpacingX / 2}px`
+                                      }}
+                                    >
                                       {/* 在水平 flex 容器中，新增网址按钮同样需要 flex-shrink-0 避免缩水 */}
                                       <button
                                       onClick={() => {
