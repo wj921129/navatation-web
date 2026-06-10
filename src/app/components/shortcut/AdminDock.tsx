@@ -31,13 +31,13 @@ export function AdminDock({
   const [isPending, startTransition] = useTransition();
 
   return (
-    <div className="absolute top-8 -left-[71px] w-[72px] bg-card/60 backdrop-blur-2xl hover:bg-card/95 border border-border hover:border-border/80 border-r-0 rounded-l-3xl p-3 py-6 flex flex-col items-center gap-4 z-50 transition-all duration-300 animate-in fade-in slide-in-from-right-4 shadow-[-10px_10px_20px_-5px_rgba(0,0,0,0.08)] hover:shadow-[-12px_12px_24px_-5px_rgba(0,0,0,0.15)] dark:shadow-[-10px_10px_20px_-5px_rgba(0,0,0,0.5)] dark:hover:shadow-[-12px_12px_24px_-5px_rgba(0,0,0,0.7)] group cursor-default">
+    <div className="interactive-glass-panel absolute top-8 -left-[71px] w-[72px] border border-border hover:border-border/80 border-r-0 rounded-l-3xl p-3 py-6 flex flex-col items-center gap-4 z-50 animate-in fade-in slide-in-from-right-4 shadow-[-10px_10px_20px_-5px_rgba(0,0,0,0.08)] hover:shadow-[-12px_12px_24px_-5px_rgba(0,0,0,0.15)] dark:shadow-[-10px_10px_20px_-5px_rgba(0,0,0,0.5)] dark:hover:shadow-[-12px_12px_24px_-5px_rgba(0,0,0,0.7)] cursor-default">
       
       {/* 模式切换 (图标/列表) */}
       <div className="group relative flex items-center justify-center">
         <button
           onClick={() => startTransition(() => toggleBatchMode())}
-          className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm border cursor-pointer ${
+          className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm border cursor-pointer hover:scale-105 hover:shadow-md ${
             !isBatchMode 
               ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-400' 
               : 'bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-900/30 dark:border-indigo-800 dark:text-indigo-400'

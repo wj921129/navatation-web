@@ -299,3 +299,14 @@
   0%, 100% { opacity: 1; }
   50% { opacity: 0.15; }
 }
+
+@utility interactive-glass-panel {
+  background-color: color-mix(in srgb, var(--card) 60%, transparent);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    background-color: color-mix(in srgb, var(--card) 95%, transparent);
+  }
+}
