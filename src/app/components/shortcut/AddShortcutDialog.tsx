@@ -161,31 +161,6 @@ export function AddShortcutDialog({
           <div className="bg-card/95 border-b border-border px-6 py-4 flex items-center justify-between transition-colors duration-300">
             <h2 className="text-xl font-medium">添加网址</h2>
             <div className="flex items-center gap-3">
-              {userRole === 'ADMIN' && (
-                <div className="group relative flex items-center justify-center">
-                  <button
-                    onClick={() => {
-                      if (!isAdminMode) {
-                        setIsAdminMode(true);
-                        setTimeout(() => setIsGridAdmin(true), 300);
-                      } else {
-                        setIsAdminMode(false);
-                        setIsGridAdmin(false);
-                        batchCategoryControls.toggleBatchMode(false);
-                      }
-                    }}
-                    title={isAdminMode ? '退出管理模式' : '管理推荐网址'}
-                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm border cursor-pointer ${
-                      isAdminMode 
-                        ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-400' 
-                        : 'bg-background hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-600 dark:text-gray-400 border-border'
-                    }`}
-                  >
-                    <Settings className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
-              
               {!isAdminMode && (
                 <>
                   <div className="group relative flex items-center justify-center">
@@ -209,6 +184,31 @@ export function AddShortcutDialog({
                     </button>
                   </div>
                 </>
+              )}
+
+              {userRole === 'ADMIN' && (
+                <div className="group relative flex items-center justify-center">
+                  <button
+                    onClick={() => {
+                      if (!isAdminMode) {
+                        setIsAdminMode(true);
+                        setTimeout(() => setIsGridAdmin(true), 300);
+                      } else {
+                        setIsAdminMode(false);
+                        setIsGridAdmin(false);
+                        batchCategoryControls.toggleBatchMode(false);
+                      }
+                    }}
+                    title={isAdminMode ? '退出管理模式' : '管理推荐网址'}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm border cursor-pointer ${
+                      isAdminMode 
+                        ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-400' 
+                        : 'bg-background hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-600 dark:text-gray-400 border-border'
+                    }`}
+                  >
+                    <Settings className="w-4 h-4" />
+                  </button>
+                </div>
               )}
             </div>
           </div>
