@@ -72,19 +72,19 @@ export function AdminCategoryModal({
             <span>图标选择</span>
             <span className="text-xs bg-gray-100 dark:bg-neutral-800 px-2 py-0.5 rounded text-gray-400">{editingCategory?.iconValue || 'Folder'}</span>
           </label>
-          <div className="grid grid-cols-6 sm:grid-cols-8 gap-2 max-h-52 overflow-y-auto p-2 border rounded-xl bg-background scrollbar-thin">
+          <div className="grid grid-cols-4 sm:grid-cols-5 gap-3 max-h-64 overflow-y-auto p-3 border rounded-xl bg-background scrollbar-thin">
             {Object.entries(IconMap).map(([iconName, IconComp]) => (
               <button
                 key={iconName}
                 onClick={() => editingCategory && setEditingCategory({...editingCategory, iconValue: iconName})}
-                className={`flex items-center justify-center p-2.5 rounded-lg transition-all cursor-pointer ${
+                className={`flex items-center justify-center p-3 rounded-xl transition-all cursor-pointer ${
                   (editingCategory?.iconValue || 'Folder') === iconName
-                    ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/50 shadow-sm ring-1 ring-blue-500/50'
+                    ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/50 shadow-sm ring-2 ring-blue-500/50'
                     : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-neutral-800 dark:hover:text-gray-200 border border-transparent'
                 }`}
                 title={iconName}
               >
-                <IconComp className="w-5 h-5" />
+                <IconComp className="w-8 h-8" />
               </button>
             ))}
           </div>
