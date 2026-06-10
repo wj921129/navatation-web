@@ -48,6 +48,7 @@ export function AddShortcutDialog({
 }: AddShortcutDialogProps) {
   const [activeTab, setActiveTab] = useState<'recommended' | 'custom'>('recommended');
   const [isAdminMode, setIsAdminMode] = useState(false);
+  const [isGridAdmin, setIsGridAdmin] = useState(false);
   const [pendingShortcuts, setPendingShortcuts] = useState<RecommendedSite[]>([]);
   const [categories, setCategories] = useState<CategoryGroup[]>([]);
   
@@ -101,6 +102,7 @@ export function AddShortcutDialog({
       customShortcutControls.resetCustomState();
       setActiveTab('recommended');
       setIsAdminMode(false);
+      setIsGridAdmin(false);
       setIsBatchMode(false);
       setBatchEditData([]);
       loadRecommended();
@@ -162,8 +164,12 @@ export function AddShortcutDialog({
                 <div className="group relative flex items-center justify-center">
                   <button
                     onClick={() => {
-                      setIsAdminMode(!isAdminMode);
-                      if (isAdminMode) {
+                      if (!isAdminMode) {
+                        setIsAdminMode(true);
+                        setTimeout(() => setIsGridAdmin(true), 300);
+                      } else {
+                        setIsAdminMode(false);
+                        setIsGridAdmin(false);
                         batchCategoryControls.setIsBatchMode(false);
                       }
                     }}
@@ -239,7 +245,7 @@ export function AddShortcutDialog({
                       <RecommendedTabGrid
                         categories={categories}
                         setCategories={setCategories}
-                        userRole={isAdminMode ? 'ADMIN' : 'USER'}
+                        userRole={isGridAdmin ? 'ADMIN' : 'USER'}
                         iconSize={iconSize}
                         iconRadius={iconRadius}
                         iconSpacingX={iconSpacingX}
