@@ -62,6 +62,8 @@ export function BatchCategoryList({
         copy[destCatIdx].sites = destSites;
       }
       return copy;
+    });
+  };
   const renderedCount = useProgressiveRender({
     total: batchEditData.length,
     initialCount: 0,
