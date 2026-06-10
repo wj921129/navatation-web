@@ -239,7 +239,7 @@ export function ManageHomepageShortcutsDialog({
       overlayClassName="bg-black/50 backdrop-blur-sm"
       zIndex={50}
     >
-      <div className="absolute top-1/2 -translate-y-1/2 -left-[80px] bg-card/95 backdrop-blur-xl border border-border/80 rounded-full p-3 flex flex-col items-center gap-4 shadow-2xl z-50 animate-in fade-in slide-in-from-left-8 duration-300">
+      <div className="absolute top-8 -left-[71px] w-[72px] bg-card border border-border border-r-0 rounded-l-3xl p-3 py-6 flex flex-col items-center gap-4 z-50 animate-in fade-in slide-in-from-right-4 duration-300 shadow-[-10px_10px_20px_-5px_rgba(0,0,0,0.1)] dark:shadow-[-10px_10px_20px_-5px_rgba(0,0,0,0.5)]">
         <div className="group relative flex items-center justify-center">
           <button
             onClick={() => setIsBatchMode(!isBatchMode)}
