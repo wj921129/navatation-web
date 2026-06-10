@@ -90,7 +90,7 @@ export default function ClockWidget({
       ref={containerRef}
       onPointerDown={handlePointerDown}
       className={`absolute select-none z-20 group touch-none isolate ${
-        isEditMode ? 'cursor-grab active:cursor-grabbing' : ''
+        isEditMode ? 'cursor-pointer' : ''
       }`}
       style={{
         left: `${x}%`,
