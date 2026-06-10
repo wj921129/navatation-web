@@ -2,6 +2,7 @@ import React from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Loader2, Link as LinkIcon, RotateCw, Upload, Trash2, Plus, GripVertical } from 'lucide-react';
 import { IconMap } from '../ui/IconMap';
+import { useProgressiveRender } from '../../hooks/useProgressiveRender';
 
 /**
  * 批量管理模式下的分类列表组件
@@ -61,26 +62,12 @@ export function BatchCategoryList({
         copy[destCatIdx].sites = destSites;
       }
       return copy;
-    });
-  };
-
-  const [renderedCount, setRenderedCount] = React.useState(0);
-
-  React.useEffect(() => {
-    // Reset when data shrinks or changes mode
-    if (batchEditData.length === 0) {
-      setRenderedCount(0);
-      return;
-    }
-    
-    // Progressively render to avoid blocking the main thread and ensure smooth CSS transitions
-    if (renderedCount < batchEditData.length) {
-      const timer = setTimeout(() => {
-        setRenderedCount(prev => Math.min(prev + 2, batchEditData.length));
-      }, 30);
-      return () => clearTimeout(timer);
-    }
-  }, [renderedCount, batchEditData.length]);
+  const renderedCount = useProgressiveRender({
+    total: batchEditData.length,
+    initialCount: 0,
+    batchSize: 2,
+    delay: 30
+  });
 
   const visibleCategories = batchEditData.slice(0, renderedCount);
 
