@@ -293,12 +293,24 @@ export function ManageHomepageShortcutsDialog({
         <div className="bg-card/95 border-b border-border px-6 py-4 flex items-center justify-between">
           <h2 className="text-xl font-medium">管理首页图标</h2>
           <div className="flex items-center gap-3">
-            <button onClick={onClose} className="px-5 py-2 bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-800 dark:text-gray-200 rounded-full text-sm cursor-pointer">
-              取消
-            </button>
-            <button onClick={handleSaveAll} className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-sm cursor-pointer">
-              保存
-            </button>
+            <div className="group relative flex items-center justify-center">
+              <button
+                onClick={handleSaveAll}
+                title="保存更改"
+                className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer"
+              >
+                <Check className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="group relative flex items-center justify-center">
+              <button
+                onClick={onClose}
+                title="取消/关闭"
+                className="w-10 h-10 rounded-full flex items-center justify-center bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-800 dark:text-gray-200 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -309,11 +321,20 @@ export function ManageHomepageShortcutsDialog({
               <div className="flex items-center justify-between border-b border-border pb-3">
                 <h3 className="text-base font-medium">快捷方式列表</h3>
                 <div className="flex items-center gap-2">
-                  <button onClick={handleBatchRefreshAllIcons} disabled={isAllRefreshing} className="flex items-center gap-1 px-3 py-1.5 bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-lg text-xs cursor-pointer">
-                    <RotateCw className={`w-3.5 h-3.5 ${isAllRefreshing ? 'animate-spin' : ''}`} /> 一键刷新
+                  <button
+                    onClick={handleBatchRefreshAllIcons}
+                    disabled={isAllRefreshing}
+                    className="flex items-center justify-center w-8 h-8 bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-lg cursor-pointer transition-colors disabled:opacity-50"
+                    title="批量刷新所有网址图标"
+                  >
+                    <RotateCw className={`w-4 h-4 ${isAllRefreshing ? 'animate-spin' : ''}`} />
                   </button>
-                  <button onClick={handleAddEmptyRow} className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 hover:bg-blue-100 rounded-lg text-xs cursor-pointer">
-                    <Plus className="w-3.5 h-3.5" /> 新增网址
+                  <button
+                    onClick={handleAddEmptyRow}
+                    className="flex items-center justify-center w-8 h-8 bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg cursor-pointer transition-colors"
+                    title="新增网址"
+                  >
+                    <Plus className="w-4 h-4" />
                   </button>
                 </div>
               </div>
