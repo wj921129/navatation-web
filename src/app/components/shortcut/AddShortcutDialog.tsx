@@ -3,7 +3,7 @@
  * @date 2026-06-09
  */
 import React, { useState, useEffect } from 'react';
-import { X, Link } from 'lucide-react';
+import { X, Link, Check, Settings } from 'lucide-react';
 import { toast } from 'sonner';
 import { BaseModal } from '../ui/BaseModal';
 import { IconMap } from '../ui/IconMap';
@@ -47,6 +47,7 @@ export function AddShortcutDialog({
   userRole,
 }: AddShortcutDialogProps) {
   const [activeTab, setActiveTab] = useState<'recommended' | 'custom'>('recommended');
+  const [isAdminMode, setIsAdminMode] = useState(false);
   const [pendingShortcuts, setPendingShortcuts] = useState<RecommendedSite[]>([]);
   const [categories, setCategories] = useState<CategoryGroup[]>([]);
   
@@ -99,6 +100,7 @@ export function AddShortcutDialog({
     if (isOpen) {
       customShortcutControls.resetCustomState();
       setActiveTab('recommended');
+      setIsAdminMode(false);
       setIsBatchMode(false);
       setBatchEditData([]);
       loadRecommended();
@@ -137,7 +139,7 @@ export function AddShortcutDialog({
         overlayClassName="bg-black/50 backdrop-blur-sm"
         zIndex={50}
       >
-        {userRole === 'ADMIN' && activeTab === 'recommended' && (
+        {userRole === 'ADMIN' && activeTab === 'recommended' && isAdminMode && (
           <AdminDock
             isBatchMode={batchCategoryControls.isBatchMode}
             setIsBatchMode={batchCategoryControls.setIsBatchMode}
@@ -156,25 +158,56 @@ export function AddShortcutDialog({
           <div className="bg-card/95 border-b border-border px-6 py-4 flex items-center justify-between transition-colors duration-300">
             <h2 className="text-xl font-medium">添加网址</h2>
             <div className="flex items-center gap-3">
-              <button
-                onClick={handleCancel}
-                className="px-5 py-2 bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-800 dark:text-gray-200 rounded-full transition-colors text-sm cursor-pointer"
-              >
-                取消
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={pendingShortcuts.length === 0}
-                className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors text-sm disabled:bg-gray-200 dark:disabled:bg-neutral-800 disabled:text-gray-400 dark:disabled:text-neutral-600 disabled:cursor-not-allowed cursor-pointer"
-              >
-                保存 {pendingShortcuts.length > 0 && `(${pendingShortcuts.length})`}
-              </button>
-              <button
-                onClick={onClose}
-                className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
-              >
-                <X className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              </button>
+              {userRole === 'ADMIN' && (
+                <div className="group relative flex items-center justify-center">
+                  <button
+                    onClick={() => {
+                      setIsAdminMode(!isAdminMode);
+                      if (isAdminMode) {
+                        batchCategoryControls.setIsBatchMode(false);
+                      }
+                    }}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm border cursor-pointer ${
+                      isAdminMode 
+                        ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-400' 
+                        : 'bg-background hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-600 dark:text-gray-400 border-border'
+                    }`}
+                  >
+                    <Settings className="w-4 h-4" />
+                  </button>
+                  <div className="absolute right-full mr-4 px-3 py-2 bg-gray-800/95 backdrop-blur-sm text-white text-sm font-medium rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-all shadow-xl z-50 translate-x-[10px] group-hover:translate-x-0">
+                    {isAdminMode ? '退出管理模式' : '管理推荐网址'}
+                    <div className="absolute top-1/2 -translate-y-1/2 -right-1.5 border-y-4 border-y-transparent border-l-4 border-l-gray-800/95" />
+                  </div>
+                </div>
+              )}
+              
+              <div className="group relative flex items-center justify-center">
+                <button
+                  onClick={handleSave}
+                  disabled={pendingShortcuts.length === 0}
+                  className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white transition-colors disabled:bg-gray-200 dark:disabled:bg-neutral-800 disabled:text-gray-400 dark:disabled:text-neutral-600 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  <Check className="w-5 h-5" />
+                </button>
+                <div className="absolute right-full mr-4 px-3 py-2 bg-gray-800/95 backdrop-blur-sm text-white text-sm font-medium rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-all shadow-xl z-50 translate-x-[10px] group-hover:translate-x-0">
+                  保存更改 {pendingShortcuts.length > 0 && `(${pendingShortcuts.length})`}
+                  <div className="absolute top-1/2 -translate-y-1/2 -right-1.5 border-y-4 border-y-transparent border-l-4 border-l-gray-800/95" />
+                </div>
+              </div>
+
+              <div className="group relative flex items-center justify-center">
+                <button
+                  onClick={handleCancel}
+                  className="w-10 h-10 rounded-full flex items-center justify-center bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-800 dark:text-gray-200 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                <div className="absolute right-full mr-4 px-3 py-2 bg-gray-800/95 backdrop-blur-sm text-white text-sm font-medium rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-all shadow-xl z-50 translate-x-[10px] group-hover:translate-x-0">
+                  取消/关闭
+                  <div className="absolute top-1/2 -translate-y-1/2 -right-1.5 border-y-4 border-y-transparent border-l-4 border-l-gray-800/95" />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -201,9 +234,9 @@ export function AddShortcutDialog({
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-hidden">
             <div className="grid grid-cols-3 h-full">
-              <div className={`${isBatchMode ? 'col-span-3' : 'col-span-2'} border-r border-border overflow-y-auto`}>
+              <div className={`${isBatchMode ? 'col-span-3' : 'col-span-2'} border-r border-border overflow-y-scroll`}>
                 {activeTab === 'recommended' ? (
                   <div className="p-6 space-y-8 relative">
                     {isBatchMode ? (
@@ -215,7 +248,7 @@ export function AddShortcutDialog({
                       <RecommendedTabGrid
                         categories={categories}
                         setCategories={setCategories}
-                        userRole={userRole}
+                        userRole={isAdminMode ? 'ADMIN' : 'USER'}
                         iconSize={iconSize}
                         iconRadius={iconRadius}
                         iconSpacingX={iconSpacingX}
