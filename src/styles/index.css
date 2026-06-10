@@ -113,11 +113,11 @@
   justify-content: center !important;
 }
 
-/* 修复浅色模式下自带抓取小手偏白不可见问题：采用高保真系统小手SVG并加上黑色描边 */
-html:not(.dark) .cursor-grab {
+/* 修复自带抓取小手不可见问题：全模式统一采用高保真系统小手SVG并加上黑色描边 */
+.cursor-grab {
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='white' stroke='black' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round' d='M 8.5 10 V 5.5 C 8.5 4.7 9.2 4 10 4 C 10.8 4 11.5 4.7 11.5 5.5 V 10 M 11.5 10 V 3.5 C 11.5 2.7 12.2 2 13 2 C 13.8 2 14.5 2.7 14.5 3.5 V 10 M 14.5 10 V 4.5 C 14.5 3.7 15.2 3 16 3 C 16.8 3 17.5 3.7 17.5 4.5 V 10 M 17.5 10 V 7.5 C 17.5 6.7 18.2 6 19 6 C 19.8 6 20.5 6.7 20.5 7.5 V 14 C 20.5 17 18 19.5 15 19.5 H 11 C 8 19.5 5.5 17 5.5 14 V 11.5 C 5.5 10.7 6.2 10 7 10 C 7.8 10 8.5 10.7 8.5 11.5' /%3E%3C/svg%3E") 12 10, grab !important;
 }
 
-html:not(.dark) .active\:cursor-grabbing:active {
+.active\:cursor-grabbing:active {
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='white' stroke='black' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round' d='M 8.5 10 V 8 C 8.5 7.2 9.2 6.5 10 6.5 C 10.8 6.5 11.5 7.2 11.5 8 V 10 M 11.5 10 V 6 C 11.5 5.2 12.2 4.5 13 4.5 C 13.8 4.5 14.5 5.2 14.5 6 V 10 M 14.5 10 V 7 C 14.5 6.2 15.2 5.5 16 5.5 C 16.8 5.5 17.5 6.2 17.5 7 V 10 M 17.5 10 V 9.5 C 17.5 8.7 18.2 8 19 8 C 19.8 8 20.5 8.7 20.5 9.5 V 14 C 20.5 17 18 19.5 15 19.5 H 11 C 8 19.5 5.5 17 5.5 14 V 11.5 C 5.5 10.7 6.2 10 7 10 C 7.8 10 8.5 10.7 8.5 11.5' /%3E%3C/svg%3E") 12 10, grabbing !important;
 }
