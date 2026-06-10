@@ -29,7 +29,7 @@ function formatDate(isoString: string): string {
 
 /**
  * 待办事项面板 - 从右侧滑出的面板组件
- * 支持创建、切换完成、双击编辑、删除和清除已完成功能。
+ * 支持创建、切换完成、单击编辑、删除和清除已完成功能。
  * 使用 todoStore 实现全局状态共享，使首页其他挂载的小组件能实时联动。
  */
 export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
@@ -124,7 +124,7 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
     await todoStore.toggleTodo(todo.todoId, authState.isLoggedIn);
   };
 
-  // 开始编辑（双击触发）
+  // 开始编辑（单击触发）
   const handleStartEdit = (todo: TodoItem) => {
     if (todo.completed) return;
     setEditingId(todo.todoId);
@@ -311,7 +311,7 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
                       )}
                     </button>
 
-                    {/* 待办内容 - 双击进入编辑模式 */}
+                    {/* 待办内容 - 单击进入编辑模式 */}
                     {editingId === todo.todoId ? (
                       <div className="flex-1">
                         <input
@@ -341,8 +341,8 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
                           className={`text-sm transition-all duration-200 select-none line-clamp-5 break-all ${
                             todo.completed ? 'text-text-secondary line-through' : 'text-text-primary'
                           }`}
-                          onDoubleClick={() => handleStartEdit(todo)}
-                          title="双击编辑"
+                          onClick={() => handleStartEdit(todo)}
+                          title="单击编辑"
                           style={{
                             cursor: customCursor
                           }}
@@ -386,16 +386,14 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
                         </button>
                       ) : null}
 
-                      {/* 删除按钮 (仅已完成项显示) */}
-                      {todo.completed ? (
-                        <button
-                          onClick={() => handleDelete(todo.todoId)}
-                          className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-950/20 text-red-400 hover:text-red-500 dark:text-red-400 dark:hover:text-red-300 transition-colors flex items-center justify-center cursor-pointer"
-                          title="删除任务"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      ) : null}
+                      {/* 删除按钮 (所有事项显示) */}
+                      <button
+                        onClick={() => handleDelete(todo.todoId)}
+                        className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-950/20 text-red-400 hover:text-red-500 dark:text-red-400 dark:hover:text-red-300 transition-colors flex items-center justify-center cursor-pointer"
+                        title="删除任务"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
                 ))}
