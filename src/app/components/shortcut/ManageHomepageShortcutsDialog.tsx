@@ -146,7 +146,7 @@ export function ManageHomepageShortcutsDialog({
     for (let i = 0; i < editData.length; i++) {
       const site = editData[i];
       if (!site.name?.trim() || !site.url?.trim()) {
-        toast.warning(`第 ${i + 1} 行网址名称或链接为空，请补充完整再保存。`);
+        toast.warning(`�?${i + 1} 行网址名称或链接为空，请补充完整再保存。`);
         return;
       }
     }
@@ -219,7 +219,7 @@ export function ManageHomepageShortcutsDialog({
         }
       }
 
-      toast.success('已保存', { duration: 2000 });
+      toast.success('已保�?, { duration: 2000 });
       onSaveComplete?.();
       onClose();
     } catch (err) {
@@ -282,7 +282,7 @@ export function ManageHomepageShortcutsDialog({
               <RotateCw className={`w-5 h-5 ${isAllRefreshing ? 'animate-spin' : ''}`} />
             </button>
             <div className="absolute left-full ml-4 px-3 py-2 bg-gray-800/95 backdrop-blur-sm text-white text-sm font-medium rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-all shadow-xl z-50 translate-x-[-10px] group-hover:translate-x-0">
-              {isAllRefreshing ? '正在刷新...' : '一键刷新图标'}
+              {isAllRefreshing ? '正在刷新...' : '一键刷新图�?}
               <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 border-y-4 border-y-transparent border-r-4 border-r-gray-800/95" />
             </div>
           </div>
@@ -310,7 +310,7 @@ export function ManageHomepageShortcutsDialog({
                 <h3 className="text-base font-medium">快捷方式列表</h3>
                 <div className="flex items-center gap-2">
                   <button onClick={handleBatchRefreshAllIcons} disabled={isAllRefreshing} className="flex items-center gap-1 px-3 py-1.5 bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-lg text-xs cursor-pointer">
-                    <RotateCw className={`w-3.5 h-3.5 ${isAllRefreshing ? 'animate-spin' : ''}`} /> 一键刷新
+                    <RotateCw className={`w-3.5 h-3.5 ${isAllRefreshing ? 'animate-spin' : ''}`} /> 一键刷�?
                   </button>
                   <button onClick={handleAddEmptyRow} className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 hover:bg-blue-100 rounded-lg text-xs cursor-pointer">
                     <Plus className="w-3.5 h-3.5" /> 新增网址
@@ -340,7 +340,7 @@ export function ManageHomepageShortcutsDialog({
                                 }}
                               >
                                 <div className="flex items-center gap-2 w-full">
-                                  <div className="flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-400 hover:text-blue-500">
+                                  <div className="flex-shrink-0 cursor-pointer active:cursor-pointerbing text-gray-400 hover:text-blue-500">
                                     <GripVertical className="w-5 h-5" />
                                   </div>
                                   <div className="flex-shrink-0 flex items-center justify-center bg-card shadow-inner border border-border overflow-hidden w-10 h-10 rounded-full">
@@ -471,7 +471,7 @@ function GridItemInner({
           return <IconComponent style={{ color: site.color || '#333', width: `${iconSize * 0.5}px`, height: `${iconSize * 0.5}px` }} strokeWidth={2} />;
         })()}
       </div>
-      <span className="text-foreground mt-2 font-light tracking-wide text-center w-full truncate px-1" style={{ fontSize: `${textSize}px` }}>{site.name || '未命名'}</span>
+      <span className="text-foreground mt-2 font-light tracking-wide text-center w-full truncate px-1" style={{ fontSize: `${textSize}px` }}>{site.name || '未命�?}</span>
       <button 
         onPointerDown={(e) => e.stopPropagation()} 
         onClick={(e) => { e.stopPropagation(); handleDeleteRow(idx); }} 

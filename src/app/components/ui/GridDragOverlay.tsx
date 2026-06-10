@@ -49,7 +49,7 @@ export function UnifiedDragItem({
   const radius = typeof borderRadius === 'number' ? `${borderRadius}px` : borderRadius;
   
   return (
-    <div className={`flex flex-col items-center relative cursor-grabbing ${wrapperClassName}`} style={{ width: `${iconSize + 32}px` }}>
+    <div className={`flex flex-col items-center relative cursor-pointerbing ${wrapperClassName}`} style={{ width: `${iconSize + 32}px` }}>
       <div 
         className={`flex items-center justify-center shadow-2xl scale-110 border overflow-hidden pointer-events-none transition-transform ${className}`} 
         style={{ width: `${iconSize}px`, height: `${iconSize}px`, borderRadius: radius }}
@@ -68,7 +68,7 @@ export function UnifiedDragItem({
       </div>
       {showText && (
         <span className="mt-2 font-medium tracking-wide text-center w-full truncate px-1 opacity-0 pointer-events-none" style={{ fontSize: `${textSize}px` }}>
-          {shortcut.name || '未命名'}
+          {shortcut.name || '未命�?}
         </span>
       )}
     </div>

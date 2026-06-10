@@ -41,7 +41,7 @@ export function SortableGridItem({ id, children, className = '', style = {} }: S
       style={combinedStyle}
       {...attributes}
       {...listeners}
-      className={`${className} ${isDragging ? 'z-50' : 'z-0'} cursor-grab active:cursor-grabbing`}
+      className={`${className} ${isDragging ? 'z-50' : 'z-0'} cursor-pointer active:cursor-pointerbing`}
     >
       {children}
     </div>
