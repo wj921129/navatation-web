@@ -1,5 +1,5 @@
 import { Grid, List, Check, FolderPlus, RotateCw } from 'lucide-react';
-import React from 'react';
+import React, { useTransition } from 'react';
 
 /**
  * 管理员侧边栏操作组件，提供切换模式、保存、新增分类和批量刷新图标功能
@@ -24,13 +24,15 @@ export function AdminDock({
   handleBatchRefreshAllIcons,
   isAllRefreshing,
 }: AdminDockProps) {
+  const [isPending, startTransition] = useTransition();
+
   return (
     <div className="absolute top-1/2 -translate-y-1/2 -left-[80px] bg-card/95 backdrop-blur-xl border border-border/80 rounded-full p-3 flex flex-col items-center gap-4 shadow-2xl z-50 animate-in fade-in slide-in-from-left-8 duration-300">
       
       {/* 模式切换 (图标/列表) */}
       <div className="group relative flex items-center justify-center">
         <button
-          onClick={() => setIsBatchMode(!isBatchMode)}
+          onClick={() => startTransition(() => setIsBatchMode(!isBatchMode))}
           className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm border cursor-pointer ${
             !isBatchMode 
               ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-400' 
