@@ -1,6 +1,6 @@
 import React from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
-import { Loader2, Link as LinkIcon, RotateCw, Upload, Trash2, Plus, GripVertical } from 'lucide-react';
+import { Loader2, Link as LinkIcon, RotateCw, Upload, Trash2, Plus, GripVertical, Check } from 'lucide-react';
 import { IconMap } from '../ui/IconMap';
 import { useProgressiveRender } from '../../hooks/useProgressiveRender';
 
