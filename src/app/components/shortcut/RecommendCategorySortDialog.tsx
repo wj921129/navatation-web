@@ -241,21 +241,22 @@ export function RecommendCategorySortDialog({
         <div className="flex items-center gap-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm border border-border rounded-xl hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+            className="w-10 h-10 flex items-center justify-center border border-border rounded-xl hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+            title="取消"
           >
-            取消
+            <X className="w-4 h-4" />
           </button>
           <button
             onClick={handleSave}
             disabled={!isDirty || isSaving || sortList.length === 0}
-            className="flex items-center gap-1.5 px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="w-10 h-10 flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            title="保存排序"
           >
             {isSaving ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
-              <Check className="w-3.5 h-3.5" />
+              <Check className="w-4 h-4" />
             )}
-            {isSaving ? '保存中...' : '保存排序'}
           </button>
         </div>
       </div>
