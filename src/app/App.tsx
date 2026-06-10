@@ -329,14 +329,16 @@ export default function App() {
     setActiveDragId(null);
     const { active, over } = event;
     if (over && active.id !== over.id) {
-      const oldIndex = displayShortcuts.findIndex(item => item.dragId === active.id);
-      const newIndex = displayShortcuts.findIndex(item => item.dragId === over.id);
+      const oldIndex = displayShortcuts.findIndex((item, idx) => (item.dragId || `shortcut-edit-${idx}`) === active.id);
+      const newIndex = displayShortcuts.findIndex((item, idx) => (item.dragId || `shortcut-edit-${idx}`) === over.id);
       
-      const newItems = arrayMove(displayShortcuts, oldIndex, newIndex);
-      if (isEditMode) {
-        setTempShortcuts(newItems);
-      } else {
-        setShortcuts(newItems);
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const newItems = arrayMove(displayShortcuts, oldIndex, newIndex);
+        if (isEditMode) {
+          setTempShortcuts(newItems);
+        } else {
+          setShortcuts(newItems);
+        }
       }
     }
   }, [isEditMode, displayShortcuts, setTempShortcuts, setShortcuts]);
@@ -348,7 +350,7 @@ export default function App() {
     setActiveDragId(null);
   }, []);
 
-  const activeDragShortcut = activeDragId ? displayShortcuts.find(s => s.dragId === activeDragId) : null;
+  const activeDragShortcut = activeDragId ? displayShortcuts.find((s, idx) => (s.dragId || `shortcut-edit-${idx}`) === activeDragId) : null;
 
   return (
       <div className="size-full relative flex flex-col items-center justify-start overflow-hidden">
