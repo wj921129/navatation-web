@@ -70,16 +70,7 @@ export function AdminCategoryModal({
             onChange={e => editingCategory && setEditingCategory({...editingCategory, iconValue: e.target.value})} 
           />
         </div>
-        <div>
-          <label className="text-sm text-gray-500 mb-1 block">排序</label>
-          <input 
-            type="number" 
-            step="0.01" 
-            className="w-full px-3 py-2 border rounded-lg bg-background outline-none focus:border-blue-500" 
-            value={editingCategory?.sortOrder || 0} 
-            onChange={e => editingCategory && setEditingCategory({...editingCategory, sortOrder: Number(e.target.value)})} 
-          />
-        </div>
+
       </div>
       <div className="mt-6 flex justify-end gap-3">
         <button onClick={() => setEditingCategory(null)} className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors">取消</button>
