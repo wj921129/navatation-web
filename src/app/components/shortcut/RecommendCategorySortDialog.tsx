@@ -4,8 +4,23 @@
  * @date 2026-06-10
  */
 import React, { useState, useEffect } from 'react';
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { 
+  DndContext, 
+  closestCenter, 
+  PointerSensor, 
+  useSensor, 
+  useSensors, 
+  DragStartEvent, 
+  DragEndEvent 
+} from '@dnd-kit/core';
+import { 
+  SortableContext, 
+  verticalListSortingStrategy, 
+  arrayMove 
+} from '@dnd-kit/sortable';
 import { GripVertical, FolderCog, Check, X, Loader2, FolderPlus, Edit3, Trash2 } from 'lucide-react';
+import { SortableListItem } from '../ui/SortableListItem';
+import { GridDragOverlay } from '../ui/GridDragOverlay';
 import { BaseModal } from '../ui/BaseModal';
 import { navService } from '../../services/nav-service';
 import { toast } from 'sonner';
@@ -64,20 +79,85 @@ export function RecommendCategorySortDialog({
     }
   }, [isOpen, categories]);
 
-  const handleDragEnd = (result: DropResult) => {
-    if (!result.destination) return;
-    const src = result.source.index;
-    const dst = result.destination.index;
-    if (src === dst) return;
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    })
+  );
 
-    setSortList(prev => {
-      const copy = [...prev];
-      const [moved] = copy.splice(src, 1);
-      copy.splice(dst, 0, moved);
-      return copy;
-    });
-    setIsDirty(true);
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
   };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveId(null);
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setSortList(prev => {
+        const oldIndex = prev.findIndex(item => item.categoryId === active.id);
+        const newIndex = prev.findIndex(item => item.categoryId === over.id);
+        return arrayMove(prev, oldIndex, newIndex);
+      });
+      setIsDirty(true);
+    }
+  };
+
+  const activeItem = sortList.find(c => c.categoryId === activeId);
+  const activeIndex = activeItem ? sortList.findIndex(c => c.categoryId === activeId) : -1;
+
+  const renderCategoryCard = (cat: SortCategory, idx: number, isOverlay = false) => (
+    <div
+      className={`flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all duration-200 select-none ${
+        isOverlay
+          ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700 shadow-xl scale-[1.02] rotate-1'
+          : 'bg-background border-border hover:border-gray-300 dark:hover:border-neutral-600 hover:shadow-sm'
+      }`}
+    >
+      <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-neutral-800 flex items-center justify-center flex-shrink-0">
+        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+          {idx + 1}
+        </span>
+      </div>
+
+      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 border border-indigo-100 dark:border-indigo-800/30 flex items-center justify-center flex-shrink-0">
+        <cat.icon className="w-4.5 h-4.5 text-indigo-500 dark:text-indigo-400" style={{ width: '18px', height: '18px' }} />
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium truncate">{cat.category}</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+          {cat.siteCount} 个网址
+        </p>
+      </div>
+
+      <div className="flex items-center gap-1 flex-shrink-0">
+        {onEditCategory && (
+          <button
+            onClick={(e) => { e.stopPropagation(); !isOverlay && onEditCategory(cat); }}
+            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full transition-colors cursor-pointer"
+            title="编辑分类"
+          >
+            <Edit3 className="w-4 h-4" />
+          </button>
+        )}
+        <button
+          onClick={(e) => { e.stopPropagation(); !isOverlay && handleDeleteCategory(cat); }}
+          className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors cursor-pointer"
+          title="删除分类"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      </div>
+
+      <div className="flex-shrink-0 text-gray-300 dark:text-gray-600 p-1">
+        <GripVertical className="w-5 h-5" />
+      </div>
+    </div>
+  );
 
   const handleSave = async () => {
     if (isSaving) return;
@@ -175,88 +255,29 @@ export function RecommendCategorySortDialog({
             <p className="text-xs mt-1 text-gray-300">请先在管理模式下创建推荐分类</p>
           </div>
         ) : (
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <Droppable droppableId="category-sort" direction="vertical">
-              {(provided) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className="space-y-2"
-                >
-                  {sortList.map((cat, idx) => (
-                    <Draggable key={cat.categoryId} draggableId={cat.categoryId} index={idx}>
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          style={{
-                            ...provided.draggableProps.style,
-                            transition: snapshot.isDropAnimating
-                              ? 'transform 0.15s cubic-bezier(0.2, 1, 0.1, 1)'
-                              : provided.draggableProps.style?.transition,
-                          }}
-                          className={`flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all duration-200 select-none ${
-                            snapshot.isDragging
-                              ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700 shadow-lg scale-[1.02]'
-                              : 'bg-background border-border hover:border-gray-300 dark:hover:border-neutral-600 hover:shadow-sm'
-                          }`}
-                        >
-                          {/* 序号徽标 */}
-                          <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-neutral-800 flex items-center justify-center flex-shrink-0">
-                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                              {idx + 1}
-                            </span>
-                          </div>
-
-                          {/* 分类图标 */}
-                          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 border border-indigo-100 dark:border-indigo-800/30 flex items-center justify-center flex-shrink-0">
-                            <cat.icon className="w-4.5 h-4.5 text-indigo-500 dark:text-indigo-400" style={{ width: '18px', height: '18px' }} />
-                          </div>
-
-                          {/* 分类名称 & 网址数量 */}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{cat.category}</p>
-                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                              {cat.siteCount} 个网址
-                            </p>
-                          </div>
-
-                          {/* 操作按钮区 */}
-                          <div className="flex items-center gap-1 flex-shrink-0">
-                            {onEditCategory && (
-                              <button
-                                onClick={() => onEditCategory(cat)}
-                                className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full transition-colors cursor-pointer"
-                                title="编辑分类"
-                              >
-                                <Edit3 className="w-4 h-4" />
-                              </button>
-                            )}
-                            <button
-                              onClick={() => handleDeleteCategory(cat)}
-                              className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors cursor-pointer"
-                              title="删除分类"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-
-                          {/* 拖拽把手 */}
-                          <div
-                            {...provided.dragHandleProps}
-                            className="flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-300 dark:text-gray-600 hover:text-indigo-400 dark:hover:text-indigo-500 transition-colors p-1"
-                          >
-                            <GripVertical className="w-5 h-5" />
-                          </div>
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={sortList.map(c => c.categoryId)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-2">
+                {sortList.map((cat, idx) => (
+                  <SortableListItem key={cat.categoryId} id={cat.categoryId}>
+                    {renderCategoryCard(cat, idx, false)}
+                  </SortableListItem>
+                ))}
+              </div>
+            </SortableContext>
+            
+            <GridDragOverlay>
+              {activeId && activeItem ? renderCategoryCard(activeItem, activeIndex, true) : null}
+            </GridDragOverlay>
+          </DndContext>
         )}
       </div>
 
