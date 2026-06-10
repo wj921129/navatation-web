@@ -186,26 +186,30 @@ export function AddShortcutDialog({
                 </div>
               )}
               
-              <div className="group relative flex items-center justify-center">
-                <button
-                  onClick={handleSave}
-                  disabled={pendingShortcuts.length === 0}
-                  title={`保存更改 ${pendingShortcuts.length > 0 ? `(${pendingShortcuts.length})` : ''}`}
-                  className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white transition-colors disabled:bg-gray-200 dark:disabled:bg-neutral-800 disabled:text-gray-400 dark:disabled:text-neutral-600 disabled:cursor-not-allowed cursor-pointer"
-                >
-                  <Check className="w-5 h-5" />
-                </button>
-              </div>
+              {!isAdminMode && (
+                <>
+                  <div className="group relative flex items-center justify-center">
+                    <button
+                      onClick={handleSave}
+                      disabled={pendingShortcuts.length === 0}
+                      title={`保存更改 ${pendingShortcuts.length > 0 ? `(${pendingShortcuts.length})` : ''}`}
+                      className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white transition-colors disabled:bg-gray-200 dark:disabled:bg-neutral-800 disabled:text-gray-400 dark:disabled:text-neutral-600 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      <Check className="w-5 h-5" />
+                    </button>
+                  </div>
 
-              <div className="group relative flex items-center justify-center">
-                <button
-                  onClick={handleCancel}
-                  title="取消/关闭"
-                  className="w-10 h-10 rounded-full flex items-center justify-center bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-800 dark:text-gray-200 transition-colors cursor-pointer"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+                  <div className="group relative flex items-center justify-center">
+                    <button
+                      onClick={handleCancel}
+                      title="取消/关闭"
+                      className="w-10 h-10 rounded-full flex items-center justify-center bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-800 dark:text-gray-200 transition-colors cursor-pointer"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
