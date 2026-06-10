@@ -62,6 +62,7 @@ export default function BreatheWidget({
    * 处理指针按下事件，用于拖拽
    * @param e 指针事件对象
    */
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
     if (target.closest('.no-drag')) {
       return;

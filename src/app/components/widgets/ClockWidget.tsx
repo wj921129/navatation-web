@@ -40,6 +40,7 @@ export default function ClockWidget({
    * 指针按下开始拖动处理器
    * @param e 指针事件对象
    */
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
     if (target.closest('.delete-clock-btn')) {
       return;
