@@ -5,7 +5,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
-import { GripVertical, FolderCog, Check, X, Loader2, FolderPlus, Edit3 } from 'lucide-react';
+import { GripVertical, FolderCog, Check, X, Loader2, FolderPlus, Edit3, Trash2 } from 'lucide-react';
 import { BaseModal } from '../ui/BaseModal';
 import { navService } from '../../services/nav-service';
 import { toast } from 'sonner';
@@ -104,6 +104,24 @@ export function RecommendCategorySortDialog({
     }
   };
 
+  const handleDeleteCategory = async (cat: SortCategory) => {
+    if (cat.siteCount > 0) {
+      if (!window.confirm(`分类 "${cat.category}" 包含 ${cat.siteCount} 个网址，确定要删除吗？`)) {
+        return;
+      }
+    }
+    
+    try {
+      await navService.deleteRecommendCategory(cat.categoryId);
+      toast.success(`已删除分类 "${cat.category}"`);
+      setSortList(prev => prev.filter(c => c.categoryId !== cat.categoryId));
+      onSaveComplete();
+    } catch (err) {
+      console.error('删除分类失败', err);
+      toast.error('删除分类失败，请重试');
+    }
+  };
+
   return (
     <BaseModal
       isOpen={isOpen}
@@ -199,16 +217,25 @@ export function RecommendCategorySortDialog({
                             </p>
                           </div>
 
-                          {/* 编辑按钮 */}
-                          {onEditCategory && (
+                          {/* 操作按钮区 */}
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            {onEditCategory && (
+                              <button
+                                onClick={() => onEditCategory(cat)}
+                                className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full transition-colors cursor-pointer"
+                                title="编辑分类"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+                            )}
                             <button
-                              onClick={() => onEditCategory(cat)}
-                              className="flex-shrink-0 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full transition-colors cursor-pointer"
-                              title="编辑分类"
+                              onClick={() => handleDeleteCategory(cat)}
+                              className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors cursor-pointer"
+                              title="删除分类"
                             >
-                              <Edit3 className="w-4 h-4" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
-                          )}
+                          </div>
 
                           {/* 拖拽把手 */}
                           <div
