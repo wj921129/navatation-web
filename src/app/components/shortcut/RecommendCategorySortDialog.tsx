@@ -43,6 +43,7 @@ export function RecommendCategorySortDialog({
   const [sortList, setSortList] = useState<SortCategory[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<SortCategory | null>(null);
 
   // 弹窗打开时，初始化排序列表
   useEffect(() => {
@@ -106,16 +107,19 @@ export function RecommendCategorySortDialog({
 
   const handleDeleteCategory = async (cat: SortCategory) => {
     if (cat.siteCount > 0) {
-      if (!window.confirm(`分类 "${cat.category}" 包含 ${cat.siteCount} 个网址，确定要删除吗？`)) {
-        return;
-      }
+      setCategoryToDelete(cat);
+      return;
     }
-    
+    await performDelete(cat);
+  };
+
+  const performDelete = async (cat: SortCategory) => {
     try {
       await navService.deleteRecommendCategory(cat.categoryId);
       toast.success(`已删除分类 "${cat.category}"`);
       setSortList(prev => prev.filter(c => c.categoryId !== cat.categoryId));
       onSaveComplete();
+      setCategoryToDelete(null);
     } catch (err) {
       console.error('删除分类失败', err);
       toast.error('删除分类失败，请重试');
@@ -287,6 +291,41 @@ export function RecommendCategorySortDialog({
           </button>
         </div>
       </div>
+
+      {/* 确认删除弹窗 */}
+      <BaseModal
+        isOpen={!!categoryToDelete}
+        onClose={() => setCategoryToDelete(null)}
+        animationType="scale"
+        position="center"
+        containerClassName="bg-card p-6 rounded-2xl w-80 shadow-2xl border border-border"
+        overlayClassName="bg-black/50 backdrop-blur-sm"
+        zIndex={70}
+      >
+        <div className="flex flex-col items-center text-center">
+          <div className="w-12 h-12 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center mb-4 text-red-500">
+            <Trash2 className="w-6 h-6" />
+          </div>
+          <h3 className="text-lg font-medium mb-2">确认删除该分类？</h3>
+          <p className="text-sm text-gray-500 mb-6">
+            分类 <span className="font-medium text-foreground">"{categoryToDelete?.category}"</span> 包含 <span className="text-red-500 font-medium">{categoryToDelete?.siteCount}</span> 个网址。删除后无法恢复。
+          </p>
+          <div className="flex items-center gap-3 w-full">
+            <button
+              onClick={() => setCategoryToDelete(null)}
+              className="flex-1 py-2.5 border rounded-xl hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+            >
+              取消
+            </button>
+            <button
+              onClick={() => categoryToDelete && performDelete(categoryToDelete)}
+              className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors cursor-pointer"
+            >
+              删除
+            </button>
+          </div>
+        </div>
+      </BaseModal>
     </BaseModal>
   );
 }
