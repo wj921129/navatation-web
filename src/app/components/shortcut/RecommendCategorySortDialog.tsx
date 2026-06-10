@@ -117,7 +117,7 @@ export function RecommendCategorySortDialog({
             <ArrowUpDown className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
           </div>
           <div>
-            <h3 className="text-base font-medium">分类排序</h3>
+            <h3 className="text-base font-medium">分类管理</h3>
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">拖拽卡片调整推荐分类的展示顺序</p>
           </div>
         </div>

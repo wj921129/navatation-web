@@ -100,6 +100,8 @@ export function AdminDock({
         </div>
       )}
 
+      <div className="w-8 h-[1px] bg-border/60" />
+
       {/* 分类排序 */}
       <div className="group relative flex items-center justify-center">
         <button
@@ -109,7 +111,7 @@ export function AdminDock({
           <ArrowUpDown className="w-5 h-5" />
         </button>
         <div className="absolute left-full ml-4 px-3 py-2 bg-gray-800/95 backdrop-blur-sm text-white text-sm font-medium rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-all shadow-xl z-50 translate-x-[-10px] group-hover:translate-x-0">
-          分类排序
+          分类管理
           <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 border-y-4 border-y-transparent border-r-4 border-r-gray-800/95" />
         </div>
       </div>
