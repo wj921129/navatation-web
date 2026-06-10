@@ -117,22 +117,24 @@ export function BatchCategoryList({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handleBatchRefreshCategoryIcons(catIdx)}
-                className="flex items-center gap-1 px-3 py-1.5 bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-lg text-xs cursor-pointer transition-colors"
+                className="flex items-center justify-center w-8 h-8 bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-lg cursor-pointer transition-colors"
                 title="批量刷新当前分类下所有网址的图标"
               >
-                <RotateCw className="w-3.5 h-3.5" /> 一键刷新图标
+                <RotateCw className="w-4 h-4" />
               </button>
               <button
                 onClick={() => handleAddEmptyRow(catIdx)}
-                className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg text-xs cursor-pointer transition-colors"
+                className="flex items-center justify-center w-8 h-8 bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg cursor-pointer transition-colors"
+                title="新增网址"
               >
-                <Plus className="w-3.5 h-3.5" /> 新增网址
+                <Plus className="w-4 h-4" />
               </button>
               <button
                 onClick={() => handleSaveCategorySites(category)}
-                className="flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs cursor-pointer transition-colors"
+                className="flex items-center justify-center w-8 h-8 bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/40 rounded-lg cursor-pointer transition-colors"
+                title="保存修改"
               >
-                保存修改
+                <Check className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -309,10 +311,9 @@ export function BatchCategoryList({
                   onClick={() => handleAddEmptyRow(catIdx)}
                   className="w-full mt-2 py-3 border-2 border-dashed border-border hover:border-blue-400 hover:bg-blue-50/50 dark:hover:border-blue-500/50 dark:hover:bg-blue-900/10 rounded-xl flex items-center justify-center gap-2 text-gray-400 hover:text-blue-500 transition-all cursor-pointer group"
                 >
-                  <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-neutral-800 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 flex items-center justify-center transition-colors">
-                    <Plus className="w-4 h-4" />
+                  <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-neutral-800 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 flex items-center justify-center transition-colors">
+                    <Plus className="w-5 h-5 text-gray-500 group-hover:text-blue-500" />
                   </div>
-                  <span className="text-xs font-medium">添加新网址</span>
                 </button>
               </>
             )}
