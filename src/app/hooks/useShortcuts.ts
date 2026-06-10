@@ -110,6 +110,7 @@ export function useShortcuts(authState: any) {
           if (newRes.code === 200) {
             const loaded = newRes.data.map(item => ({
               id: item.shortcutId,
+              dragId: item.shortcutId,
               categoryId: item.categoryId,
               name: item.name,
               url: item.url,
@@ -127,6 +128,7 @@ export function useShortcuts(authState: any) {
       // 正常加载并将云端数据转换为前端格式
       const loaded = res.data.map(item => ({
         id: item.shortcutId,
+        dragId: item.shortcutId,
         categoryId: item.categoryId,
         name: item.name,
         url: item.url,
@@ -251,6 +253,7 @@ export function useShortcuts(authState: any) {
       if (res.code === 200 && res.data) {
         const loaded = res.data.map(item => ({
           id: item.shortcutId,
+          dragId: item.shortcutId,
           categoryId: item.categoryId,
           name: item.name,
           url: item.url,
