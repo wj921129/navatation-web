@@ -39,6 +39,21 @@ export function BatchCategoryList({
 }: BatchCategoryListProps) {
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
+    
+    if (result.type === 'category') {
+      const sourceIdx = result.source.index;
+      const destIdx = result.destination.index;
+      if (sourceIdx === destIdx) return;
+      
+      setBatchEditData(prev => {
+        const copy = [...prev];
+        const [moved] = copy.splice(sourceIdx, 1);
+        copy.splice(destIdx, 0, moved);
+        return copy;
+      });
+      return;
+    }
+
     const sourceCatIdx = parseInt(result.source.droppableId);
     const destCatIdx = parseInt(result.destination.droppableId);
     const sourceIdx = result.source.index;
@@ -74,13 +89,31 @@ export function BatchCategoryList({
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      {visibleCategories.map((category, catIdx) => (
-        <div key={category.categoryId || catIdx} className="bg-muted/40 border border-border p-6 rounded-3xl shadow-sm space-y-4">
-          <div className="flex items-center justify-between border-b border-border pb-3">
-            <div className="flex items-center gap-2">
-              <category.icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              <h3 className="text-base font-medium">{category.category}</h3>
-            </div>
+      <Droppable droppableId="categories" type="category" direction="vertical">
+        {(provided) => (
+          <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-4 relative pb-32">
+            {visibleCategories.map((category, catIdx) => (
+              <Draggable key={category.categoryId || `cat-${catIdx}`} draggableId={category.categoryId || `cat-${catIdx}`} index={catIdx}>
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    style={{
+                      ...provided.draggableProps.style,
+                      transition: snapshot.isDropAnimating
+                        ? 'transform 0.12s cubic-bezier(0.2, 1, 0.1, 1)'
+                        : provided.draggableProps.style?.transition
+                    }}
+                    className="bg-muted/40 border border-border p-6 rounded-3xl shadow-sm space-y-4"
+                  >
+                    <div className="flex items-center justify-between border-b border-border pb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-400 hover:text-blue-500" {...provided.dragHandleProps}>
+                          <GripVertical className="w-5 h-5" />
+                        </div>
+                        <category.icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                        <h3 className="text-base font-medium">{category.category}</h3>
+                      </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handleBatchRefreshCategoryIcons(catIdx)}
@@ -284,8 +317,14 @@ export function BatchCategoryList({
               </>
             )}
           </div>
-        </div>
-      ))}
+                  </div>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
     </DragDropContext>
   );
 }

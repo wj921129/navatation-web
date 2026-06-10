@@ -142,8 +142,23 @@ export function useBatchCategory(
         }
       }
 
-      await Promise.all(dataToSave.map(cat => {
+      await Promise.all(dataToSave.map((cat, index) => {
         if (!cat.categoryId) return Promise.resolve();
+        
+        const promises = [];
+        
+        // Check if category sort order changed
+        const originalCat = categories.find(c => c.categoryId === cat.categoryId);
+        if (originalCat && originalCat.sortOrder !== index) {
+          promises.push(
+            navService.updateRecommendCategory(cat.categoryId, {
+              name: cat.category,
+              icon: cat.iconValue,
+              sortOrder: index
+            })
+          );
+        }
+        
         const formattedSites = cat.sites.map(site => ({
           siteId: site.siteId,
           name: site.name.trim(),
@@ -152,7 +167,10 @@ export function useBatchCategory(
           iconValue: site.iconValue || '',
           iconColor: site.color || '#fff'
         }));
-        return navService.batchSaveRecommendSites(cat.categoryId, { sites: formattedSites });
+        
+        promises.push(navService.batchSaveRecommendSites(cat.categoryId, { sites: formattedSites }));
+        
+        return Promise.all(promises);
       }));
       loadRecommended();
       toast.success('已保存', { duration: 2000 });
