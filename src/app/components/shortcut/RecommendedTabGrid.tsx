@@ -131,8 +131,8 @@ export function RecommendedTabGrid({
               )}
             </div>
             <div 
-              className="flex flex-wrap items-center pb-4"
-              style={{ margin: `-${iconSpacingY / 2}px -${iconSpacingX / 2}px` }}
+              className="flex flex-wrap items-start pb-4"
+              style={{ gap: `${iconSpacingY}px ${iconSpacingX}px` }}
             >
               <SortableContext items={category.sites.map((s: any) => s.dragId!)} strategy={rectSortingStrategy}>
                 {category.sites.map((site: any) => (
@@ -156,7 +156,7 @@ export function RecommendedTabGrid({
               {userRole === 'ADMIN' && (
                 <div 
                   className="relative group/item flex-shrink-0" 
-                  style={{ width: `${iconSize + 32}px`, margin: `${iconSpacingY / 2}px ${iconSpacingX / 2}px` }}
+                  style={{ width: `${iconSize + 32}px` }}
                 >
                   <button
                     onClick={() => {
