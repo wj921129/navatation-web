@@ -11,9 +11,10 @@ interface UseWidgetDragProps {
   addWidget: (type: string, style: string, xPercent: number, yPercent: number) => void;
   updateWidgetPosition: (id: string, x: number, y: number) => void;
   triggerCloseClock: () => void;
+  onDragEnd?: () => void;
 }
 
-export function useWidgetDrag({ addWidget, updateWidgetPosition, triggerCloseClock }: UseWidgetDragProps) {
+export function useWidgetDrag({ addWidget, updateWidgetPosition, triggerCloseClock, onDragEnd }: UseWidgetDragProps) {
   const [activeDraggingId, setActiveDraggingId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const activeDraggingStyleRef = useRef<WidgetStyle>(null);
@@ -155,7 +156,8 @@ export function useWidgetDrag({ addWidget, updateWidgetPosition, triggerCloseClo
     activeDraggingStyleRef.current = null;
     window.removeEventListener('pointermove', handlePointerMoveGlobal);
     window.removeEventListener('pointerup', handlePointerUpGlobal);
-  }, [handlePointerMoveGlobal]);
+    if (onDragEnd) onDragEnd();
+  }, [handlePointerMoveGlobal, onDragEnd]);
 
   const handlePointerDownClock = useCallback((e: React.PointerEvent<HTMLDivElement>, id: string, style: string) => {
     e.preventDefault();

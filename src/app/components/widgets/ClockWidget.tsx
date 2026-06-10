@@ -40,11 +40,6 @@ export default function ClockWidget({
    * 指针按下开始拖动处理器
    * @param e 指针事件对象
    */
-  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    // 仅在编辑模式下允许拖拽，并且避开删除按钮的触发
-    if (!isEditMode) {
-      return;
-    }
     const target = e.target as HTMLElement;
     if (target.closest('.delete-clock-btn')) {
       return;
@@ -90,9 +85,7 @@ export default function ClockWidget({
     <div
       ref={containerRef}
       onPointerDown={handlePointerDown}
-      className={`absolute select-none z-20 group touch-none isolate ${
-        isEditMode ? 'cursor-grab active:cursor-grabbing' : ''
-      }`}
+      className={`absolute select-none z-20 group touch-none isolate cursor-grab active:cursor-grabbing`}
       style={{
         left: `${x}%`,
         top: `${y}%`,

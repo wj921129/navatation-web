@@ -253,7 +253,14 @@ export default function App() {
     menuDragPos,
     menuDragHasMoved,
     handleDragStartFromMenu
-  } = useWidgetDrag({ addWidget, updateWidgetPosition, triggerCloseClock });
+  } = useWidgetDrag({ 
+    addWidget, 
+    updateWidgetPosition, 
+    triggerCloseClock,
+    onDragEnd: () => {
+      if (!isEditMode) saveWidgets();
+    }
+  });
 
   const clockMenuPanel = (
     <ClockMenuPanel

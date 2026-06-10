@@ -218,7 +218,12 @@ export function useWidgets(isEditMode: boolean, authState: AuthState) {
     setTempWidgets((prev) =>
       prev.map((w) => (w.id === id ? { ...w, x, y } : w))
     );
-  }, []);
+    if (!isEditMode) {
+      setWidgets((prev) =>
+        prev.map((w) => (w.id === id ? { ...w, x, y } : w))
+      );
+    }
+  }, [isEditMode]);
 
   /**
    * 保存组件配置，写入 LocalStorage 并在登录时异步向后端提交
