@@ -167,6 +167,7 @@ export function AddShortcutDialog({
                         batchCategoryControls.setIsBatchMode(false);
                       }
                     }}
+                    title={isAdminMode ? '退出管理模式' : '管理推荐网址'}
                     className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm border cursor-pointer ${
                       isAdminMode 
                         ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-400' 
@@ -175,10 +176,6 @@ export function AddShortcutDialog({
                   >
                     <Settings className="w-4 h-4" />
                   </button>
-                  <div className="absolute right-full mr-4 px-3 py-2 bg-gray-800/95 backdrop-blur-sm text-white text-sm font-medium rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-all shadow-xl z-50 translate-x-[10px] group-hover:translate-x-0">
-                    {isAdminMode ? '退出管理模式' : '管理推荐网址'}
-                    <div className="absolute top-1/2 -translate-y-1/2 -right-1.5 border-y-4 border-y-transparent border-l-4 border-l-gray-800/95" />
-                  </div>
                 </div>
               )}
               
@@ -186,27 +183,21 @@ export function AddShortcutDialog({
                 <button
                   onClick={handleSave}
                   disabled={pendingShortcuts.length === 0}
+                  title={`保存更改 ${pendingShortcuts.length > 0 ? `(${pendingShortcuts.length})` : ''}`}
                   className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white transition-colors disabled:bg-gray-200 dark:disabled:bg-neutral-800 disabled:text-gray-400 dark:disabled:text-neutral-600 disabled:cursor-not-allowed cursor-pointer"
                 >
                   <Check className="w-5 h-5" />
                 </button>
-                <div className="absolute right-full mr-4 px-3 py-2 bg-gray-800/95 backdrop-blur-sm text-white text-sm font-medium rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-all shadow-xl z-50 translate-x-[10px] group-hover:translate-x-0">
-                  保存更改 {pendingShortcuts.length > 0 && `(${pendingShortcuts.length})`}
-                  <div className="absolute top-1/2 -translate-y-1/2 -right-1.5 border-y-4 border-y-transparent border-l-4 border-l-gray-800/95" />
-                </div>
               </div>
 
               <div className="group relative flex items-center justify-center">
                 <button
                   onClick={handleCancel}
+                  title="取消/关闭"
                   className="w-10 h-10 rounded-full flex items-center justify-center bg-background border border-border hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-800 dark:text-gray-200 transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
-                <div className="absolute right-full mr-4 px-3 py-2 bg-gray-800/95 backdrop-blur-sm text-white text-sm font-medium rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-all shadow-xl z-50 translate-x-[10px] group-hover:translate-x-0">
-                  取消/关闭
-                  <div className="absolute top-1/2 -translate-y-1/2 -right-1.5 border-y-4 border-y-transparent border-l-4 border-l-gray-800/95" />
-                </div>
               </div>
             </div>
           </div>
