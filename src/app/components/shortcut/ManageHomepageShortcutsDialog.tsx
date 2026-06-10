@@ -289,7 +289,7 @@ export function ManageHomepageShortcutsDialog({
         )}
       </div>
 
-      <div className="interactive-glass-panel w-full h-full border border-border rounded-3xl shadow-2xl overflow-hidden flex flex-col text-foreground">
+      <div className="w-full h-full bg-card border border-border rounded-3xl shadow-2xl overflow-hidden flex flex-col text-foreground transition-all duration-300">
         <div className="bg-card/95 border-b border-border px-6 py-4 flex items-center justify-between">
           <h2 className="text-xl font-medium">管理首页图标</h2>
           <div className="flex items-center gap-3">

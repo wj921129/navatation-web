@@ -157,7 +157,7 @@ export function AddShortcutDialog({
         )}
 
         <div
-          className="interactive-glass-panel w-full h-full border border-border rounded-3xl shadow-2xl overflow-hidden flex flex-col text-foreground"
+          className="w-full h-full bg-card border border-border rounded-3xl shadow-2xl overflow-hidden flex flex-col text-foreground transition-all duration-300"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="bg-card/95 border-b border-border px-6 py-4 flex items-center justify-between transition-colors duration-300">
