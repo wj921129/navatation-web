@@ -14,7 +14,6 @@ import { CustomShortcutTab } from './CustomShortcutTab';
 import { RecommendSiteItem } from './RecommendSiteItem';
 import { AdminDock } from './AdminDock';
 import { PendingShortcutsList } from './PendingShortcutsList';
-import { AdminCategoryModal } from './AdminCategoryModal';
 import { BatchCategoryList } from './BatchCategoryList';
 import { useCustomShortcut } from './useCustomShortcut';
 import { RecommendedTabGrid } from './RecommendedTabGrid';
@@ -289,12 +288,6 @@ export function AddShortcutDialog({
         </div>
       </BaseModal>
 
-      <AdminCategoryModal
-        editingCategory={editingCategory}
-        setEditingCategory={setEditingCategory}
-        loadRecommended={loadRecommended}
-      />
-
       <EditShortcutDialog
         isOpen={!!editingSite}
         onClose={() => setEditingSite(null)}
@@ -353,8 +346,6 @@ export function AddShortcutDialog({
         onClose={() => setIsSortDialogOpen(false)}
         categories={categories}
         onSaveComplete={loadRecommended}
-        onAddCategory={() => setEditingCategory({ category: '', iconValue: 'Folder', sortOrder: categories.length })}
-        onEditCategory={(cat) => setEditingCategory({ ...cat })}
       />
     </>
   );

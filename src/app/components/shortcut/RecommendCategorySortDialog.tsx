@@ -24,6 +24,8 @@ import { GridDragOverlay } from '../ui/GridDragOverlay';
 import { BaseModal } from '../ui/BaseModal';
 import { navService } from '../../services/nav-service';
 import { toast } from 'sonner';
+import { IconMap } from '../ui/IconMap';
+import { AdminCategoryModal } from './AdminCategoryModal';
 
 interface SortCategory {
   categoryId: string;
@@ -39,8 +41,6 @@ interface RecommendCategorySortDialogProps {
   onClose: () => void;
   categories: any[];
   onSaveComplete: () => void;
-  onAddCategory?: () => void;
-  onEditCategory?: (cat: any) => void;
 }
 
 /**
@@ -52,13 +52,13 @@ export function RecommendCategorySortDialog({
   onClose,
   categories,
   onSaveComplete,
-  onAddCategory,
-  onEditCategory,
 }: RecommendCategorySortDialogProps) {
   const [sortList, setSortList] = useState<SortCategory[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<SortCategory | null>(null);
+  const [deletedCategoryIds, setDeletedCategoryIds] = useState<string[]>([]);
+  const [editingCategory, setEditingCategory] = useState<any>(null);
 
   // 弹窗打开时，初始化排序列表
   useEffect(() => {
@@ -75,6 +75,7 @@ export function RecommendCategorySortDialog({
         }))
         .sort((a, b) => a.sortOrder - b.sortOrder);
       setSortList(validCats);
+      setDeletedCategoryIds([]);
       setIsDirty(false);
     }
   }, [isOpen, categories]);
@@ -135,15 +136,13 @@ export function RecommendCategorySortDialog({
       </div>
 
       <div className="flex items-center gap-1 flex-shrink-0">
-        {onEditCategory && (
-          <button
-            onClick={(e) => { e.stopPropagation(); !isOverlay && onEditCategory(cat); }}
-            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full transition-colors cursor-pointer"
-            title="编辑分类"
-          >
-            <Edit3 className="w-4 h-4" />
-          </button>
-        )}
+        <button
+          onClick={(e) => { e.stopPropagation(); !isOverlay && setEditingCategory({...cat}); }}
+          className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full transition-colors cursor-pointer"
+          title="编辑分类"
+        >
+          <Edit3 className="w-4 h-4" />
+        </button>
         <button
           onClick={(e) => { e.stopPropagation(); !isOverlay && handleDeleteCategory(cat); }}
           className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors cursor-pointer"
@@ -159,19 +158,66 @@ export function RecommendCategorySortDialog({
     </div>
   );
 
+  const handleSaveCategory = (editedCat: any) => {
+    if (editedCat.categoryId && !editedCat.categoryId.startsWith('temp-')) {
+      setSortList(prev => prev.map(c => c.categoryId === editedCat.categoryId ? {
+        ...c,
+        category: editedCat.category,
+        iconValue: editedCat.iconValue,
+        icon: IconMap[editedCat.iconValue] || IconMap.Folder
+      } : c));
+    } else {
+      const tempId = editedCat.categoryId || `temp-${Date.now()}`;
+      setSortList(prev => {
+        const copy = [...prev];
+        const existingIdx = copy.findIndex(c => c.categoryId === tempId);
+        if (existingIdx >= 0) {
+          copy[existingIdx] = {
+            ...copy[existingIdx],
+            category: editedCat.category,
+            iconValue: editedCat.iconValue,
+            icon: IconMap[editedCat.iconValue] || IconMap.Folder
+          };
+        } else {
+          copy.push({
+            categoryId: tempId,
+            category: editedCat.category,
+            iconValue: editedCat.iconValue,
+            icon: IconMap[editedCat.iconValue] || IconMap.Folder,
+            sortOrder: prev.length,
+            siteCount: 0
+          });
+        }
+        return copy;
+      });
+    }
+    setIsDirty(true);
+  };
+
   const handleSave = async () => {
     if (isSaving) return;
     setIsSaving(true);
     try {
-      // 依次更新每个分类的 sortOrder（只更新有 categoryId 的分类）
+      for (const catId of deletedCategoryIds) {
+        await navService.deleteRecommendCategory(catId);
+      }
+      
       await Promise.all(
-        sortList.map((cat, idx) =>
-          navService.updateRecommendCategory(cat.categoryId, {
-            name: cat.category,
-            icon: cat.iconValue,
-            sortOrder: idx,
-          })
-        )
+        sortList.map((cat, idx) => {
+          if (cat.categoryId.startsWith('temp-')) {
+            return navService.addRecommendCategory({
+              name: cat.category,
+              icon: cat.iconValue,
+              sortOrder: idx,
+            });
+          } else {
+            return navService.updateRecommendCategory(cat.categoryId, {
+              name: cat.category,
+              icon: cat.iconValue,
+              sortOrder: idx,
+            });
+          }
+        })
       );
       toast.success('分类排序已保存', { duration: 2000 });
       setIsDirty(false);
@@ -185,25 +231,21 @@ export function RecommendCategorySortDialog({
     }
   };
 
-  const handleDeleteCategory = async (cat: SortCategory) => {
+  const handleDeleteCategory = (cat: SortCategory) => {
     if (cat.siteCount > 0) {
       setCategoryToDelete(cat);
       return;
     }
-    await performDelete(cat);
+    performDelete(cat);
   };
 
-  const performDelete = async (cat: SortCategory) => {
-    try {
-      await navService.deleteRecommendCategory(cat.categoryId);
-      toast.success(`已删除分类 "${cat.category}"`);
-      setSortList(prev => prev.filter(c => c.categoryId !== cat.categoryId));
-      onSaveComplete();
-      setCategoryToDelete(null);
-    } catch (err) {
-      console.error('删除分类失败', err);
-      toast.error('删除分类失败，请重试');
+  const performDelete = (cat: SortCategory) => {
+    if (!cat.categoryId.startsWith('temp-')) {
+      setDeletedCategoryIds(prev => [...prev, cat.categoryId]);
     }
+    setSortList(prev => prev.filter(c => c.categoryId !== cat.categoryId));
+    setIsDirty(true);
+    setCategoryToDelete(null);
   };
 
   return (
@@ -228,15 +270,13 @@ export function RecommendCategorySortDialog({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {onAddCategory && (
-            <button
-              onClick={onAddCategory}
-              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-indigo-50 dark:hover:bg-indigo-900/30 text-indigo-500 transition-colors cursor-pointer"
-              title="新增分类"
-            >
-              <FolderPlus className="w-4 h-4" />
-            </button>
-          )}
+          <button
+            onClick={() => setEditingCategory({ category: '', iconValue: 'Folder', sortOrder: sortList.length })}
+            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-indigo-50 dark:hover:bg-indigo-900/30 text-indigo-500 transition-colors cursor-pointer"
+            title="新增分类"
+          >
+            <FolderPlus className="w-4 h-4" />
+          </button>
           <button
             onClick={onClose}
             className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-400 transition-colors cursor-pointer"
@@ -329,7 +369,8 @@ export function RecommendCategorySortDialog({
           </div>
           <h3 className="text-lg font-medium mb-2">确认删除该分类？</h3>
           <p className="text-sm text-gray-500 mb-6">
-            分类 <span className="font-medium text-foreground">"{categoryToDelete?.category}"</span> 包含 <span className="text-red-500 font-medium">{categoryToDelete?.siteCount}</span> 个网址。删除后无法恢复。
+            分类 <span className="font-medium text-foreground">"{categoryToDelete?.category}"</span> 包含 <span className="text-red-500 font-medium">{categoryToDelete?.siteCount}</span> 个网址。
+            <br/><span className="text-xs text-gray-400 mt-1 block">确认后还需要点击底部「保存」才会生效。</span>
           </p>
           <div className="flex items-center gap-3 w-full">
             <button
@@ -342,11 +383,18 @@ export function RecommendCategorySortDialog({
               onClick={() => categoryToDelete && performDelete(categoryToDelete)}
               className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors cursor-pointer"
             >
-              删除
+              确定移除
             </button>
           </div>
         </div>
       </BaseModal>
+
+      {/* 编辑分类弹窗 */}
+      <AdminCategoryModal
+        editingCategory={editingCategory}
+        setEditingCategory={setEditingCategory}
+        onSaveCategory={handleSaveCategory}
+      />
     </BaseModal>
   );
 }

@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BaseModal } from '../ui/BaseModal';
-import { toast } from 'sonner';
-import { navService } from '../../services/nav-service';
-import { Check, X, Loader2 } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import { IconMap } from '../ui/IconMap';
 
 /**
@@ -12,38 +10,20 @@ import { IconMap } from '../ui/IconMap';
 interface AdminCategoryModalProps {
   editingCategory: any;
   setEditingCategory: (cat: any) => void;
-  loadRecommended: () => void;
+  onSaveCategory: (cat: any) => void;
 }
 
 export function AdminCategoryModal({
   editingCategory,
   setEditingCategory,
-  loadRecommended,
+  onSaveCategory,
 }: AdminCategoryModalProps) {
   const isOpen = !!editingCategory;
-  const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = () => {
-    if (!editingCategory || isSaving) return;
-    setIsSaving(true);
-    const req = { 
-      name: editingCategory.category, 
-      icon: editingCategory.iconValue, 
-      sortOrder: editingCategory.sortOrder 
-    };
-    const p = editingCategory.categoryId 
-      ? navService.updateRecommendCategory(editingCategory.categoryId, req)
-      : navService.addRecommendCategory(req);
-      
-    p.then(() => { 
-      loadRecommended(); 
-      setEditingCategory(null); 
-    }).catch((err: any) => {
-      console.error('保存分类失败', err);
-      toast.warning('保存分类失败，请重试');
-    }).finally(() => {
-      setIsSaving(false);
-    });
+    if (!editingCategory) return;
+    onSaveCategory(editingCategory);
+    setEditingCategory(null);
   };
 
   return (
@@ -95,8 +75,8 @@ export function AdminCategoryModal({
         <button onClick={() => setEditingCategory(null)} className="w-10 h-10 flex items-center justify-center border rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors cursor-pointer" title="取消">
           <X className="w-4 h-4" />
         </button>
-        <button onClick={handleSave} disabled={isSaving} className="w-10 h-10 flex items-center justify-center bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 cursor-pointer" title="保存">
-          {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+        <button onClick={handleSave} className="w-10 h-10 flex items-center justify-center bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer" title="保存">
+          <Check className="w-4 h-4" />
         </button>
       </div>
     </BaseModal>
