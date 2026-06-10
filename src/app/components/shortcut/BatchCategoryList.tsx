@@ -64,9 +64,29 @@ export function BatchCategoryList({
     });
   };
 
+  const [renderedCount, setRenderedCount] = React.useState(0);
+
+  React.useEffect(() => {
+    // Reset when data shrinks or changes mode
+    if (batchEditData.length === 0) {
+      setRenderedCount(0);
+      return;
+    }
+    
+    // Progressively render to avoid blocking the main thread and ensure smooth CSS transitions
+    if (renderedCount < batchEditData.length) {
+      const timer = setTimeout(() => {
+        setRenderedCount(prev => Math.min(prev + 2, batchEditData.length));
+      }, 30);
+      return () => clearTimeout(timer);
+    }
+  }, [renderedCount, batchEditData.length]);
+
+  const visibleCategories = batchEditData.slice(0, renderedCount);
+
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      {batchEditData.map((category, catIdx) => (
+      {visibleCategories.map((category, catIdx) => (
         <div key={category.categoryId || catIdx} className="bg-muted/40 border border-border p-6 rounded-3xl shadow-sm space-y-4">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <div className="flex items-center gap-2">
