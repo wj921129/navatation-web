@@ -11,7 +11,7 @@ import { useState, useEffect, useRef } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy } from '@dnd-kit/sortable';
 import { SortableGridItem } from '../ui/SortableGridItem';
-import { GridDragOverlay } from '../ui/GridDragOverlay';
+import { GridDragOverlay, UnifiedDragItem } from '../ui/GridDragOverlay';
 import { navService, IconType } from '../../services/nav-service';
 import { useManageHomepageIcons } from '../../hooks/useManageHomepageIcons';
 
@@ -424,11 +424,13 @@ export function ManageHomepageShortcutsDialog({
                 </SortableContext>
                 <GridDragOverlay>
                   {activeDragId ? (
-                    <GridItemPreview 
-                      site={editData.find(s => s.dragId === activeDragId)} 
+                    <UnifiedDragItem 
+                      shortcut={editData.find(s => s.dragId === activeDragId)} 
                       iconSize={iconSize} 
-                      borderRadiusCss={borderRadiusCss} 
-                      textSize={textSize} 
+                      borderRadius={borderRadiusCss} 
+                      textSize={textSize}
+                      showText={true}
+                      className="bg-card border-2 border-blue-500/60"
                     />
                   ) : null}
                 </GridDragOverlay>
@@ -481,20 +483,4 @@ function GridItemInner({
   );
 }
 
-function GridItemPreview({ site, iconSize, borderRadiusCss, textSize }: any) {
-  if (!site) return null;
-  return (
-    <div className="flex flex-col items-center relative cursor-grabbing" style={{ width: `${iconSize + 32}px` }}>
-      <div className="bg-card border-2 border-blue-500/60 flex items-center justify-center shadow-2xl scale-110 overflow-hidden pointer-events-none transition-transform" style={{ width: `${iconSize}px`, height: `${iconSize}px`, borderRadius: borderRadiusCss }}>
-        {(() => {
-          if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
-            return <img src={site.iconValue} alt={site.name} style={{ width: '50%', height: '50%', objectFit: 'contain' }} />;
-          }
-          const IconComponent = IconMap[site.iconValue || 'Link'] || Link;
-          return <IconComponent style={{ color: site.color || '#333', width: `${iconSize * 0.5}px`, height: `${iconSize * 0.5}px` }} strokeWidth={2} />;
-        })()}
-      </div>
-      <span className="mt-2 font-medium tracking-wide text-center w-full truncate px-1 opacity-0 pointer-events-none" style={{ fontSize: `${textSize}px` }}>{site.name || '未命名'}</span>
-    </div>
-  );
-}
+

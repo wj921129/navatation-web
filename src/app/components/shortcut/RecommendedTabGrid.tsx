@@ -7,7 +7,7 @@ import { Edit3, Trash2, Plus } from 'lucide-react';
 import { DndContext, useSensor, useSensors, PointerSensor, closestCenter, DragStartEvent, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import { SortableGridItem } from '../ui/SortableGridItem';
-import { GridDragOverlay } from '../ui/GridDragOverlay';
+import { GridDragOverlay, UnifiedDragItem } from '../ui/GridDragOverlay';
 import { RecommendSiteItem } from './RecommendSiteItem';
 import { navService } from '../../services/nav-service';
 import { toast } from 'sonner';
@@ -190,21 +190,12 @@ export function RecommendedTabGrid({
       </div>
       <GridDragOverlay>
         {activeDragShortcut ? (
-          <div className="flex flex-col items-center relative cursor-grabbing" style={{ width: `${iconSize + 32}px` }}>
-            <div className="bg-card flex items-center justify-center shadow-2xl scale-110 border border-blue-500 overflow-hidden pointer-events-none transition-transform" style={{ width: `${iconSize}px`, height: `${iconSize}px`, borderRadius }}>
-              {(() => {
-                if (activeDragShortcut.iconType === 'CUSTOM_URL' || activeDragShortcut.iconType === 'FAVICON' || activeDragShortcut.iconType === 'CUSTOM_UPLOAD') {
-                  return <img src={activeDragShortcut.iconValue} alt={activeDragShortcut.name} style={{ width: '50%', height: '50%', objectFit: 'contain' }} />;
-                }
-                return (
-                  <activeDragShortcut.icon
-                    style={{ color: activeDragShortcut.color || '#333', width: `${iconSize * 0.5}px`, height: `${iconSize * 0.5}px` }}
-                    strokeWidth={2}
-                  />
-                );
-              })()}
-            </div>
-          </div>
+          <UnifiedDragItem 
+            shortcut={activeDragShortcut} 
+            iconSize={iconSize} 
+            borderRadius={borderRadius} 
+            showText={false}
+          />
         ) : null}
       </GridDragOverlay>
     </DndContext>

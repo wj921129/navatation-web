@@ -4,7 +4,7 @@ import { Tooltip } from '../ui/Tooltip';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import { SortableGridItem } from '../ui/SortableGridItem';
-import { GridDragOverlay } from '../ui/GridDragOverlay';
+import { GridDragOverlay, UnifiedDragItem } from '../ui/GridDragOverlay';
 import { DraggableShortcut } from './DraggableShortcut';
 import { IconMap } from '../ui/IconMap';
 
@@ -72,18 +72,15 @@ export function ShortcutGrid({
           </SortableContext>
           <GridDragOverlay>
             {activeDragShortcut ? (
-              <div className="flex flex-col items-center relative cursor-grabbing" style={{ width: `${settings.iconSize + 32}px` }}>
-                <div className="bg-icon-bg border-2 border-blue-500/60 flex items-center justify-center shadow-2xl scale-110 overflow-hidden pointer-events-none transition-transform" style={{ width: `${settings.iconSize}px`, height: `${settings.iconSize}px`, borderRadius: borderRadius }}>
-                  {(() => {
-                    if (activeDragShortcut.iconType === 'CUSTOM_URL' || activeDragShortcut.iconType === 'FAVICON' || activeDragShortcut.iconType === 'CUSTOM_UPLOAD') {
-                      return <img src={activeDragShortcut.iconValue} alt={activeDragShortcut.name} style={{ width: '50%', height: '50%', objectFit: 'contain' }} />;
-                    }
-                    const IconComp = IconMap[activeDragShortcut.iconValue] || IconMap.Link;
-                    return <IconComp style={{ color: activeDragShortcut.color || '#333', width: `${iconInnerSize}px`, height: `${iconInnerSize}px` }} strokeWidth={2} />;
-                  })()}
-                </div>
-                <span className="mt-2 font-medium tracking-wide text-center w-full truncate px-1 opacity-0 pointer-events-none" style={{ fontSize: `${settings.textSize}px` }}>{activeDragShortcut.name || '未命名'}</span>
-              </div>
+              <UnifiedDragItem 
+                shortcut={activeDragShortcut} 
+                iconSize={settings.iconSize} 
+                borderRadius={borderRadius} 
+                iconInnerSize={iconInnerSize}
+                showText={true}
+                textSize={settings.textSize}
+                className="bg-icon-bg border-2 border-blue-500/60"
+              />
             ) : null}
           </GridDragOverlay>
         </DndContext>
