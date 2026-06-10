@@ -173,11 +173,15 @@ export function useWidgetDrag({ addWidget, updateWidgetPosition, triggerCloseClo
   }, [handlePointerMoveGlobal, handlePointerUpGlobal]);
 
   useEffect(() => {
+    if (activeDraggingId) {
+      window.addEventListener('pointermove', handlePointerMoveGlobal);
+      window.addEventListener('pointerup', handlePointerUpGlobal);
+    }
     return () => {
       window.removeEventListener('pointermove', handlePointerMoveGlobal);
       window.removeEventListener('pointerup', handlePointerUpGlobal);
     };
-  }, [handlePointerMoveGlobal, handlePointerUpGlobal]);
+  }, [activeDraggingId, handlePointerMoveGlobal, handlePointerUpGlobal]);
 
   return {
     activeDraggingId,

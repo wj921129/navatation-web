@@ -24,6 +24,9 @@ export default function CalendarWidget({ id, style, x, y, isEditMode, onStartDra
    * @param e 指针事件对象
    */
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isEditMode) {
+      return;
+    }
     const target = e.target as HTMLElement;
     if (target.closest('.delete-btn')) {
       return;
@@ -58,7 +61,9 @@ export default function CalendarWidget({ id, style, x, y, isEditMode, onStartDra
     <div
       ref={containerRef}
       onPointerDown={handlePointerDown}
-      className={`absolute select-none z-20 group touch-none isolate cursor-grab active:cursor-grabbing`}
+      className={`absolute select-none z-20 group touch-none isolate ${
+        isEditMode ? 'cursor-grab active:cursor-grabbing' : ''
+      }`}
       style={{
         left: `${x}%`,
         top: `${y}%`,
