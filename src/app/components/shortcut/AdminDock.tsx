@@ -1,4 +1,4 @@
-import { Grid, List, Check, FolderPlus, RotateCw, FolderCog } from 'lucide-react';
+import { Grid, List, Check, RotateCw, FolderCog } from 'lucide-react';
 import React, { useTransition } from 'react';
 
 /**
@@ -67,21 +67,7 @@ export function AdminDock({
         </div>
       </div>
 
-      {/* 新增分类 */}
-      {!isBatchMode && (
-        <div className="group relative flex items-center justify-center">
-          <button
-            onClick={() => setEditingCategory({ category: '', iconValue: 'Folder', sortOrder: categoriesLength })}
-            className="w-12 h-12 rounded-full flex items-center justify-center bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100 hover:scale-105 dark:bg-amber-900/30 dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-900/50 transition-all duration-300 shadow-sm cursor-pointer"
-          >
-            <FolderPlus className="w-5 h-5" />
-          </button>
-          <div className="absolute left-full ml-4 px-3 py-2 bg-gray-800/95 backdrop-blur-sm text-white text-sm font-medium rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-all shadow-xl z-50 translate-x-[-10px] group-hover:translate-x-0">
-            新增分类
-            <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 border-y-4 border-y-transparent border-r-4 border-r-gray-800/95" />
-          </div>
-        </div>
-      )}
+
 
       {/* 一键刷新全部图标 */}
       {isBatchMode && (
