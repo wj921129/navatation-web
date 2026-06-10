@@ -11,7 +11,7 @@ interface ProgressiveRenderOptions {
   initialCount?: number;
   /** 每一批次追加渲染的数量 */
   batchSize?: number;
-  /** 批次渲染间隔时间 (ms)，默认 300ms */
+  /** 批次渲染间隔时间 (ms)，默认 100ms */
   delay?: number;
 }
 
@@ -19,7 +19,7 @@ export function useProgressiveRender({
   total,
   initialCount,
   batchSize = 2,
-  delay = 300
+  delay = 100
 }: ProgressiveRenderOptions) {
   const initCount = initialCount !== undefined ? initialCount : batchSize;
   const [renderedCount, setRenderedCount] = useState(initCount);

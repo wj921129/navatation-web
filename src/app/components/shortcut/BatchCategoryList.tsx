@@ -67,7 +67,7 @@ export function BatchCategoryList({
   const renderedCount = useProgressiveRender({
     total: batchEditData.length,
     batchSize: 2,
-    delay: 300
+    delay: 100
   });
 
   const visibleCategories = batchEditData.slice(0, renderedCount);
