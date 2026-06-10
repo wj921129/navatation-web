@@ -49,6 +49,7 @@ export function AddShortcutDialog({
   const [activeTab, setActiveTab] = useState<'recommended' | 'custom'>('recommended');
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [isGridAdmin, setIsGridAdmin] = useState(false);
+  const [showBatchListContent, setShowBatchListContent] = useState(false);
   const [pendingShortcuts, setPendingShortcuts] = useState<RecommendedSite[]>([]);
   const [categories, setCategories] = useState<CategoryGroup[]>([]);
   
@@ -98,12 +99,26 @@ export function AddShortcutDialog({
   const { isBatchMode, setIsBatchMode, batchEditData, setBatchEditData } = batchCategoryControls;
 
   useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    if (isBatchMode) {
+      setShowBatchListContent(false);
+      timeout = setTimeout(() => {
+        setShowBatchListContent(true);
+      }, 350);
+    } else {
+      setShowBatchListContent(false);
+    }
+    return () => clearTimeout(timeout);
+  }, [isBatchMode]);
+
+  useEffect(() => {
     if (isOpen) {
       customShortcutControls.resetCustomState();
       setActiveTab('recommended');
       setIsAdminMode(false);
       setIsGridAdmin(false);
       setIsBatchMode(false);
+      setShowBatchListContent(false);
       setBatchEditData([]);
       loadRecommended();
     }
@@ -238,12 +253,18 @@ export function AddShortcutDialog({
                 {activeTab === 'recommended' ? (
                   <div className="p-6 space-y-8 relative">
                     {isBatchMode ? (
-                      <div key="list-mode" className="space-y-8 relative animate-in fade-in slide-in-from-right-4 duration-500">
+                      <div key="list-mode" className="space-y-8 relative animate-in fade-in slide-in-from-right-4 duration-300">
                         <input type="file" ref={batchCategoryControls.rowFileInputRef} onChange={batchCategoryControls.handleRowIconUpload} className="hidden" accept="image/*" />
-                        <BatchCategoryList {...batchCategoryControls} />
+                        {showBatchListContent ? (
+                          <BatchCategoryList {...batchCategoryControls} />
+                        ) : (
+                          <div className="flex items-center justify-center h-40 text-gray-400 dark:text-neutral-500 animate-pulse text-sm">
+                            正在加载列表视图...
+                          </div>
+                        )}
                       </div>
                     ) : (
-                      <div key="grid-mode" className="h-full animate-in fade-in slide-in-from-left-4 duration-500">
+                      <div key="grid-mode" className="h-full animate-in fade-in slide-in-from-left-4 duration-300">
                         <RecommendedTabGrid
                           categories={categories}
                           setCategories={setCategories}
