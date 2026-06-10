@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { BaseModal } from '../ui/BaseModal';
 import { toast } from 'sonner';
 import { navService } from '../../services/nav-service';
-import { Check, X, Loader2 } from 'lucide-react';
+import { Check, X, Loader2, ChevronDown } from 'lucide-react';
+import { IconMap } from '../ui/IconMap';
 
 /**
  * 分类编辑弹窗组件，用于新增或修改推荐分类
@@ -67,13 +68,29 @@ export function AdminCategoryModal({
           />
         </div>
         <div>
-          <label className="text-sm text-gray-500 mb-1 block">图标 (lucide-react name)</label>
-          <input 
-            type="text" 
-            className="w-full px-3 py-2 border rounded-lg bg-background outline-none focus:border-blue-500" 
-            value={editingCategory?.iconValue || ''} 
-            onChange={e => editingCategory && setEditingCategory({...editingCategory, iconValue: e.target.value})} 
-          />
+          <label className="text-sm text-gray-500 mb-1 block">图标选择</label>
+          <div className="relative">
+            <select 
+              className="w-full px-3 py-2 pl-10 border rounded-lg bg-background outline-none focus:border-blue-500 appearance-none cursor-pointer" 
+              value={editingCategory?.iconValue || 'Folder'} 
+              onChange={e => editingCategory && setEditingCategory({...editingCategory, iconValue: e.target.value})} 
+            >
+              {Object.keys(IconMap).map(iconName => (
+                <option key={iconName} value={iconName}>
+                  {iconName}
+                </option>
+              ))}
+            </select>
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+              {(() => {
+                const SelectedIcon = IconMap[editingCategory?.iconValue || 'Folder'] || IconMap.Folder;
+                return <SelectedIcon className="w-5 h-5" />;
+              })()}
+            </div>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+              <ChevronDown className="w-4 h-4" />
+            </div>
+          </div>
         </div>
 
       </div>
