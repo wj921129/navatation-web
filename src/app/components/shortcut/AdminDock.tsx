@@ -1,4 +1,4 @@
-import { Grid, List, Check, FolderPlus, RotateCw } from 'lucide-react';
+import { Grid, List, Check, FolderPlus, RotateCw, ArrowUpDown } from 'lucide-react';
 import React, { useTransition } from 'react';
 
 /**
@@ -14,6 +14,7 @@ interface AdminDockProps {
   categoriesLength: number;
   handleBatchRefreshAllIcons: () => void;
   isAllRefreshing: boolean;
+  onSortCategories: () => void;
 }
 
 export function AdminDock({
@@ -25,6 +26,7 @@ export function AdminDock({
   categoriesLength,
   handleBatchRefreshAllIcons,
   isAllRefreshing,
+  onSortCategories,
 }: AdminDockProps) {
   const [isPending, startTransition] = useTransition();
 
@@ -97,6 +99,20 @@ export function AdminDock({
           </div>
         </div>
       )}
+
+      {/* 分类排序 */}
+      <div className="group relative flex items-center justify-center">
+        <button
+          onClick={onSortCategories}
+          className="w-12 h-12 rounded-full flex items-center justify-center bg-teal-50 text-teal-600 border border-teal-200 hover:bg-teal-100 hover:scale-105 dark:bg-teal-900/30 dark:border-teal-800 dark:text-teal-400 dark:hover:bg-teal-900/50 transition-all duration-300 shadow-sm cursor-pointer"
+        >
+          <ArrowUpDown className="w-5 h-5" />
+        </button>
+        <div className="absolute left-full ml-4 px-3 py-2 bg-gray-800/95 backdrop-blur-sm text-white text-sm font-medium rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-all shadow-xl z-50 translate-x-[-10px] group-hover:translate-x-0">
+          分类排序
+          <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 border-y-4 border-y-transparent border-r-4 border-r-gray-800/95" />
+        </div>
+      </div>
 
     </div>
   );

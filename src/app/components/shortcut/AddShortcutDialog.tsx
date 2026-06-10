@@ -20,6 +20,7 @@ import { useCustomShortcut } from './useCustomShortcut';
 import { RecommendedTabGrid } from './RecommendedTabGrid';
 import { useBatchCategory } from './useBatchCategory';
 import { EditShortcutDialog } from './EditShortcutDialog';
+import { RecommendCategorySortDialog } from './RecommendCategorySortDialog';
 
 interface AddShortcutDialogProps {
   isOpen: boolean;
@@ -61,6 +62,7 @@ export function AddShortcutDialog({
   // 管理员编辑状态
   const [editingCategory, setEditingCategory] = useState<any>(null);
   const [editingSite, setEditingSite] = useState<any>(null);
+  const [isSortDialogOpen, setIsSortDialogOpen] = useState(false);
 
   const loadRecommended = () => {
     navService.getRecommended().then(res => {
@@ -151,6 +153,7 @@ export function AddShortcutDialog({
             categoriesLength={categories.length}
             handleBatchRefreshAllIcons={batchCategoryControls.handleBatchRefreshAllIcons}
             isAllRefreshing={batchCategoryControls.isAllRefreshing}
+            onSortCategories={() => setIsSortDialogOpen(true)}
           />
         )}
 
@@ -343,6 +346,13 @@ export function AddShortcutDialog({
           });
           setEditingSite(null);
         }}
+      />
+
+      <RecommendCategorySortDialog
+        isOpen={isSortDialogOpen}
+        onClose={() => setIsSortDialogOpen(false)}
+        categories={categories}
+        onSaveComplete={loadRecommended}
       />
     </>
   );
