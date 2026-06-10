@@ -42,7 +42,7 @@ export function SortableListItem({ id, children, className = '', style = {} }: S
       style={combinedStyle}
       {...attributes}
       {...listeners}
-      className={`${className} ${isDragging ? 'z-50' : 'z-0'} cursor-grab active:cursor-grabbing touch-none`}
+      className={`${className} ${isDragging ? 'z-50' : 'z-0'} cursor-pointer touch-none`}
     >
       {children}
     </div>

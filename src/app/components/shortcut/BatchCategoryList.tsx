@@ -108,7 +108,7 @@ export function BatchCategoryList({
                   >
                     <div className="flex items-center justify-between border-b border-border pb-3">
                       <div className="flex items-center gap-2">
-                        <div className="flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-400 hover:text-blue-500" {...provided.dragHandleProps}>
+                        <div className="flex-shrink-0 cursor-pointer text-gray-400 hover:text-blue-500" {...provided.dragHandleProps}>
                           <GripVertical className="w-5 h-5" />
                         </div>
                         <category.icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
@@ -169,7 +169,7 @@ export function BatchCategoryList({
                               >
                                 <div className="flex items-center gap-2 w-full">
                                   {/* 拖拽把手 */}
-                                  <div className="flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-400 hover:text-blue-500">
+                                  <div className="flex-shrink-0 cursor-pointer text-gray-400 hover:text-blue-500">
                                     <GripVertical className="w-5 h-5" />
                                   </div>
                                   {/* 图标展示区 */}

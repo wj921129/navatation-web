@@ -340,7 +340,7 @@ export function ManageHomepageShortcutsDialog({
                                 }}
                               >
                                 <div className="flex items-center gap-2 w-full">
-                                  <div className="flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-400 hover:text-blue-500">
+                                  <div className="flex-shrink-0 cursor-pointer text-gray-400 hover:text-blue-500">
                                     <GripVertical className="w-5 h-5" />
                                   </div>
                                   <div className="flex-shrink-0 flex items-center justify-center bg-card shadow-inner border border-border overflow-hidden w-10 h-10 rounded-full">
