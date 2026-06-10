@@ -66,7 +66,6 @@ export function BatchCategoryList({
   };
   const renderedCount = useProgressiveRender({
     total: batchEditData.length,
-    initialCount: 0,
     batchSize: 2,
     delay: 300
   });

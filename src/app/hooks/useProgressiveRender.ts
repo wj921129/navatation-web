@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 interface ProgressiveRenderOptions {
   /** 数据总长度 */
   total: number;
-  /** 初始挂载渲染的数量，通常设为 0 以保证初次加载无阻塞 */
+  /** 初始挂载渲染的数量，如果不传默认等于 batchSize，实现初次渲染无需等待 */
   initialCount?: number;
   /** 每一批次追加渲染的数量 */
   batchSize?: number;
@@ -17,20 +17,21 @@ interface ProgressiveRenderOptions {
 
 export function useProgressiveRender({
   total,
-  initialCount = 0,
+  initialCount,
   batchSize = 2,
   delay = 300
 }: ProgressiveRenderOptions) {
-  const [renderedCount, setRenderedCount] = useState(initialCount);
+  const initCount = initialCount !== undefined ? initialCount : batchSize;
+  const [renderedCount, setRenderedCount] = useState(initCount);
 
   // 当总数变为0或发生变化时，如果当前渲染数超出总数，或者总数为0，进行安全重置
   useEffect(() => {
     if (total === 0) {
-      setRenderedCount(initialCount);
+      setRenderedCount(initCount);
     } else if (renderedCount > total) {
       setRenderedCount(total);
     }
-  }, [total, initialCount]);
+  }, [total, initCount]);
 
   useEffect(() => {
     if (total > 0 && renderedCount < total) {
