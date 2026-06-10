@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { BaseModal } from '../ui/BaseModal';
 import { toast } from 'sonner';
 import { navService } from '../../services/nav-service';
-import { Check, X, Loader2, ChevronDown } from 'lucide-react';
+import { Check, X, Loader2 } from 'lucide-react';
 import { IconMap } from '../ui/IconMap';
 
 /**
@@ -68,28 +68,25 @@ export function AdminCategoryModal({
           />
         </div>
         <div>
-          <label className="text-sm text-gray-500 mb-1 block">图标选择</label>
-          <div className="relative">
-            <select 
-              className="w-full px-3 py-2 pl-10 border rounded-lg bg-background outline-none focus:border-blue-500 appearance-none cursor-pointer" 
-              value={editingCategory?.iconValue || 'Folder'} 
-              onChange={e => editingCategory && setEditingCategory({...editingCategory, iconValue: e.target.value})} 
-            >
-              {Object.keys(IconMap).map(iconName => (
-                <option key={iconName} value={iconName}>
-                  {iconName}
-                </option>
-              ))}
-            </select>
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-              {(() => {
-                const SelectedIcon = IconMap[editingCategory?.iconValue || 'Folder'] || IconMap.Folder;
-                return <SelectedIcon className="w-5 h-5" />;
-              })()}
-            </div>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-              <ChevronDown className="w-4 h-4" />
-            </div>
+          <label className="text-sm text-gray-500 mb-2 block flex items-center justify-between">
+            <span>图标选择</span>
+            <span className="text-xs bg-gray-100 dark:bg-neutral-800 px-2 py-0.5 rounded text-gray-400">{editingCategory?.iconValue || 'Folder'}</span>
+          </label>
+          <div className="grid grid-cols-6 sm:grid-cols-8 gap-2 max-h-52 overflow-y-auto p-2 border rounded-xl bg-background scrollbar-thin">
+            {Object.entries(IconMap).map(([iconName, IconComp]) => (
+              <button
+                key={iconName}
+                onClick={() => editingCategory && setEditingCategory({...editingCategory, iconValue: iconName})}
+                className={`flex items-center justify-center p-2.5 rounded-lg transition-all cursor-pointer ${
+                  (editingCategory?.iconValue || 'Folder') === iconName
+                    ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/50 shadow-sm ring-1 ring-blue-500/50'
+                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-neutral-800 dark:hover:text-gray-200 border border-transparent'
+                }`}
+                title={iconName}
+              >
+                <IconComp className="w-5 h-5" />
+              </button>
+            ))}
           </div>
         </div>
 
