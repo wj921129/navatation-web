@@ -8,6 +8,7 @@ import React, { useTransition } from 'react';
 interface AdminDockProps {
   isBatchMode: boolean;
   setIsBatchMode: (val: boolean) => void;
+  toggleBatchMode: (val?: boolean) => void;
   handleSaveAllCategories: () => void;
   setEditingCategory: (cat: any) => void;
   categoriesLength: number;
@@ -18,6 +19,7 @@ interface AdminDockProps {
 export function AdminDock({
   isBatchMode,
   setIsBatchMode,
+  toggleBatchMode,
   handleSaveAllCategories,
   setEditingCategory,
   categoriesLength,
@@ -32,7 +34,7 @@ export function AdminDock({
       {/* 模式切换 (图标/列表) */}
       <div className="group relative flex items-center justify-center">
         <button
-          onClick={() => startTransition(() => setIsBatchMode(!isBatchMode))}
+          onClick={() => startTransition(() => toggleBatchMode())}
           className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm border cursor-pointer ${
             !isBatchMode 
               ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-400' 

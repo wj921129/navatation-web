@@ -2,7 +2,7 @@
  * @description 批量分类编辑管理钩子
  * @date 2026-06-09
  */
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, startTransition } from 'react';
 import { toast } from 'sonner';
 import { navService, IconType } from '../../services/nav-service';
 import { CategoryGroup, RecommendedSite } from '../../constants/recommendedSitesData';
@@ -16,6 +16,22 @@ export function useBatchCategory(
   const [isBatchMode, setIsBatchMode] = useState(false);
   const [batchEditData, setBatchEditData] = useState<CategoryGroup[]>([]);
   
+  const toggleBatchMode = (forceState?: boolean) => {
+    const nextState = forceState !== undefined ? forceState : !isBatchMode;
+    if (nextState === isBatchMode) return;
+
+    if (nextState) {
+      const deepCopied = categories.map(cat => ({
+        ...cat,
+        sites: Array.isArray(cat.sites) ? cat.sites.map(site => ({ ...site })) : []
+      }));
+      setBatchEditData(deepCopied);
+      setIsBatchMode(true);
+    } else {
+      setIsBatchMode(false);
+    }
+  };
+
   const updateBatchEditSite = (catIdx: number, siteIdx: number, fields: Partial<RecommendedSite>) => {
     setBatchEditData(prev => {
       const copy = [...prev];
@@ -47,9 +63,11 @@ export function useBatchCategory(
         ...cat,
         sites: Array.isArray(cat.sites) ? cat.sites.map(site => ({ ...site })) : []
       }));
-      setBatchEditData(deepCopied);
+      startTransition(() => {
+        setBatchEditData(deepCopied);
+      });
     }
-  }, [isBatchMode, categories]);
+  }, [categories]);
 
   const handleTriggerRowUpload = (catIdx: number, siteIdx: number) => {
     activeUploadRow.current = { catIdx, siteIdx };
@@ -186,6 +204,7 @@ export function useBatchCategory(
   return {
     isBatchMode,
     setIsBatchMode,
+    toggleBatchMode,
     batchEditData,
     setBatchEditData,
     rowLoadingStatus,

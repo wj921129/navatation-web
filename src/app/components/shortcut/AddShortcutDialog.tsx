@@ -145,6 +145,7 @@ export function AddShortcutDialog({
           <AdminDock
             isBatchMode={batchCategoryControls.isBatchMode}
             setIsBatchMode={batchCategoryControls.setIsBatchMode}
+            toggleBatchMode={batchCategoryControls.toggleBatchMode}
             handleSaveAllCategories={batchCategoryControls.handleSaveAllCategories}
             setEditingCategory={setEditingCategory}
             categoriesLength={categories.length}
@@ -170,7 +171,7 @@ export function AddShortcutDialog({
                       } else {
                         setIsAdminMode(false);
                         setIsGridAdmin(false);
-                        batchCategoryControls.setIsBatchMode(false);
+                        batchCategoryControls.toggleBatchMode(false);
                       }
                     }}
                     title={isAdminMode ? '退出管理模式' : '管理推荐网址'}
