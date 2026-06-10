@@ -108,7 +108,7 @@ export function BatchCategoryList({
                   >
                     <div className="flex items-center justify-between border-b border-border pb-3">
                       <div className="flex items-center gap-2">
-                        <div className="flex-shrink-0 cursor-pointer active:cursor-pointerbing text-gray-400 hover:text-blue-500" {...provided.dragHandleProps}>
+                        <div className="flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-400 hover:text-blue-500" {...provided.dragHandleProps}>
                           <GripVertical className="w-5 h-5" />
                         </div>
                         <category.icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
@@ -118,7 +118,7 @@ export function BatchCategoryList({
               <button
                 onClick={() => handleBatchRefreshCategoryIcons(catIdx)}
                 className="flex items-center justify-center w-8 h-8 bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-lg cursor-pointer transition-colors"
-                title="批量刷新当前分类下所有网址的图�?
+                title="批量刷新当前分类下所有网址的图标"
               >
                 <RotateCw className="w-4 h-4" />
               </button>
@@ -141,7 +141,7 @@ export function BatchCategoryList({
 
           <div className="space-y-3">
             {category.sites.length === 0 ? (
-              <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-6">暂无网址，请点击右上方“新增网址�?/p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-6">暂无网址，请点击右上方“新增网址”</p>
             ) : (
               <>
                 <Droppable droppableId={catIdx.toString()} direction="vertical">
@@ -169,10 +169,10 @@ export function BatchCategoryList({
                               >
                                 <div className="flex items-center gap-2 w-full">
                                   {/* 拖拽把手 */}
-                                  <div className="flex-shrink-0 cursor-pointer active:cursor-pointerbing text-gray-400 hover:text-blue-500">
+                                  <div className="flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-400 hover:text-blue-500">
                                     <GripVertical className="w-5 h-5" />
                                   </div>
-                                  {/* 图标展示�?*/}
+                                  {/* 图标展示区 */}
                                   <div className="flex-shrink-0 flex items-center justify-center bg-card shadow-inner border border-border overflow-hidden w-10 h-10 rounded-full relative">
                                     {isLoading ? (
                                       <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
@@ -222,7 +222,7 @@ export function BatchCategoryList({
                                     </div>
                                   </div>
 
-                                  {/* 多图标选择区域 - 直接放在同一�?*/}
+                                  {/* 多图标选择区域 - 直接放在同一行 */}
                                   {detectedIcons.length > 0 && (
                                     <div className="flex items-center gap-1.5 border-l border-border/50 pl-2 flex-1 overflow-x-auto scrollbar-none">
                                       {detectedIcons.map((url, idx) => (
@@ -238,7 +238,7 @@ export function BatchCategoryList({
                                           className={`w-9 h-9 flex-shrink-0 bg-card shadow-sm border rounded-lg flex items-center justify-center overflow-hidden transition-all cursor-pointer ${
                                             site.iconValue === url ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-border hover:border-gray-400 dark:hover:border-gray-500'
                                           }`}
-                                          title="点击使用此图�?
+                                          title="点击使用此图标"
                                         >
                                           <img
                                             src={url}
@@ -270,13 +270,13 @@ export function BatchCategoryList({
                                   )}
                                   {!detectedIcons.length && <div className="flex-1"></div>}
 
-                                  {/* 操作按钮�?*/}
+                                  {/* 操作按钮区 */}
                                   <div className="flex-shrink-0 flex items-center gap-1">
                                     <button
                                       onClick={() => handleDetectRowIcon(catIdx, siteIdx)}
                                       disabled={isLoading}
                                       className="p-2 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
-                                      title="自动刷新并检测网站图�?
+                                      title="自动刷新并检测网站图标"
                                     >
                                       <RotateCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
                                     </button>

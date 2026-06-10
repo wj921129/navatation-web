@@ -114,7 +114,7 @@ export const ClockMenuPanel: React.FC<ClockMenuPanelProps> = ({
             className={getCategoryBtnClass(isEditMode ? activeCategory === 'timer' : timerVisible)}
           >
             <Timer className="w-3.5 h-3.5" />
-            <span>计时�?/span>
+            <span>计时器</span>
           </button>
 
           <button
@@ -143,7 +143,7 @@ export const ClockMenuPanel: React.FC<ClockMenuPanelProps> = ({
           <div className="flex items-center gap-3 animate-fade-in">
             <button
               onPointerDown={(e) => handleDragStartFromMenu(e, 'flip')}
-              className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/50 transition-colors cursor-pointer active:cursor-pointerbing group/btn"
+              className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/50 transition-colors cursor-grab active:cursor-grabbing group/btn"
             >
               <div className="w-16 h-12 flex items-center justify-center gap-1 bg-input-bg border border-widget-border group-hover/btn:border-text-secondary rounded-xl px-1">
                 <div className="w-6 h-8 rounded bg-widget-bg border border-widget-border flex items-center justify-center">
@@ -162,7 +162,7 @@ export const ClockMenuPanel: React.FC<ClockMenuPanelProps> = ({
           <div className="flex items-center gap-3 animate-fade-in">
             <button
               onPointerDown={(e) => handleDragStartFromMenu(e, 'month')}
-              className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/50 transition-colors cursor-pointer active:cursor-pointerbing group/btn"
+              className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/50 transition-colors cursor-grab active:cursor-grabbing group/btn"
             >
               <div className="w-16 h-16 flex items-center justify-center relative bg-input-bg/20 border border-widget-border rounded-xl shadow-sm transition-all overflow-hidden p-1">
                 <div className="w-full h-full flex flex-col gap-0.5">
@@ -180,14 +180,14 @@ export const ClockMenuPanel: React.FC<ClockMenuPanelProps> = ({
           <div className="flex items-center gap-3 animate-fade-in">
             <button
               onPointerDown={(e) => handleDragStartFromMenu(e, 'pomodoro')}
-              className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/50 transition-colors cursor-pointer active:cursor-pointerbing group/btn"
+              className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/50 transition-colors cursor-grab active:cursor-grabbing group/btn"
             >
               <div className="w-12 h-12 flex items-center justify-center relative bg-input-bg/20 border border-widget-border rounded-xl shadow-sm transition-all">
                 <div className="w-8 h-8 rounded-full border-2 border-blue-500/60 group-hover/btn:border-blue-500 flex items-center justify-center">
                   <div className="w-1 h-3 bg-blue-500/60 group-hover/btn:bg-blue-500 absolute top-2" />
                 </div>
               </div>
-              <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">番茄�?/span>
+              <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary">番茄钟</span>
             </button>
           </div>
         )}
@@ -196,7 +196,7 @@ export const ClockMenuPanel: React.FC<ClockMenuPanelProps> = ({
           <div className="flex items-center gap-3 animate-fade-in">
             <button
               onPointerDown={(e) => handleDragStartFromMenu(e, 'breathe')}
-              className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/50 transition-colors cursor-pointer active:cursor-pointerbing group/btn"
+              className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/50 transition-colors cursor-grab active:cursor-grabbing group/btn"
             >
               <div className="w-12 h-12 flex items-center justify-center relative bg-input-bg/20 border border-widget-border rounded-xl shadow-sm transition-all">
                 <div className="w-8 h-8 rounded-full border border-teal-500/30 group-hover/btn:border-teal-500 flex items-center justify-center bg-teal-500/10">
@@ -212,7 +212,7 @@ export const ClockMenuPanel: React.FC<ClockMenuPanelProps> = ({
           <div className="flex items-center gap-3 animate-fade-in">
             <button
               onPointerDown={(e) => handleDragStartFromMenu(e, 'simple')}
-              className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/50 transition-colors cursor-pointer active:cursor-pointerbing group/btn"
+              className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/50 transition-colors cursor-grab active:cursor-grabbing group/btn"
             >
               <div className="w-16 h-16 flex items-center justify-center relative bg-input-bg/20 border border-widget-border rounded-xl shadow-sm transition-all">
                 <CloudSun className="w-6 h-6 text-text-secondary group-hover/btn:text-yellow-400 transition-colors" />
