@@ -48,7 +48,7 @@ export function AdminCategoryModal({
       position="center"
       containerClassName="bg-card p-6 rounded-2xl w-96 shadow-xl"
       overlayClassName="bg-black/50 backdrop-blur-sm"
-      zIndex={60}
+      zIndex={70}
     >
       <h3 className="text-lg font-medium mb-4">{editingCategory?.categoryId ? '编辑分类' : '新增分类'}</h3>
       <div className="space-y-4">

@@ -5,7 +5,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
-import { GripVertical, ArrowUpDown, Check, X, Loader2 } from 'lucide-react';
+import { GripVertical, FolderCog, Check, X, Loader2, FolderPlus, Edit3 } from 'lucide-react';
 import { BaseModal } from '../ui/BaseModal';
 import { navService } from '../../services/nav-service';
 import { toast } from 'sonner';
@@ -24,6 +24,8 @@ interface RecommendCategorySortDialogProps {
   onClose: () => void;
   categories: any[];
   onSaveComplete: () => void;
+  onAddCategory?: () => void;
+  onEditCategory?: (cat: any) => void;
 }
 
 /**
@@ -35,6 +37,8 @@ export function RecommendCategorySortDialog({
   onClose,
   categories,
   onSaveComplete,
+  onAddCategory,
+  onEditCategory,
 }: RecommendCategorySortDialogProps) {
   const [sortList, setSortList] = useState<SortCategory[]>([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -114,27 +118,38 @@ export function RecommendCategorySortDialog({
       <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-card/95">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center">
-            <ArrowUpDown className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+            <FolderCog className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
           </div>
           <div>
             <h3 className="text-base font-medium">分类管理</h3>
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">拖拽卡片调整推荐分类的展示顺序</p>
           </div>
         </div>
-        <button
-          onClick={onClose}
-          className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-400 transition-colors cursor-pointer"
-        >
-          <X className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-2">
+          {onAddCategory && (
+            <button
+              onClick={onAddCategory}
+              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-indigo-50 dark:hover:bg-indigo-900/30 text-indigo-500 transition-colors cursor-pointer"
+              title="新增分类"
+            >
+              <FolderPlus className="w-4 h-4" />
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-400 transition-colors cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* 分类卡片列表 */}
       <div className="flex-1 overflow-y-auto p-4 max-h-[60vh]">
         {sortList.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-            <ArrowUpDown className="w-10 h-10 mb-3 opacity-30" />
-            <p className="text-sm">暂无可排序的分类</p>
+            <FolderCog className="w-10 h-10 mb-3 opacity-30" />
+            <p className="text-sm">暂无可管理的分类</p>
             <p className="text-xs mt-1 text-gray-300">请先在管理模式下创建推荐分类</p>
           </div>
         ) : (
@@ -183,6 +198,17 @@ export function RecommendCategorySortDialog({
                               {cat.siteCount} 个网址
                             </p>
                           </div>
+
+                          {/* 编辑按钮 */}
+                          {onEditCategory && (
+                            <button
+                              onClick={() => onEditCategory(cat)}
+                              className="flex-shrink-0 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full transition-colors cursor-pointer"
+                              title="编辑分类"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </button>
+                          )}
 
                           {/* 拖拽把手 */}
                           <div

@@ -353,6 +353,8 @@ export function AddShortcutDialog({
         onClose={() => setIsSortDialogOpen(false)}
         categories={categories}
         onSaveComplete={loadRecommended}
+        onAddCategory={() => setEditingCategory({ category: '', iconValue: 'Folder', sortOrder: categories.length })}
+        onEditCategory={(cat) => setEditingCategory({ ...cat })}
       />
     </>
   );
