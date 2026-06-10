@@ -68,7 +68,7 @@ export function BatchCategoryList({
     total: batchEditData.length,
     initialCount: 0,
     batchSize: 2,
-    delay: 100
+    delay: 300
   });
 
   const visibleCategories = batchEditData.slice(0, renderedCount);
