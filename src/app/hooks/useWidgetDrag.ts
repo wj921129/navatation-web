@@ -70,6 +70,9 @@ export function useWidgetDrag({ addWidget, updateWidgetPosition, triggerCloseClo
     const distance = Math.sqrt(dx * dx + dy * dy);
 
     if (distance > 5) {
+      if (!menuDragHasMovedRef.current) {
+        triggerCloseClock();
+      }
       menuDragHasMovedRef.current = true;
       setMenuDragHasMoved(true);
     }
@@ -105,11 +108,15 @@ export function useWidgetDrag({ addWidget, updateWidgetPosition, triggerCloseClo
       }
     }
 
+    // 如果只是点击（没有产生足够拖拽距离），则在这里关闭面板
+    if (!menuDragHasMovedRef.current) {
+      triggerCloseClock();
+    }
+
     menuDraggingStyleRef.current = null;
     setMenuDraggingStyle(null);
     menuDragHasMovedRef.current = false;
     setMenuDragHasMoved(false);
-    triggerCloseClock();
 
     window.removeEventListener('pointermove', handleMenuDragMove);
     window.removeEventListener('pointerup', handleMenuDragUp);

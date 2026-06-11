@@ -381,7 +381,7 @@ export default function App() {
 
         {menuDraggingStyle && menuDragHasMoved && (
           <div
-            className="absolute pointer-events-none opacity-60 z-50 select-none border border-dashed border-blue-500/60 p-1 rounded-3xl bg-blue-500/5 shadow-xl"
+            className="absolute pointer-events-none opacity-60 z-[200] select-none border border-dashed border-blue-500/60 p-1 rounded-3xl bg-blue-500/5 shadow-xl"
             style={{
               left: `${menuDragPos.x}px`,
               top: `${menuDragPos.y}px`,
