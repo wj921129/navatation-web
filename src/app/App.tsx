@@ -260,6 +260,14 @@ export default function App() {
     handleMouseEnterTheme();
   }, [handleMouseEnterTheme]);
 
+  const handleTriggerCloseClock = useCallback(() => {
+    setIsWidgetGalleryOpen(false);
+  }, []);
+
+  const handleDragEnd = useCallback(() => {
+    if (!isEditMode) saveWidgets();
+  }, [isEditMode, saveWidgets]);
+
   const {
     activeDraggingId,
     setActiveDraggingId,
@@ -273,10 +281,8 @@ export default function App() {
   } = useWidgetDrag({ 
     addWidget, 
     updateWidgetPosition, 
-    triggerCloseClock: () => setIsWidgetGalleryOpen(false),
-    onDragEnd: () => {
-      if (!isEditMode) saveWidgets();
-    }
+    triggerCloseClock: handleTriggerCloseClock,
+    onDragEnd: handleDragEnd
   });
 
 
