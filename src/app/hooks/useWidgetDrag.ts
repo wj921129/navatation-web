@@ -119,7 +119,11 @@ export function useWidgetDrag({ addWidget, updateWidgetPosition, triggerCloseClo
     window.removeEventListener('pointermove', handleMenuDragMove);
     window.removeEventListener('pointerup', handleMenuDragUp);
     window.removeEventListener('pointercancel', handleMenuDragUp);
-  }, [addWidget, triggerCloseClock, handleMenuDragMove]);
+
+    if (onDragEnd) {
+      onDragEnd();
+    }
+  }, [addWidget, triggerCloseClock, handleMenuDragMove, onDragEnd]);
 
   const handleDragStartFromMenu = useCallback((e: React.PointerEvent<HTMLButtonElement>, style: NonNullable<WidgetStyle>) => {
     e.preventDefault();

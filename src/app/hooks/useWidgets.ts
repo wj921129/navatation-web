@@ -172,15 +172,31 @@ export function useWidgets(isEditMode: boolean, authState: AuthState) {
     setTempWidgets(widgets.map((w) => ({ ...w, meta: w.meta ? { ...w.meta } : {} })));
   }, [isEditMode, widgets]);
 
+  const persistWidgets = useCallback(async (data: WidgetItem[]) => {
+    localStorage.setItem('navatation_widgets', JSON.stringify(data));
+    if (!authState.isLoggedIn) {
+      return;
+    }
+    try {
+      const uploadPayload = data.map((w) => {
+        const widgetId = w.id.startsWith('WG') ? w.id : undefined;
+        return {
+          widgetId,
+          type: w.type,
+          style: w.style,
+          x: w.x,
+          y: w.y,
+          meta: w.meta ?? {},
+        };
+      });
+      await widgetService.saveWidgets(uploadPayload);
+    } catch (err) {
+      console.error('[useWidgets] 保存云端组件配置出错:', err);
+    }
+  }, [authState.isLoggedIn]);
+
   /**
-   * 新增组件至草稿态
-   *
-   * @param type 组件类型
-   * @param style 组件样式
-   * @param initialX 初始 X 轴百分比位置
-   * @param initialY 初始 Y 轴百分比位置
-   * @param meta 组件可选元数据
-   * @returns 新生成组件的临时 ID
+   * 新增组件至草稿态或生效态
    */
   const addWidget = useCallback(
     (type: string, style: string, initialX = 40, initialY = 30, meta: Record<string, any> = {}) => {
@@ -192,33 +208,45 @@ export function useWidgets(isEditMode: boolean, authState: AuthState) {
         y: initialY,
         meta,
       };
-      setTempWidgets((prev) => [...prev, newWidget]);
+      
+      if (isEditMode) {
+        setTempWidgets((prev) => [...prev, newWidget]);
+      } else {
+        setWidgets((prev) => {
+          const next = [...prev, newWidget];
+          persistWidgets(next);
+          return next;
+        });
+      }
       return newWidget.id;
     },
-    []
+    [isEditMode, persistWidgets]
   );
 
   /**
-   * 从草稿态中删除组件
-   *
-   * @param id 组件 ID
+   * 删除组件
    */
   const removeWidget = useCallback((id: string) => {
-    setTempWidgets((prev) => prev.filter((w) => w.id !== id));
-  }, []);
+    if (isEditMode) {
+      setTempWidgets((prev) => prev.filter((w) => w.id !== id));
+    } else {
+      setWidgets((prev) => {
+        const next = prev.filter((w) => w.id !== id);
+        persistWidgets(next);
+        return next;
+      });
+    }
+  }, [isEditMode, persistWidgets]);
 
   /**
-   * 更新草稿态中组件的百分比位置
-   *
-   * @param id 组件 ID
-   * @param x X 轴百分比位置
-   * @param y Y 轴百分比位置
+   * 更新组件位置
    */
   const updateWidgetPosition = useCallback((id: string, x: number, y: number) => {
-    setTempWidgets((prev) =>
-      prev.map((w) => (w.id === id ? { ...w, x, y } : w))
-    );
-    if (!isEditMode) {
+    if (isEditMode) {
+      setTempWidgets((prev) =>
+        prev.map((w) => (w.id === id ? { ...w, x, y } : w))
+      );
+    } else {
       setWidgets((prev) =>
         prev.map((w) => (w.id === id ? { ...w, x, y } : w))
       );
@@ -226,43 +254,15 @@ export function useWidgets(isEditMode: boolean, authState: AuthState) {
   }, [isEditMode]);
 
   /**
-   * 保存组件配置，写入 LocalStorage 并在登录时异步向后端提交
+   * 保存组件配置
    */
   const saveWidgets = useCallback(async () => {
-    // 1. 同步更新本地 state 状态与 LocalStorage 缓存
-    setWidgets(tempWidgets);
-    localStorage.setItem('navatation_widgets', JSON.stringify(tempWidgets));
-
-    // 2. 卫语句：若用户未登录，不向后端保存，直接返回
-    if (!authState.isLoggedIn) {
-      return;
+    const dataToSave = isEditMode ? tempWidgets : widgets;
+    if (isEditMode) {
+      setWidgets(dataToSave);
     }
-
-    try {
-      // 3. 构造提交到云端的 DTO 载荷
-      const uploadPayload = tempWidgets.map((w) => {
-        // 本地新增的临时 ID 以 clock- 等开头，这些 ID 过滤掉，让后端重新生成权威 ID (以 WG 开头)
-        const widgetId = w.id.startsWith('WG') ? w.id : undefined;
-        return {
-          widgetId,
-          type: w.type,
-          style: w.style,
-          x: w.x,
-          y: w.y,
-          meta: w.meta ?? {},
-        };
-      });
-
-      // 4. 调用 API 同步至云端
-      await widgetService.saveWidgets(uploadPayload);
-
-      // 5. 保存完毕后重新拉取权威数据，确保本地 ID 与数据库保存的主键一致
-      await fetchWidgets();
-    } catch (err) {
-      // 捕获异常，防止 Promise 错误逃逸
-      console.error('[useWidgets] 异步保存组件配置到云端失败:', err);
-    }
-  }, [tempWidgets, authState.isLoggedIn, fetchWidgets]);
+    await persistWidgets(dataToSave);
+  }, [isEditMode, tempWidgets, widgets, persistWidgets]);
 
   /**
    * 取消编辑，丢弃临时草稿并从当前生效的 widgets 列表中重置回滚

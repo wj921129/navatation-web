@@ -17,9 +17,6 @@ interface TopDockProps {
   brightnessPanel?: React.ReactNode;
   onMouseEnterOtherWidget?: () => void;
   isHoveringBrightness?: boolean;
-  isEditMode?: boolean;
-  clocksVisible?: boolean;
-  onToggleClockVisibility?: () => void;
   onOpenWidgetGallery?: () => void;
 }
 
@@ -37,9 +34,6 @@ export function TopDock({
   brightnessPanel,
   onMouseEnterOtherWidget,
   isHoveringBrightness = false,
-  isEditMode = false,
-  clocksVisible = true,
-  onToggleClockVisibility,
   onOpenWidgetGallery
 }: TopDockProps) {
   const [shuffling, setShuffling] = useState(false);
@@ -210,17 +204,11 @@ export function TopDock({
           ref={item4Ref}
           className="relative group"
         >
-          <Tooltip content={isEditMode ? '小组件中心' : clocksVisible ? '隐藏小组件' : '显示小组件'} side="bottom">
+          <Tooltip content="小组件中心" side="bottom">
             <button
-              onClick={isEditMode ? onOpenWidgetGallery : onToggleClockVisibility}
-              className={`p-2 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center ${
-                isEditMode
-                  ? 'text-text-secondary hover:text-text-primary hover:bg-input-bg cursor-pointer'
-                  : clocksVisible
-                    ? 'text-text-secondary hover:text-text-primary hover:bg-input-bg cursor-pointer'
-                    : 'text-text-secondary/40 hover:text-text-secondary hover:bg-input-bg cursor-pointer'
-              }`}
-              aria-label={isEditMode ? '小组件中心' : clocksVisible ? '隐藏小组件' : '显示小组件'}
+              onClick={onOpenWidgetGallery}
+              className={`p-2 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-input-bg cursor-pointer`}
+              aria-label="小组件中心"
             >
               <span className="dock-icon-wrapper transition-transform duration-150 ease-out flex items-center justify-center" style={{ willChange: 'transform' }}>
                 <LayoutGrid className="w-4 h-4" />
