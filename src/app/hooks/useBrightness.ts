@@ -65,6 +65,9 @@ export function useBrightness(
       setIsBrightnessOpen(true);
       setIsBrightnessClosing(false);
       clearBrightnessTimer();
+      brightnessTimerRef.current = setTimeout(() => {
+        triggerCloseBrightness();
+      }, 2000);
     } else {
       resetBrightnessState();
     }
@@ -79,7 +82,7 @@ export function useBrightness(
       console.error('Toggle theme error:', err);
       toast.error('保存主题设置失败');
     }
-  }, [theme, authState.isLoggedIn, clearBrightnessTimer, resetBrightnessState, setTheme]);
+  }, [theme, authState.isLoggedIn, clearBrightnessTimer, resetBrightnessState, setTheme, triggerCloseBrightness]);
 
   /**
    * 鼠标进入主题按钮
