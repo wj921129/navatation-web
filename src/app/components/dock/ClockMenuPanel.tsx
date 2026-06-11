@@ -140,6 +140,7 @@ export const ClockMenuPanel: React.FC<ClockMenuPanelProps> = ({
           <div className="relative w-fit bg-input-bg/30 border border-widget-border/30 rounded-xl p-2 flex items-center justify-center min-h-[82px] transition-all duration-300">
             {activeCategory === 'clock' && (
               <div className="flex items-center gap-3 animate-fade-in">
+                {/* 翻页时钟 */}
                 <button
                   onPointerDown={(e) => handleDragStartFromMenu(e, 'flip')}
                   className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/60 hover:scale-105 active:scale-95 hover:shadow-sm transition-all duration-200 cursor-pointer group/btn"
@@ -153,6 +154,48 @@ export const ClockMenuPanel: React.FC<ClockMenuPanelProps> = ({
                     </div>
                   </div>
                   <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary transition-colors">翻页</span>
+                </button>
+
+                {/* 极简时钟 */}
+                <button
+                  onPointerDown={(e) => handleDragStartFromMenu(e, 'analog')}
+                  className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/60 hover:scale-105 active:scale-95 hover:shadow-sm transition-all duration-200 cursor-pointer group/btn"
+                >
+                  <div className="w-12 h-12 flex items-center justify-center relative bg-input-bg/20 border border-widget-border rounded-xl shadow-sm transition-all">
+                     <div className="w-8 h-8 rounded-full border-2 border-text-secondary group-hover/btn:border-text-primary flex justify-center items-center relative transition-colors">
+                        <div className="w-0.5 h-3 bg-text-secondary group-hover/btn:bg-text-primary absolute bottom-1/2 origin-bottom rotate-[30deg] rounded-full transition-colors" />
+                        <div className="w-0.5 h-2.5 bg-text-secondary group-hover/btn:bg-text-primary absolute bottom-1/2 origin-bottom rotate-[-45deg] rounded-full transition-colors" />
+                     </div>
+                  </div>
+                  <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary transition-colors">极简</span>
+                </button>
+
+                {/* 经典时钟 */}
+                <button
+                  onPointerDown={(e) => handleDragStartFromMenu(e, 'traditional')}
+                  className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/60 hover:scale-105 active:scale-95 hover:shadow-sm transition-all duration-200 cursor-pointer group/btn"
+                >
+                  <div className="w-12 h-12 flex items-center justify-center relative bg-input-bg/20 border border-widget-border rounded-xl shadow-sm transition-all">
+                     <div className="w-8 h-8 rounded-full bg-white/5 border-2 border-widget-border group-hover/btn:border-text-secondary flex justify-center items-center relative shadow-inner transition-colors">
+                        <div className="absolute inset-0 flex items-center justify-center"><div className="w-0.5 h-full py-0.5"><div className="w-full h-1 bg-text-secondary/50 rounded-full" /></div></div>
+                        <div className="absolute inset-0 flex items-center justify-center rotate-90"><div className="w-0.5 h-full py-0.5"><div className="w-full h-1 bg-text-secondary/50 rounded-full" /></div></div>
+                        <div className="w-0.5 h-2.5 bg-text-primary absolute bottom-1/2 left-1/2 -translate-x-1/2 origin-bottom rounded-full" />
+                        <div className="w-0.5 h-2 bg-text-secondary absolute bottom-1/2 left-1/2 -translate-x-1/2 origin-bottom rotate-90 rounded-full" />
+                        <div className="w-1 h-1 rounded-full bg-red-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                     </div>
+                  </div>
+                  <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary transition-colors">经典</span>
+                </button>
+
+                {/* 数字时钟 */}
+                <button
+                  onPointerDown={(e) => handleDragStartFromMenu(e, 'digital')}
+                  className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/60 hover:scale-105 active:scale-95 hover:shadow-sm transition-all duration-200 cursor-pointer group/btn"
+                >
+                  <div className="w-16 h-12 flex items-center justify-center bg-input-bg/40 border border-widget-border group-hover/btn:border-text-secondary rounded-xl shadow-sm px-2 transition-colors">
+                     <span className="text-xs font-mono font-bold tracking-wider text-text-primary">12:00</span>
+                  </div>
+                  <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary transition-colors">数字</span>
                 </button>
               </div>
             )}
