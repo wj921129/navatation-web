@@ -2,7 +2,14 @@
  * @description 前端核心业务逻辑与组件
  * @date 2026-06-10
  */
-import { Plus, Edit3, Save, Settings, User, Clock, Calendar, Timer, Flower2, CloudSun, LayoutGrid } from 'lucide-react';
+import { Plus, Edit3, Save, Settings, User, Clock, Calendar, Timer, Flower2, CloudSun, LayoutGrid, Sun, Moon, ListTodo } from 'lucide-react';
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+} from './components/ui/context-menu';
 import { IconMap } from './components/ui/IconMap';
 import { Tooltip } from './components/ui/Tooltip';
 import { useState, useEffect, useCallback } from 'react';
@@ -360,7 +367,8 @@ export default function App() {
   const activeDragShortcut = activeDragId ? displayShortcuts.find((s, idx) => (s.dragId || `shortcut-edit-${idx}`) === activeDragId) : null;
 
   return (
-      <div className="size-full relative flex flex-col items-center justify-start overflow-hidden">
+    <ContextMenu>
+      <ContextMenuTrigger className="size-full relative flex flex-col items-center justify-start overflow-hidden">
         {/* Background Image */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -491,6 +499,8 @@ export default function App() {
           setIsManageHomepageOpen={setIsManageHomepageOpen}
         />
 
+      </ContextMenuTrigger>
+
         {/* Dialogs */}
         <AppDialogs
           isSettingsOpen={isSettingsOpen}
@@ -523,6 +533,30 @@ export default function App() {
           aiSearchQuery={aiSearchQuery}
           aiSearchEngine={aiSearchEngine}
         />
-      </div>
+
+        <ContextMenuContent className="w-56 z-[100] bg-widget-bg/95 backdrop-blur-xl border border-widget-border text-foreground shadow-2xl p-1.5 rounded-xl">
+          <ContextMenuItem onClick={handleStartEdit} className="gap-3 cursor-pointer rounded-lg p-2.5 text-[15px] font-medium transition-colors">
+            <Edit3 className="w-[18px] h-[18px] text-muted-foreground" />
+            <span>编辑布局</span>
+          </ContextMenuItem>
+          <ContextMenuItem onClick={() => handleOpenSettings()} className="gap-3 cursor-pointer rounded-lg p-2.5 text-[15px] font-medium transition-colors">
+            <Settings className="w-[18px] h-[18px] text-muted-foreground" />
+            <span>个性化设置</span>
+          </ContextMenuItem>
+          <ContextMenuItem onClick={() => setIsAddShortcutOpen(true)} className="gap-3 cursor-pointer rounded-lg p-2.5 text-[15px] font-medium transition-colors">
+            <Plus className="w-[18px] h-[18px] text-muted-foreground" />
+            <span>添加网址</span>
+          </ContextMenuItem>
+          <ContextMenuSeparator className="bg-border/60 my-1.5" />
+          <ContextMenuItem onClick={handleToggleTheme} className="gap-3 cursor-pointer rounded-lg p-2.5 text-[15px] font-medium transition-colors">
+            {theme === 'dark' ? <Sun className="w-[18px] h-[18px] text-muted-foreground" /> : <Moon className="w-[18px] h-[18px] text-muted-foreground" />}
+            <span>切换{theme === 'dark' ? '浅色' : '深色'}主题</span>
+          </ContextMenuItem>
+          <ContextMenuItem onClick={() => setIsTodoOpen(true)} className="gap-3 cursor-pointer rounded-lg p-2.5 text-[15px] font-medium transition-colors">
+            <ListTodo className="w-[18px] h-[18px] text-muted-foreground" />
+            <span>待办事项</span>
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
   );
 }
