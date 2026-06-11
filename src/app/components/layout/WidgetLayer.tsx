@@ -37,7 +37,7 @@ export function WidgetLayer({
           <ClockWidget
             key={widget.id}
             id={widget.id}
-            style={widget.style as 'analog' | 'digital' | 'flip' | 'traditional'}
+            style={widget.style as 'analog' | 'digital' | 'flip' | 'flip-seconds' | 'traditional'}
             x={widget.x}
             y={widget.y}
             isEditMode={isEditMode}

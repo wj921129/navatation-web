@@ -7,15 +7,16 @@ import { useRef } from 'react';
 import AnalogClock from './AnalogClock';
 import DigitalClock from './DigitalClock';
 import FlipClock from './FlipClock';
+import FlipClockSeconds from './FlipClockSeconds';
 import TraditionalClock from './TraditionalClock';
 
 interface ClockWidgetProps {
   id: string;
-  style: 'analog' | 'digital' | 'flip' | 'traditional';
+  style: 'analog' | 'digital' | 'flip' | 'flip-seconds' | 'traditional';
   x: number; // percentage from left
   y: number; // percentage from top
   isEditMode: boolean;
-  onStartDrag: (id: string, style: 'analog' | 'digital' | 'flip' | 'traditional', offsetX: number, offsetY: number) => void;
+  onStartDrag: (id: string, style: 'analog' | 'digital' | 'flip' | 'flip-seconds' | 'traditional', offsetX: number, offsetY: number) => void;
   onDelete: (id: string) => void;
   isDragging?: boolean; // 新增可选属性，代表当前时钟是否正在被拖拽
 }
@@ -78,6 +79,8 @@ export default function ClockWidget({
         return <DigitalClock />;
       case 'flip':
         return <FlipClock />;
+      case 'flip-seconds':
+        return <FlipClockSeconds />;
       case 'traditional':
         return <TraditionalClock />;
       default:

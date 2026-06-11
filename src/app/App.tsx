@@ -33,6 +33,7 @@ import { useRef } from 'react';
 import AnalogClock from './components/widgets/AnalogClock';
 import DigitalClock from './components/widgets/DigitalClock';
 import FlipClock from './components/widgets/FlipClock';
+import FlipClockSeconds from './components/widgets/FlipClockSeconds';
 import TraditionalClock from './components/widgets/TraditionalClock';
 import CalendarWidget from './components/widgets/CalendarWidget';
 import WeatherWidget from './components/widgets/WeatherWidget';
@@ -441,6 +442,7 @@ export default function App() {
             {menuDraggingStyle === 'traditional' && <TraditionalClock />}
             {menuDraggingStyle === 'digital' && <DigitalClock />}
             {menuDraggingStyle === 'flip' && <FlipClock />}
+            {menuDraggingStyle === 'flip-seconds' && <FlipClockSeconds />}
             {menuDraggingStyle === 'pomodoro' && (
               <div className="w-[180px] h-[220px] rounded-3xl border-2 border-widget-border bg-widget-bg backdrop-blur-md" />
             )}

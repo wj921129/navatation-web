@@ -156,6 +156,25 @@ export const ClockMenuPanel: React.FC<ClockMenuPanelProps> = ({
                   <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary transition-colors">翻页</span>
                 </button>
 
+                {/* 翻页时钟(带秒) */}
+                <button
+                  onPointerDown={(e) => handleDragStartFromMenu(e, 'flip-seconds')}
+                  className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-input-bg/60 hover:scale-105 active:scale-95 hover:shadow-sm transition-all duration-200 cursor-pointer group/btn"
+                >
+                  <div className="w-20 h-12 flex items-center justify-center gap-1 bg-input-bg border border-widget-border group-hover/btn:border-text-secondary rounded-xl px-1">
+                    <div className="w-5 h-8 rounded bg-widget-bg border border-widget-border flex items-center justify-center">
+                      <span className="text-[10px] font-mono font-bold">12</span>
+                    </div>
+                    <div className="w-5 h-8 rounded bg-widget-bg border border-widget-border flex items-center justify-center">
+                      <span className="text-[10px] font-mono font-bold">00</span>
+                    </div>
+                    <div className="w-5 h-8 rounded bg-widget-bg border border-widget-border flex items-center justify-center">
+                      <span className="text-[10px] font-mono font-bold">30</span>
+                    </div>
+                  </div>
+                  <span className="text-[10px] text-text-secondary font-light group-hover/btn:text-text-primary transition-colors">翻页(秒)</span>
+                </button>
+
                 {/* 极简时钟 */}
                 <button
                   onPointerDown={(e) => handleDragStartFromMenu(e, 'analog')}
