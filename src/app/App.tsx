@@ -2,7 +2,7 @@
  * @description 前端核心业务逻辑与组件
  * @date 2026-06-10
  */
-import { Plus, Edit3, Save, Settings, User, Clock, Calendar, Timer, Flower2, CloudSun, LayoutGrid, Sun, Moon, ListTodo } from 'lucide-react';
+import { Plus, Edit3, Settings, Sun, Moon, ListTodo } from 'lucide-react';
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -10,8 +10,8 @@ import {
   ContextMenuItem,
   ContextMenuSeparator,
 } from './components/ui/context-menu';
-import { IconMap } from './components/ui/IconMap';
-import { Tooltip } from './components/ui/Tooltip';
+
+
 import { useState, useEffect, useCallback } from 'react';
 import { AppDialogs } from './components/layout/AppDialogs';
 
@@ -19,31 +19,31 @@ import { TopDock } from './components/dock/TopDock';
 import { WidgetLayer } from './components/layout/WidgetLayer';
 import { TodoListWidget } from './components/todo/TodoListWidget';
 import { useTheme } from 'next-themes';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy } from '@dnd-kit/sortable';
-import { SortableGridItem } from './components/ui/SortableGridItem';
-import { GridDragOverlay } from './components/ui/GridDragOverlay';
+import { KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+import { arrayMove, sortableKeyboardCoordinates, } from '@dnd-kit/sortable';
+
+
 import { authStore } from './stores/auth-store';
 import { useWidgets } from './hooks/useWidgets';
 import { WidgetGalleryModal } from './components/dock/WidgetGalleryModal';
-import ClockWidget from './components/widgets/ClockWidget';
-import PomodoroWidget from './components/widgets/PomodoroWidget';
-import BreatheWidget from './components/widgets/BreatheWidget';
+
+
+
 import { useRef } from 'react';
 import AnalogClock from './components/widgets/AnalogClock';
 import DigitalClock from './components/widgets/DigitalClock';
 import FlipClock from './components/widgets/FlipClock';
 import FlipClockSeconds from './components/widgets/FlipClockSeconds';
 import TraditionalClock from './components/widgets/TraditionalClock';
-import CalendarWidget from './components/widgets/CalendarWidget';
-import WeatherWidget from './components/widgets/WeatherWidget';
-import MonthCalendar from './components/widgets/MonthCalendar';
-import SimpleWeather from './components/widgets/SimpleWeather';
+
+
+
+
 
 
 import { SearchBox } from './components/search/SearchBox';
 import { ShortcutGrid } from './components/shortcut/ShortcutGrid';
-import { AiSearchOverlay } from './components/search/AiSearchOverlay';
+
 import { BottomRightDock } from './components/dock/BottomRightDock';
 import { BrightnessPanel } from './components/dock/BrightnessPanel';
 
@@ -51,9 +51,9 @@ import { useBrightness } from './hooks/useBrightness';
 import { useSettings } from './hooks/useSettings';
 import { useShortcuts } from './hooks/useShortcuts';
 import { useAppInit } from './hooks/useAppInit';
-import { publicService } from './services/public-service';
 
-import { DEFAULT_SHORTCUTS, DEFAULT_WALLPAPER } from '../config/app.config';
+
+import { DEFAULT_SHORTCUTS,  } from '../config/app.config';
 import { useWidgetDrag } from './hooks/useWidgetDrag';
 
 /**
@@ -74,10 +74,10 @@ export default function App() {
     return localStorage.getItem('navatation_clocks_visible') !== '0';
   });
   const [calendarVisible, setCalendarVisible] = useState<boolean>(() => localStorage.getItem('navatation_calendar_visible') !== '0');
-  const [timerVisible, setTimerVisible] = useState<boolean>(() => localStorage.getItem('navatation_timer_visible') !== '0');
-  const [breatheVisible, setBreatheVisible] = useState<boolean>(() => localStorage.getItem('navatation_breathe_visible') !== '0');
+
+
   const [weatherVisible, setWeatherVisible] = useState<boolean>(() => localStorage.getItem('navatation_weather_visible') !== '0');
-  const [activeCategory, setActiveCategory] = useState<'clock' | 'calendar' | 'timer' | 'breathe' | 'weather'>('clock');
+
   const [isWidgetGalleryOpen, setIsWidgetGalleryOpen] = useState(false);
 
   /**
@@ -99,13 +99,13 @@ export default function App() {
       return next;
     });
   }, []);
-  /** 切换日历组件可见性 */
+
   const handleToggleCalendarVisibility = useCallback(() => setCalendarVisible(prev => { localStorage.setItem('navatation_calendar_visible', !prev ? '1' : '0'); return !prev; }), []);
-  /** 切换计时器组件可见性 */
+
   const handleToggleTimerVisibility = useCallback(() => setTimerVisible(prev => { localStorage.setItem('navatation_timer_visible', !prev ? '1' : '0'); return !prev; }), []);
-  /** 切换冥想组件可见性 */
+
   const handleToggleBreatheVisibility = useCallback(() => setBreatheVisible(prev => { localStorage.setItem('navatation_breathe_visible', !prev ? '1' : '0'); return !prev; }), []);
-  /** 切换天气组件可见性 */
+
   const handleToggleWeatherVisibility = useCallback(() => setWeatherVisible(prev => { localStorage.setItem('navatation_weather_visible', !prev ? '1' : '0'); return !prev; }), []);
 
   // 1. 订阅登录状态

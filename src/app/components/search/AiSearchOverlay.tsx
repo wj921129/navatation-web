@@ -5,8 +5,8 @@
  */
 import { useState, useEffect, useRef } from 'react';
 import { 
-  X, Sparkles, Send, Copy, RefreshCw, Layers, Layout, ChevronRight, 
-  Check, Play, MessageSquare, ArrowRight, Zap, CheckCircle2, ShieldAlert
+  X, Sparkles, Copy, RefreshCw, Layers, Layout, ChevronRight, 
+  Check
 } from 'lucide-react';
 import { BaseModal } from '../ui/BaseModal';
 import { Tooltip } from '../ui/Tooltip';
@@ -92,7 +92,7 @@ export function AiSearchOverlay({ isOpen, onClose, initialQuery, initialEngine }
     }
   });
 
-  const chatEndRefs = {
+  const chatEndRefs: Record<string, React.RefObject<HTMLDivElement>> = {
     chatgpt: useRef<HTMLDivElement>(null),
     qwen: useRef<HTMLDivElement>(null),
     doubao: useRef<HTMLDivElement>(null),
