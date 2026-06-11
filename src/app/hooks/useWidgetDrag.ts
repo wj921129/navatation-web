@@ -108,10 +108,8 @@ export function useWidgetDrag({ addWidget, updateWidgetPosition, triggerCloseClo
       }
     }
 
-    // 如果只是点击（没有产生足够拖拽距离），则在这里关闭面板
-    if (!menuDragHasMovedRef.current) {
-      triggerCloseClock();
-    }
+    // 不论是点击还是拖拽结束，都关闭画廊面板
+    triggerCloseClock();
 
     menuDraggingStyleRef.current = null;
     setMenuDraggingStyle(null);
@@ -120,10 +118,12 @@ export function useWidgetDrag({ addWidget, updateWidgetPosition, triggerCloseClo
 
     window.removeEventListener('pointermove', handleMenuDragMove);
     window.removeEventListener('pointerup', handleMenuDragUp);
+    window.removeEventListener('pointercancel', handleMenuDragUp);
   }, [addWidget, triggerCloseClock, handleMenuDragMove]);
 
   const handleDragStartFromMenu = useCallback((e: React.PointerEvent<HTMLButtonElement>, style: NonNullable<WidgetStyle>) => {
     e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
     menuDragStartPosRef.current = { x: e.clientX, y: e.clientY };
     menuDraggingStyleRef.current = style;
     setMenuDraggingStyle(style);
@@ -138,12 +138,14 @@ export function useWidgetDrag({ addWidget, updateWidgetPosition, triggerCloseClo
 
     window.addEventListener('pointermove', handleMenuDragMove);
     window.addEventListener('pointerup', handleMenuDragUp);
+    window.addEventListener('pointercancel', handleMenuDragUp);
   }, [handleMenuDragMove, handleMenuDragUp]);
 
   useEffect(() => {
     return () => {
       window.removeEventListener('pointermove', handleMenuDragMove);
       window.removeEventListener('pointerup', handleMenuDragUp);
+      window.removeEventListener('pointercancel', handleMenuDragUp);
     };
   }, [handleMenuDragMove, handleMenuDragUp]);
 

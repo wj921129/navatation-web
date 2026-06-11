@@ -547,6 +547,7 @@ export default function App() {
         isOpen={isWidgetGalleryOpen} 
         onClose={() => setIsWidgetGalleryOpen(false)} 
         onDragStart={handleDragStartFromMenu} 
+        isHidden={menuDragHasMoved}
       />
     </ContextMenu>
   );
