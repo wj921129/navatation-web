@@ -201,6 +201,12 @@ export function useShortcuts(authState: any) {
       return;
     }
 
+    // 乐观更新 (Optimistic UI)：立即应用 UI 更改，避免界面卡顿
+    const snapshotBeforeEdit = [...shortcuts];
+    const optimisticShortcuts = [...tempShortcuts];
+    setShortcuts(optimisticShortcuts);
+    setIsEditMode(false);
+
     try {
       // 1. 找出所有在编辑模式下被删除的快捷网址
       const deleted = shortcuts.filter(s => s.id && !tempShortcuts.some(t => t.id === s.id));
@@ -292,14 +298,14 @@ export function useShortcuts(authState: any) {
         await navService.sortShortcuts(sortItems);
       }
 
-      // 9. 全局重新加载以同步 React 界面状态
+      // 9. 全局静默重新加载以同步 React 界面状态及真实的数据库 ID
       await fetchShortcuts();
     } catch (err) {
       console.error('Failed to save shortcut edits to backend', err);
+      // 发生异常时回滚乐观更新
+      setShortcuts(snapshotBeforeEdit);
+      // 可以加上 toast 提示
     }
-    
-    // 退出编辑模式并清除选择项
-    setIsEditMode(false);
   }, [tempShortcuts, shortcuts, authState.isLoggedIn, fetchShortcuts]);
 
   /**

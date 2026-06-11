@@ -34,48 +34,30 @@ function clearTokens(): void {
   localStorage.removeItem('refresh_token');
 }
 
-// 刷新 Token 防并发标志：保证同一时刻只有一次 refresh 请求在途
-/** 是否正在执行 Token 刷新，防止并发重复刷新 */
+// 刷新 Token 防并发标志与请求队列
 let isRefreshing = false;
-/** 当前进行中的刷新 Promise，供并发请求复用结果 */
-let refreshPromise: Promise<boolean> | null = null;
+let requestsQueue: Array<(token: string) => void> = [];
 
 /**
- * 尝试使用 Refresh Token 刷新 Access Token。
- * 并发调用时共享同一 Promise，避免重复请求。
+ * 将挂起的请求压入队列
  */
-async function tryRefreshToken(): Promise<boolean> {
-  if (isRefreshing && refreshPromise) return refreshPromise;
+function subscribeTokenRefresh(cb: (token: string) => void) {
+  requestsQueue.push(cb);
+}
 
-  isRefreshing = true;
-  refreshPromise = (async () => {
-    try {
-      const refreshToken = getRefreshToken();
-      if (!refreshToken) return false;
+/**
+ * 刷新成功后，释放所有挂起的请求
+ */
+function onRefreshed(token: string) {
+  requestsQueue.forEach(cb => cb(token));
+  requestsQueue = [];
+}
 
-      const res = await fetch(`${API_BASE}/auth/refresh`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken }),
-      });
-
-      if (!res.ok) return false;
-
-      const json: ApiResponse<{ accessToken: string; refreshToken: string }> = await res.json();
-      if (json.code === 200 && json.data) {
-        setTokens(json.data.accessToken, json.data.refreshToken);
-        return true;
-      }
-      return false;
-    } catch {
-      return false;
-    } finally {
-      isRefreshing = false;
-      refreshPromise = null;
-    }
-  })();
-
-  return refreshPromise;
+/**
+ * 刷新失败后，清空队列
+ */
+function rejectRefreshed() {
+  requestsQueue = [];
 }
 
 /**
@@ -113,24 +95,73 @@ async function request<T = any>(
       throw new Error('认证状态已变更，取消原请求');
     }
 
-    // 登出请求不需要在 token 失效时尝试刷新，防止误用新 token
     if (path === '/auth/logout') {
       clearTokens();
       throw new Error('认证已过期');
     }
 
-    const refreshed = await tryRefreshToken();
-    if (refreshed) {
-      headers['Authorization'] = `Bearer ${getAccessToken()}`;
-      res = await fetch(url, { ...options, headers });
-    } else {
-      // 清除前检查 Token 是否已被其他流程（如登录）更新
-      // 避免竞态条件下误删新写入的 Token
-      if (getAccessToken() === token) {
-        clearTokens();
-        window.dispatchEvent(new CustomEvent('auth:logout'));
+    if (!isRefreshing) {
+      isRefreshing = true;
+      try {
+        const refreshToken = getRefreshToken();
+        const refreshRes = await fetch(`${API_BASE}/auth/refresh`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken }),
+        });
+
+        if (refreshRes.ok) {
+          const json: ApiResponse<{ accessToken: string; refreshToken: string }> = await refreshRes.json();
+          if (json.code === 200 && json.data) {
+            const newToken = json.data.accessToken;
+            setTokens(newToken, json.data.refreshToken);
+            
+            // 刷新成功，释放挂起的请求
+            onRefreshed(newToken);
+            
+            // 重新发送当前请求
+            headers['Authorization'] = `Bearer ${newToken}`;
+            res = await fetch(url, { ...options, headers });
+          } else {
+            throw new Error('Refresh failed');
+          }
+        } else {
+          throw new Error('Refresh failed');
+        }
+      } catch (err) {
+        rejectRefreshed();
+        if (getAccessToken() === token) {
+          clearTokens();
+          window.dispatchEvent(new CustomEvent('auth:logout'));
+        }
+        throw new Error('认证已过期，请重新登录');
+      } finally {
+        isRefreshing = false;
       }
-      throw new Error('认证已过期，请重新登录');
+    } else {
+      // 正在刷新中，将当前请求挂起，等待刷新完成后重试
+      return new Promise<ApiResponse<T>>((resolve, reject) => {
+        subscribeTokenRefresh(async (newToken: string) => {
+          try {
+            headers['Authorization'] = `Bearer ${newToken}`;
+            const retryRes = await fetch(url, { ...options, headers });
+            
+            if (!retryRes.ok) {
+              const errorBody = await retryRes.json().catch(() => ({}));
+              throw new Error(errorBody.message || `请求失败 (${retryRes.status})`);
+            }
+            
+            const retryJson = await retryRes.json();
+            if (retryJson && typeof retryJson.code === 'number' && retryJson.code !== 200) {
+              throw new Error(retryJson.message || `业务异常 (${retryJson.code})`);
+            }
+            
+            resolve(retryJson);
+          } catch (e) {
+            reject(e);
+          }
+        });
+      });
     }
   }
 
