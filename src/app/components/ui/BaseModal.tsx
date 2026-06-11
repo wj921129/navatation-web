@@ -104,17 +104,25 @@ export function BaseModal({
   zIndex = 50,
 }: BaseModalProps) {
   
-  // 阻止背景层滚动
+  // 阻止背景层滚动及全局 ESC 按键关闭支持
   useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && onClose) {
+        onClose();
+      }
+    };
+
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', handleKeyDown);
     } else {
       document.body.style.overflow = '';
     }
     return () => {
       document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
   const handleOverlayClick = () => {
     if (closeOnOverlayClick && onClose) {

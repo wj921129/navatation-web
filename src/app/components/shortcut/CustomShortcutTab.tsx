@@ -42,7 +42,16 @@ export function CustomShortcutTab({
 
   return (
     <div className="p-8 h-full flex items-center justify-center animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="w-full max-w-md bg-card/95 border border-border backdrop-blur-xl rounded-3xl shadow-2xl p-8 flex flex-col relative overflow-hidden">
+      <div 
+        className="w-full max-w-md bg-card/95 border border-border backdrop-blur-xl rounded-3xl shadow-2xl p-8 flex flex-col relative overflow-hidden"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            if (customName.trim() && customUrl.trim() && faviconStatus !== 'loading' && faviconStatus !== 'uploading') {
+              handleAddCustomToPending();
+            }
+          }
+        }}
+      >
         <div className="flex items-center gap-4 mb-6">
           <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 text-blue-600 dark:text-blue-400">
             <Link className="w-6 h-6" />

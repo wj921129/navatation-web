@@ -234,6 +234,42 @@ export default function App() {
     cancelWidgets();
   }, [cancelShortcutsEdits, cancelWidgets]);
 
+  // 全局键盘交互优化：编辑模式下且无弹窗遮挡时，支持 ESC 取消、Enter 保存
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isAnyModalOpen =
+        isSettingsOpen ||
+        isAddShortcutOpen ||
+        isLoginOpen ||
+        isLogoutConfirmOpen ||
+        isManageHomepageOpen ||
+        isAiSearchOpen;
+
+      if (isEditMode && !isAnyModalOpen) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          handleCancelEdits();
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          handleSaveEdits();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [
+    isEditMode,
+    isSettingsOpen,
+    isAddShortcutOpen,
+    isLoginOpen,
+    isLogoutConfirmOpen,
+    isManageHomepageOpen,
+    isAiSearchOpen,
+    handleCancelEdits,
+    handleSaveEdits,
+  ]);
+
   // 悬停交互事件融合防重发
   const handleMouseEnterOtherWidgetCombined = useCallback(() => {
     handleMouseEnterOtherWidget();
