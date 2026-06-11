@@ -25,7 +25,7 @@ import { SortableGridItem } from './components/ui/SortableGridItem';
 import { GridDragOverlay } from './components/ui/GridDragOverlay';
 import { authStore } from './stores/auth-store';
 import { useWidgets } from './hooks/useWidgets';
-import { useClockMenu } from './hooks/useClockMenu';
+import { WidgetGalleryModal } from './components/dock/WidgetGalleryModal';
 import ClockWidget from './components/widgets/ClockWidget';
 import PomodoroWidget from './components/widgets/PomodoroWidget';
 import BreatheWidget from './components/widgets/BreatheWidget';
@@ -55,7 +55,8 @@ import { publicService } from './services/public-service';
 
 import { DEFAULT_SHORTCUTS, DEFAULT_WALLPAPER } from '../config/app.config';
 import { useWidgetDrag } from './hooks/useWidgetDrag';
-import { ClockMenuPanel } from './components/dock/ClockMenuPanel';/**
+
+/**
  * 文件名：App.tsx
  * 描述：应用主组件，负责布局、搜索、捷径卡片展示与编辑、系统设置等核心功能。
  * 通过自定义 Hooks (useShortcuts, useSettings, useBrightness) 进行复杂业务解耦，确保高维护性。
@@ -77,6 +78,7 @@ export default function App() {
   const [breatheVisible, setBreatheVisible] = useState<boolean>(() => localStorage.getItem('navatation_breathe_visible') !== '0');
   const [weatherVisible, setWeatherVisible] = useState<boolean>(() => localStorage.getItem('navatation_weather_visible') !== '0');
   const [activeCategory, setActiveCategory] = useState<'clock' | 'calendar' | 'timer' | 'breathe' | 'weather'>('clock');
+  const [isWidgetGalleryOpen, setIsWidgetGalleryOpen] = useState(false);
 
   /**
    * 处理 AI 搜索请求，打开 AI 搜索面板
@@ -147,7 +149,6 @@ export default function App() {
   const settingsData = useSettings(authState, theme || 'light', setTheme, searchEngine, setSearchEngine);
   const brightnessData = useBrightness(theme || 'light', setTheme, authState);
   const widgetsData = useWidgets(isEditMode, authState);
-  const clockMenuData = useClockMenu();
 
   const {
     widgets,
@@ -160,27 +161,6 @@ export default function App() {
     saveWidgets,
     cancelWidgets,
   } = widgetsData;
-
-  const {
-    isClockOpen,
-    setIsClockOpen,
-    isClockClosing,
-    setIsClockClosing,
-    isHoveringClock,
-    setIsHoveringClock,
-    clockTimerRef,
-    clearClockTimer,
-    triggerCloseClock,
-    handleMouseEnterClock,
-    handleMouseLeaveClock,
-    resetClockState,
-  } = clockMenuData;
-
-  useEffect(() => {
-    if (!isClockOpen) {
-      setActiveCategory('clock');
-    }
-  }, [isClockOpen]);
 
   const {
     backgroundImage,
@@ -274,18 +254,11 @@ export default function App() {
   // 悬停交互事件融合防重发
   const handleMouseEnterOtherWidgetCombined = useCallback(() => {
     handleMouseEnterOtherWidget();
-    resetClockState();
-  }, [handleMouseEnterOtherWidget, resetClockState]);
+  }, [handleMouseEnterOtherWidget]);
 
   const handleMouseEnterThemeCombined = useCallback(() => {
     handleMouseEnterTheme();
-    resetClockState();
-  }, [handleMouseEnterTheme, resetClockState]);
-
-  const handleMouseEnterClockCombined = useCallback(() => {
-    handleMouseEnterClock();
-    brightnessData.resetBrightnessState();
-  }, [handleMouseEnterClock, brightnessData]);
+  }, [handleMouseEnterTheme]);
 
   const {
     activeDraggingId,
@@ -300,37 +273,13 @@ export default function App() {
   } = useWidgetDrag({ 
     addWidget, 
     updateWidgetPosition, 
-    triggerCloseClock,
+    triggerCloseClock: () => setIsWidgetGalleryOpen(false),
     onDragEnd: () => {
       if (!isEditMode) saveWidgets();
     }
   });
 
-  const clockMenuPanel = (
-    <ClockMenuPanel
-      isClockOpen={isClockOpen}
-      isClockClosing={isClockClosing}
-      isEditMode={isEditMode}
-      activeCategory={activeCategory}
-      setActiveCategory={setActiveCategory}
-      clocksVisible={clocksVisible}
-      calendarVisible={calendarVisible}
-      timerVisible={timerVisible}
-      breatheVisible={breatheVisible}
-      weatherVisible={weatherVisible}
-      handleToggleClockVisibility={handleToggleClockVisibility}
-      handleToggleCalendarVisibility={handleToggleCalendarVisibility}
-      handleToggleTimerVisibility={handleToggleTimerVisibility}
-      handleToggleBreatheVisibility={handleToggleBreatheVisibility}
-      handleToggleWeatherVisibility={handleToggleWeatherVisibility}
-      setIsHoveringClock={setIsHoveringClock}
-      setIsClockClosing={setIsClockClosing}
-      clearClockTimer={clearClockTimer}
-      clockTimerRef={clockTimerRef}
-      triggerCloseClock={triggerCloseClock}
-      handleDragStartFromMenu={handleDragStartFromMenu}
-    />
-  );
+
 
 
 
@@ -475,12 +424,9 @@ export default function App() {
             onMouseEnterOtherWidget={handleMouseEnterOtherWidgetCombined}
             isHoveringBrightness={isHoveringBrightness}
             isEditMode={isEditMode}
-            onMouseEnterClock={handleMouseEnterClockCombined}
-            onMouseLeaveClock={handleMouseLeaveClock}
-            isHoveringClockMenu={isHoveringClock}
-            clockMenuPanel={clockMenuPanel}
             clocksVisible={clocksVisible}
             onToggleClockVisibility={handleToggleClockVisibility}
+            onOpenWidgetGallery={() => setIsWidgetGalleryOpen(true)}
             brightnessPanel={
               <BrightnessPanel
                 isBrightnessOpen={isBrightnessOpen}
@@ -595,6 +541,13 @@ export default function App() {
             <span>待办事项</span>
           </ContextMenuItem>
         </ContextMenuContent>
-      </ContextMenu>
+  
+      {/* Widget Gallery Modal */}
+      <WidgetGalleryModal 
+        isOpen={isWidgetGalleryOpen} 
+        onClose={() => setIsWidgetGalleryOpen(false)} 
+        onDragStart={handleDragStartFromMenu} 
+      />
+    </ContextMenu>
   );
 }

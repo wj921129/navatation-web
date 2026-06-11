@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @description 顶部停靠栏组件
  * @date 2026-06-09
  */
@@ -18,12 +18,9 @@ interface TopDockProps {
   onMouseEnterOtherWidget?: () => void;
   isHoveringBrightness?: boolean;
   isEditMode?: boolean;
-  onMouseEnterClock?: () => void;
-  onMouseLeaveClock?: () => void;
-  isHoveringClockMenu?: boolean;
-  clockMenuPanel?: React.ReactNode;
   clocksVisible?: boolean;
   onToggleClockVisibility?: () => void;
+  onOpenWidgetGallery?: () => void;
 }
 
 /**
@@ -41,12 +38,9 @@ export function TopDock({
   onMouseEnterOtherWidget,
   isHoveringBrightness = false,
   isEditMode = false,
-  onMouseEnterClock,
-  onMouseLeaveClock,
-  isHoveringClockMenu = false,
-  clockMenuPanel,
   clocksVisible = true,
-  onToggleClockVisibility
+  onToggleClockVisibility,
+  onOpenWidgetGallery
 }: TopDockProps) {
   const [shuffling, setShuffling] = useState(false);
 
@@ -211,16 +205,14 @@ export function TopDock({
 
       <>
         <div className="w-[1px] h-4 bg-widget-border" />
-        {/* 时钟小组件按钮 - 编辑模式下悬停弹出样式选单，非编辑模式下点击切换显示/隐藏 */}
+        {/* 小组件中心按钮 - 编辑模式下点击弹出画廊，非编辑模式下点击切换显示/隐藏 */}
         <div
           ref={item4Ref}
           className="relative group"
-          onMouseEnter={onMouseEnterClock}
-          onMouseLeave={onMouseLeaveClock}
         >
-          <Tooltip content={isEditMode ? '添加小组件' : clocksVisible ? '隐藏小组件' : '显示小组件'} side="bottom" className={isHoveringClockMenu ? 'hidden' : ''}>
+          <Tooltip content={isEditMode ? '小组件中心' : clocksVisible ? '隐藏小组件' : '显示小组件'} side="bottom">
             <button
-              onClick={isEditMode ? undefined : onToggleClockVisibility}
+              onClick={isEditMode ? onOpenWidgetGallery : onToggleClockVisibility}
               className={`p-2 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center ${
                 isEditMode
                   ? 'text-text-secondary hover:text-text-primary hover:bg-input-bg cursor-pointer'
@@ -228,14 +220,13 @@ export function TopDock({
                     ? 'text-text-secondary hover:text-text-primary hover:bg-input-bg cursor-pointer'
                     : 'text-text-secondary/40 hover:text-text-secondary hover:bg-input-bg cursor-pointer'
               }`}
-              aria-label={isEditMode ? '添加小组件' : clocksVisible ? '隐藏小组件' : '显示小组件'}
+              aria-label={isEditMode ? '小组件中心' : clocksVisible ? '隐藏小组件' : '显示小组件'}
             >
               <span className="dock-icon-wrapper transition-transform duration-150 ease-out flex items-center justify-center" style={{ willChange: 'transform' }}>
                 <LayoutGrid className="w-4 h-4" />
               </span>
             </button>
           </Tooltip>
-          {clockMenuPanel}
         </div>
       </>
     </div>

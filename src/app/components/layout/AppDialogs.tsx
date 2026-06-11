@@ -18,8 +18,8 @@ import { AiSearchOverlay } from '../search/AiSearchOverlay';
 export interface AppDialogsProps {
   isSettingsOpen: boolean;
   handleCloseSettings: () => void;
-  handleSaveSettings: () => void;
-  handlePreviewSettings: () => void;
+  handleSaveSettings: (draftSettings: any, draftBackgroundImage: string, draftTheme: string) => void;
+  handlePreviewSettings: (previewSettings: any, previewBg: string, previewTheme: string) => void;
   settings: any;
   backgroundImage: string;
   theme: string;
@@ -41,7 +41,7 @@ export interface AppDialogsProps {
 
   editingShortcut: any;
   setEditingShortcut: (v: any) => void;
-  handleSaveEdit: (shortcut: any, iconFile: File | null) => Promise<boolean>;
+  handleSaveEdit: (shortcut: { name: string; url: string; iconType: string; iconValue: string }) => void;
 
   isManageHomepageOpen: boolean;
   setIsManageHomepageOpen: (v: boolean) => void;

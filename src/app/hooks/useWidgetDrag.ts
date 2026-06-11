@@ -5,7 +5,7 @@
  */
 import { useState, useRef, useCallback, useEffect } from 'react';
 
-type WidgetStyle = 'analog' | 'digital' | 'flip' | 'traditional' | 'pomodoro' | 'breathe' | 'month' | 'simple' | null;
+type WidgetStyle = 'analog' | 'digital' | 'flip' | 'flip-seconds' | 'traditional' | 'pomodoro' | 'breathe' | 'month' | 'simple' | null;
 
 interface UseWidgetDragProps {
   addWidget: (type: string, style: string, xPercent: number, yPercent: number) => void;
