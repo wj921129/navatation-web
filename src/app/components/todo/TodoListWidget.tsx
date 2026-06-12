@@ -152,10 +152,12 @@ export function TodoListWidget({ onOpenTodoPanel }: TodoListWidgetProps) {
   }
 
   let roundedClass = 'rounded-2xl border';
-  if (snapEdge === 'top') roundedClass = 'rounded-b-2xl border-t-0 border-b border-l border-r';
-  else if (snapEdge === 'bottom') roundedClass = 'rounded-t-2xl border-b-0 border-t border-l border-r';
-  else if (snapEdge === 'left') roundedClass = 'rounded-r-2xl border-l-0 border-t border-b border-r';
-  else if (snapEdge === 'right') roundedClass = 'rounded-l-2xl border-r-0 border-t border-b border-l';
+  if (!isDragging) {
+    if (snapEdge === 'top') roundedClass = 'rounded-b-2xl border-t-0 border-b border-l border-r';
+    else if (snapEdge === 'bottom') roundedClass = 'rounded-t-2xl border-b-0 border-t border-l border-r';
+    else if (snapEdge === 'left') roundedClass = 'rounded-r-2xl border-l-0 border-t border-b border-r';
+    else if (snapEdge === 'right') roundedClass = 'rounded-l-2xl border-r-0 border-t border-b border-l';
+  }
 
   return (
     <div 
@@ -164,7 +166,7 @@ export function TodoListWidget({ onOpenTodoPanel }: TodoListWidgetProps) {
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
-      className={`absolute z-30 flex flex-col gap-2 px-4 py-2.5 ${roundedClass} border-widget-border bg-widget-bg backdrop-blur-md shadow-md opacity-70 hover:opacity-100 hover:backdrop-blur-xl ${isDragging ? 'transition-none cursor-grabbing' : 'transition-all duration-300 cursor-pointer'} w-64 max-h-[220px] overflow-hidden group select-none`}
+      className={`absolute z-30 flex flex-col gap-2 px-4 py-2.5 ${roundedClass} border-widget-border bg-widget-bg backdrop-blur-md shadow-md opacity-70 hover:opacity-100 hover:backdrop-blur-xl ${isDragging ? 'transition-none cursor-grabbing' : 'transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] cursor-pointer'} w-64 max-h-[220px] overflow-hidden group select-none`}
       style={{
         left: position.x === -1 ? 'auto' : `${position.x}px`,
         right: position.x === -1 ? '24px' : 'auto',
