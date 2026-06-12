@@ -4,7 +4,6 @@
  */
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { navService } from '../services/nav-service';
-import { DEFAULT_SHORTCUTS } from '../../config/app.config';
 
 export function useShortcuts(authState: any) {
   const [shortcuts, setShortcuts] = useState<any[]>(() => {
@@ -15,10 +14,10 @@ export function useShortcuts(authState: any) {
       try {
         return JSON.parse(local);
       } catch {
-        return DEFAULT_SHORTCUTS;
+        return [];
       }
     }
-    return DEFAULT_SHORTCUTS;
+    return [];
   });
   const [tempShortcuts, setTempShortcuts] = useState<any[]>(() => {
     if (authState.isLoggedIn) return [];
@@ -28,10 +27,10 @@ export function useShortcuts(authState: any) {
       try {
         return JSON.parse(local);
       } catch {
-        return DEFAULT_SHORTCUTS;
+        return [];
       }
     }
-    return DEFAULT_SHORTCUTS;
+    return [];
   });
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingShortcut, setEditingShortcut] = useState<{ index: number; shortcut: any } | null>(null);
@@ -59,9 +58,20 @@ export function useShortcuts(authState: any) {
     if (!authState.isLoggedIn) {
       // 未登录状态下重置登录切换追踪标识以备下次切换
       prevIsLoggedInRef.current = false;
-      // 使用默认快捷方式
-      setShortcuts(DEFAULT_SHORTCUTS);
-      setTempShortcuts(DEFAULT_SHORTCUTS);
+      const local = localStorage.getItem('navatation_guest_shortcuts');
+      if (local) {
+        try {
+          const parsed = JSON.parse(local);
+          setShortcuts(parsed);
+          setTempShortcuts(parsed);
+        } catch {
+          setShortcuts([]);
+          setTempShortcuts([]);
+        }
+      } else {
+        setShortcuts([]);
+        setTempShortcuts([]);
+      }
       return;
     }
 

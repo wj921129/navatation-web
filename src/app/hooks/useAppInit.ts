@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import { toast } from 'sonner';
 import { publicService } from '../services/public-service';
 import { authStore } from '../stores/auth-store';
-import { DEFAULT_SHORTCUTS, DEFAULT_WALLPAPER } from '../../config/app.config';
+import { DEFAULT_WALLPAPER } from '../../config/app.config';
 import { UserSettings } from '../services/settings-service';
 
 export function useAppInit(
@@ -25,8 +25,8 @@ export function useAppInit(
       setIsEditMode(false);
       localStorage.removeItem('navatation_wallpaper');
       setBackgroundImage(DEFAULT_WALLPAPER);
-      setShortcuts(DEFAULT_SHORTCUTS);
-      setTempShortcuts(DEFAULT_SHORTCUTS);
+      setShortcuts([]);
+      setTempShortcuts([]);
     }
   }, [authState.isLoggedIn, setBackgroundImage, setShortcuts, setTempShortcuts, setIsEditMode]);
 
