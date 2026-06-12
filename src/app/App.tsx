@@ -206,8 +206,8 @@ export default function App() {
 
   // 统一保存与取消逻辑
   const handleSaveEdits = useCallback(async () => {
-    await saveShortcutsEdits();
     saveWidgets();
+    await saveShortcutsEdits();
   }, [saveShortcutsEdits, saveWidgets]);
 
   const handleCancelEdits = useCallback(() => {
