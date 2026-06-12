@@ -17,7 +17,8 @@ export function TodoListWidget({ onOpenTodoPanel }: TodoListWidgetProps) {
   const [todoState, setTodoState] = useState(todoStore.getState());
   const [authState, setAuthState] = useState(authStore.getState());
   const [position, setPosition] = useState({ x: -1, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
+  const [isPointerDown, setIsPointerDown] = useState(false);
+  const [hasMoved, setHasMoved] = useState(false);
   const dragStartPos = useRef({ x: 0, y: 0 });
   const widgetStartPos = useRef({ x: 0, y: 0 });
   const widgetRef = useRef<HTMLDivElement>(null);
@@ -84,7 +85,8 @@ export function TodoListWidget({ onOpenTodoPanel }: TodoListWidgetProps) {
     e.preventDefault();
     e.stopPropagation();
     e.currentTarget.setPointerCapture(e.pointerId);
-    setIsDragging(true);
+    setIsPointerDown(true);
+    setHasMoved(false);
     dragStartPos.current = { x: e.clientX, y: e.clientY };
     
     const startX = position.x === -1 ? window.innerWidth - 256 - 24 : position.x;
@@ -92,9 +94,18 @@ export function TodoListWidget({ onOpenTodoPanel }: TodoListWidgetProps) {
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isDragging) return;
+    if (!isPointerDown) return;
     const dx = e.clientX - dragStartPos.current.x;
     const dy = e.clientY - dragStartPos.current.y;
+    
+    if (!hasMoved) {
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+        setHasMoved(true);
+      } else {
+        return;
+      }
+    }
+    
     const w = widgetRef.current?.offsetWidth || 256;
     const h = widgetRef.current?.offsetHeight || 140;
     
@@ -107,30 +118,34 @@ export function TodoListWidget({ onOpenTodoPanel }: TodoListWidgetProps) {
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isDragging) return;
-    setIsDragging(false);
+    if (!isPointerDown) return;
+    setIsPointerDown(false);
     e.currentTarget.releasePointerCapture(e.pointerId);
     
-    const w = widgetRef.current?.offsetWidth || 256;
-    const h = widgetRef.current?.offsetHeight || 140;
+    if (hasMoved) {
+      const w = widgetRef.current?.offsetWidth || 256;
+      const h = widgetRef.current?.offsetHeight || 140;
+      
+      let nx = position.x;
+      let ny = position.y;
+      
+      const distTop = ny;
+      const distBottom = window.innerHeight - ny - h;
+      const distLeft = nx;
+      const distRight = window.innerWidth - nx - w;
+      
+      const minDist = Math.min(distTop, distBottom, distLeft, distRight);
+      
+      if (minDist === distTop) ny = 0;
+      else if (minDist === distBottom) ny = window.innerHeight - h;
+      else if (minDist === distLeft) nx = 0;
+      else if (minDist === distRight) nx = window.innerWidth - w;
+      
+      setPosition({ x: nx, y: ny });
+      localStorage.setItem('todo_widget_pos', JSON.stringify({ x: nx, y: ny }));
+    }
     
-    let nx = position.x;
-    let ny = position.y;
-    
-    const distTop = ny;
-    const distBottom = window.innerHeight - ny - h;
-    const distLeft = nx;
-    const distRight = window.innerWidth - nx - w;
-    
-    const minDist = Math.min(distTop, distBottom, distLeft, distRight);
-    
-    if (minDist === distTop) ny = 0;
-    else if (minDist === distBottom) ny = window.innerHeight - h;
-    else if (minDist === distLeft) nx = 0;
-    else if (minDist === distRight) nx = window.innerWidth - w;
-    
-    setPosition({ x: nx, y: ny });
-    localStorage.setItem('todo_widget_pos', JSON.stringify({ x: nx, y: ny }));
+    setHasMoved(false);
     
     const dx = e.clientX - dragStartPos.current.x;
     const dy = e.clientY - dragStartPos.current.y;
@@ -152,7 +167,7 @@ export function TodoListWidget({ onOpenTodoPanel }: TodoListWidgetProps) {
   }
 
   let roundedClass = 'rounded-2xl border';
-  if (!isDragging) {
+  if (!hasMoved) {
     if (snapEdge === 'top') roundedClass = 'rounded-b-2xl border-t-0 border-b border-l border-r';
     else if (snapEdge === 'bottom') roundedClass = 'rounded-t-2xl border-b-0 border-t border-l border-r';
     else if (snapEdge === 'left') roundedClass = 'rounded-r-2xl border-l-0 border-t border-b border-r';
@@ -166,7 +181,7 @@ export function TodoListWidget({ onOpenTodoPanel }: TodoListWidgetProps) {
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
-      className={`absolute z-30 flex flex-col gap-2 px-4 py-2.5 ${roundedClass} border-widget-border bg-widget-bg backdrop-blur-md shadow-md opacity-70 hover:opacity-100 hover:backdrop-blur-xl ${isDragging ? 'transition-none cursor-grabbing' : 'transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] cursor-pointer'} w-64 max-h-[220px] overflow-hidden group select-none`}
+      className={`absolute z-30 flex flex-col gap-2 px-4 py-2.5 ${roundedClass} border-widget-border bg-widget-bg backdrop-blur-md shadow-md opacity-70 hover:opacity-100 hover:backdrop-blur-xl ${hasMoved ? 'transition-none cursor-grabbing' : 'transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] cursor-pointer'} w-64 max-h-[220px] overflow-hidden group select-none`}
       style={{
         left: position.x === -1 ? 'auto' : `${position.x}px`,
         right: position.x === -1 ? '24px' : 'auto',
