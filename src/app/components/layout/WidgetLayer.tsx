@@ -20,6 +20,7 @@ export interface WidgetLayerProps {
   setActiveDraggingId: (id: string | null) => void;
   setDragOffset: (offset: { x: number; y: number }) => void;
   removeWidget: (id: string) => void;
+  updateWidgetMeta: (id: string, updater: (prev: any) => any) => void;
 }
 
 /**
@@ -27,7 +28,7 @@ export interface WidgetLayerProps {
  */
 export function WidgetLayer({
   isEditMode, tempWidgets, widgets, clocksVisible, calendarVisible, weatherVisible,
-  activeDraggingId, activeDraggingStyleRef, setActiveDraggingId, setDragOffset, removeWidget
+  activeDraggingId, activeDraggingStyleRef, setActiveDraggingId, setDragOffset, removeWidget, updateWidgetMeta
 }: WidgetLayerProps) {
   return (
     <>
@@ -118,6 +119,7 @@ export function WidgetLayer({
             style={widget.style}
             x={widget.x}
             y={widget.y}
+            meta={widget.meta}
             isEditMode={isEditMode}
             isDragging={activeDraggingId === widget.id}
             onStartDrag={(id, type, style, ox, oy) => {
@@ -126,6 +128,7 @@ export function WidgetLayer({
               setDragOffset({ x: ox, y: oy });
             }}
             onDelete={removeWidget}
+            updateWidgetMeta={updateWidgetMeta}
           />
         ))}
     </>

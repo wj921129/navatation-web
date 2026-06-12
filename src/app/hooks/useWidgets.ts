@@ -254,6 +254,23 @@ export function useWidgets(isEditMode: boolean, authState: AuthState) {
   }, [isEditMode]);
 
   /**
+   * 更新组件的 meta 数据（例如天气组件的选定城市）
+   */
+  const updateWidgetMeta = useCallback((id: string, metaUpdater: (prevMeta: Record<string, any>) => Record<string, any>) => {
+    if (isEditMode) {
+      setTempWidgets((prev) =>
+        prev.map((w) => (w.id === id ? { ...w, meta: metaUpdater(w.meta || {}) } : w))
+      );
+    } else {
+      setWidgets((prev) => {
+        const next = prev.map((w) => (w.id === id ? { ...w, meta: metaUpdater(w.meta || {}) } : w));
+        persistWidgets(next);
+        return next;
+      });
+    }
+  }, [isEditMode, persistWidgets]);
+
+  /**
    * 保存组件配置
    */
   const saveWidgets = useCallback(async () => {
@@ -286,6 +303,7 @@ export function useWidgets(isEditMode: boolean, authState: AuthState) {
     addWidget,
     removeWidget,
     updateWidgetPosition,
+    updateWidgetMeta,
     saveWidgets,
     cancelWidgets,
   };

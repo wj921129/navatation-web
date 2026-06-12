@@ -158,6 +158,7 @@ export default function App() {
     addWidget,
     removeWidget,
     updateWidgetPosition,
+    updateWidgetMeta,
     saveWidgets,
     cancelWidgets,
   } = widgetsData;
@@ -394,6 +395,7 @@ export default function App() {
           setActiveDraggingId={setActiveDraggingId}
           setDragOffset={setDragOffset}
           removeWidget={removeWidget}
+          updateWidgetMeta={updateWidgetMeta}
         />
 
         {menuDraggingStyle && menuDragHasMoved && (
