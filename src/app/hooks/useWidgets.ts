@@ -257,12 +257,19 @@ export function useWidgets(isEditMode: boolean, authState: AuthState) {
    * 保存组件配置
    */
   const saveWidgets = useCallback(async () => {
-    const dataToSave = isEditMode ? tempWidgets : widgets;
     if (isEditMode) {
-      setWidgets(dataToSave);
+      setTempWidgets((prevTemp) => {
+        setWidgets(prevTemp);
+        persistWidgets(prevTemp);
+        return prevTemp;
+      });
+    } else {
+      setWidgets((prevWidgets) => {
+        persistWidgets(prevWidgets);
+        return prevWidgets;
+      });
     }
-    await persistWidgets(dataToSave);
-  }, [isEditMode, tempWidgets, widgets, persistWidgets]);
+  }, [isEditMode, persistWidgets]);
 
   /**
    * 取消编辑，丢弃临时草稿并从当前生效的 widgets 列表中重置回滚
