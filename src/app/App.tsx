@@ -363,10 +363,21 @@ export default function App() {
       <ContextMenuTrigger className="size-full relative flex flex-col items-center justify-start overflow-hidden">
         {/* Background Image */}
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-500"
           style={{
             backgroundImage: `url(${backgroundImage})`,
             filter: theme === 'dark' ? `brightness(${bgBrightness}%)` : 'none',
+          }}
+        />
+
+        {/* Pixelated Dot Grid Layer */}
+        <div 
+          className={`absolute inset-0 pointer-events-none transition-opacity duration-500 z-0 ${isEditMode ? 'opacity-100' : 'opacity-0'}`}
+          style={{
+            backgroundImage: theme === 'dark' 
+              ? 'radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px)' 
+              : 'radial-gradient(circle, rgba(0,0,0,0.1) 1px, transparent 1px)',
+            backgroundSize: '20px 20px',
           }}
         />
 

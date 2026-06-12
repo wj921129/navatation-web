@@ -18,6 +18,7 @@ export function useWidgetDrag({ addWidget, updateWidgetPosition, triggerCloseClo
   const [activeDraggingId, setActiveDraggingId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const activeDraggingStyleRef = useRef<WidgetStyle>(null);
+  const lastDragPosRef = useRef({ x: 0, y: 0 });
 
   // Menu drag-and-drop state & refs
   const [menuDraggingStyle, setMenuDraggingStyle] = useState<WidgetStyle>(null);
@@ -100,6 +101,10 @@ export function useWidgetDrag({ addWidget, updateWidgetPosition, triggerCloseClo
         newX = Math.max(0, Math.min(newX, window.innerWidth - w));
         newY = Math.max(0, Math.min(newY, window.innerHeight - h));
 
+        const GRID_SIZE = 20;
+        newX = Math.round(newX / GRID_SIZE) * GRID_SIZE;
+        newY = Math.round(newY / GRID_SIZE) * GRID_SIZE;
+
         const xPercent = (newX / window.innerWidth) * 100;
         const yPercent = (newY / window.innerHeight) * 100;
         addWidget(getWidgetType(style), style, xPercent, yPercent);
@@ -161,16 +166,24 @@ export function useWidgetDrag({ addWidget, updateWidgetPosition, triggerCloseClo
     let newX = Math.max(0, Math.min(e.clientX - dragOffset.x, window.innerWidth - w));
     let newY = Math.max(0, Math.min(e.clientY - dragOffset.y, window.innerHeight - h));
 
+    lastDragPosRef.current = { x: newX, y: newY };
     updateWidgetPosition(activeDraggingId, (newX / window.innerWidth) * 100, (newY / window.innerHeight) * 100);
   }, [activeDraggingId, dragOffset, updateWidgetPosition]);
 
   const handlePointerUpGlobal = useCallback(() => {
+    if (activeDraggingId && activeDraggingStyleRef.current) {
+      const GRID_SIZE = 20;
+      const snappedX = Math.round(lastDragPosRef.current.x / GRID_SIZE) * GRID_SIZE;
+      const snappedY = Math.round(lastDragPosRef.current.y / GRID_SIZE) * GRID_SIZE;
+      updateWidgetPosition(activeDraggingId, (snappedX / window.innerWidth) * 100, (snappedY / window.innerHeight) * 100);
+    }
+
     setActiveDraggingId(null);
     activeDraggingStyleRef.current = null;
     window.removeEventListener('pointermove', handlePointerMoveGlobal);
     window.removeEventListener('pointerup', handlePointerUpGlobal);
     if (onDragEnd) onDragEnd();
-  }, [handlePointerMoveGlobal, onDragEnd]);
+  }, [handlePointerMoveGlobal, onDragEnd, activeDraggingId, updateWidgetPosition]);
 
   const handlePointerDownClock = useCallback((e: React.PointerEvent<HTMLDivElement>, id: string, style: string) => {
     e.preventDefault();
@@ -180,6 +193,7 @@ export function useWidgetDrag({ addWidget, updateWidgetPosition, triggerCloseClo
 
     const rect = e.currentTarget.getBoundingClientRect();
     setDragOffset({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    lastDragPosRef.current = { x: rect.left, y: rect.top };
 
     window.addEventListener('pointermove', handlePointerMoveGlobal);
     window.addEventListener('pointerup', handlePointerUpGlobal);
