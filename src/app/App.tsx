@@ -413,10 +413,8 @@ export default function App() {
           </div>
         )}
 
-        {/* Top Left Todo Widget */}
-        <div className="absolute top-0 right-6 z-30">
-          <TodoListWidget onOpenTodoPanel={() => setIsTodoOpen(true)} />
-        </div>
+        {/* Todo Widget */}
+        <TodoListWidget onOpenTodoPanel={() => setIsTodoOpen(true)} />
 
         {/* Top Widgets Bar */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 z-30">

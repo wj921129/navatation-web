@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { TodoItem } from '../../services/todo-service';
 import { todoStore } from '../../stores/todo-store';
 import { authStore } from '../../stores/auth-store';
@@ -16,6 +16,11 @@ interface TodoListWidgetProps {
 export function TodoListWidget({ onOpenTodoPanel }: TodoListWidgetProps) {
   const [todoState, setTodoState] = useState(todoStore.getState());
   const [authState, setAuthState] = useState(authStore.getState());
+  const [position, setPosition] = useState({ x: -1, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartPos = useRef({ x: 0, y: 0 });
+  const widgetStartPos = useRef({ x: 0, y: 0 });
+  const widgetRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const unsubAuth = authStore.subscribe(setAuthState);
@@ -24,16 +29,49 @@ export function TodoListWidget({ onOpenTodoPanel }: TodoListWidgetProps) {
     // 初始化时加载一次数据
     todoStore.loadTodos(authStore.getState().isLoggedIn);
 
+    const savedPos = localStorage.getItem('todo_widget_pos');
+    if (savedPos) {
+      try {
+        const parsed = JSON.parse(savedPos);
+        setPosition(parsed);
+      } catch (e) {}
+    }
+
     return () => {
       unsubAuth();
       unsubTodo();
     };
   }, []);
 
+  useEffect(() => {
+    if (position.x === -1) return;
+    const handleResize = () => {
+      const w = widgetRef.current?.offsetWidth || 256;
+      const h = widgetRef.current?.offsetHeight || 140;
+      let nx = position.x;
+      let ny = position.y;
+      
+      let changed = false;
+      if (nx > window.innerWidth - w) {
+        nx = Math.max(0, window.innerWidth - w);
+        changed = true;
+      }
+      if (ny > window.innerHeight - h) {
+        ny = Math.max(0, window.innerHeight - h);
+        changed = true;
+      }
+      if (changed) {
+        setPosition({ x: nx, y: ny });
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [position.x, position.y]);
+
   // 筛选未完结的待办事项
   const uncompletedTodos = todoState.todos.filter(t => !t.completed);
 
-  // 待办事项为空时，隐藏左上角待办清单
+  // 待办事项为空时，隐藏待办清单
   if (uncompletedTodos.length === 0) return null;
 
   // 勾选完成某个待办事项
@@ -42,13 +80,96 @@ export function TodoListWidget({ onOpenTodoPanel }: TodoListWidgetProps) {
     await todoStore.toggleTodo(todoId, authState.isLoggedIn);
   };
 
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setIsDragging(true);
+    dragStartPos.current = { x: e.clientX, y: e.clientY };
+    
+    const startX = position.x === -1 ? window.innerWidth - 256 - 24 : position.x;
+    widgetStartPos.current = { x: startX, y: position.y };
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    const dx = e.clientX - dragStartPos.current.x;
+    const dy = e.clientY - dragStartPos.current.y;
+    const w = widgetRef.current?.offsetWidth || 256;
+    const h = widgetRef.current?.offsetHeight || 140;
+    
+    let nx = widgetStartPos.current.x + dx;
+    let ny = widgetStartPos.current.y + dy;
+    nx = Math.max(0, Math.min(nx, window.innerWidth - w));
+    ny = Math.max(0, Math.min(ny, window.innerHeight - h));
+    
+    setPosition({ x: nx, y: ny });
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    e.currentTarget.releasePointerCapture(e.pointerId);
+    
+    const w = widgetRef.current?.offsetWidth || 256;
+    const h = widgetRef.current?.offsetHeight || 140;
+    
+    let nx = position.x;
+    let ny = position.y;
+    
+    const distTop = ny;
+    const distBottom = window.innerHeight - ny - h;
+    const distLeft = nx;
+    const distRight = window.innerWidth - nx - w;
+    
+    const minDist = Math.min(distTop, distBottom, distLeft, distRight);
+    
+    if (minDist === distTop) ny = 0;
+    else if (minDist === distBottom) ny = window.innerHeight - h;
+    else if (minDist === distLeft) nx = 0;
+    else if (minDist === distRight) nx = window.innerWidth - w;
+    
+    setPosition({ x: nx, y: ny });
+    localStorage.setItem('todo_widget_pos', JSON.stringify({ x: nx, y: ny }));
+    
+    const dx = e.clientX - dragStartPos.current.x;
+    const dy = e.clientY - dragStartPos.current.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    
+    if (dist < 5) {
+      onOpenTodoPanel();
+    }
+  };
+
+  let snapEdge = 'top';
+  if (position.x !== -1 && widgetRef.current) {
+    const w = widgetRef.current.offsetWidth;
+    const h = widgetRef.current.offsetHeight;
+    if (position.y === 0) snapEdge = 'top';
+    else if (position.y >= window.innerHeight - h - 1) snapEdge = 'bottom';
+    else if (position.x === 0) snapEdge = 'left';
+    else if (position.x >= window.innerWidth - w - 1) snapEdge = 'right';
+  }
+
+  let roundedClass = 'rounded-2xl border';
+  if (snapEdge === 'top') roundedClass = 'rounded-b-2xl border-t-0 border-b border-l border-r';
+  else if (snapEdge === 'bottom') roundedClass = 'rounded-t-2xl border-b-0 border-t border-l border-r';
+  else if (snapEdge === 'left') roundedClass = 'rounded-r-2xl border-l-0 border-t border-b border-r';
+  else if (snapEdge === 'right') roundedClass = 'rounded-l-2xl border-r-0 border-t border-b border-l';
+
   return (
     <div 
-      onClick={onOpenTodoPanel}
-      className="flex flex-col gap-2 px-4 py-2.5 rounded-b-2xl border-t-0 border border-widget-border bg-widget-bg backdrop-blur-md shadow-md opacity-70 hover:opacity-100 hover:backdrop-blur-xl transition-all duration-300 cursor-pointer w-64 max-h-[220px] overflow-hidden group select-none"
+      ref={widgetRef}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      className={`absolute z-30 flex flex-col gap-2 px-4 py-2.5 ${roundedClass} border-widget-border bg-widget-bg backdrop-blur-md shadow-md opacity-70 hover:opacity-100 hover:backdrop-blur-xl ${isDragging ? 'transition-none cursor-grabbing' : 'transition-all duration-300 cursor-pointer'} w-64 max-h-[220px] overflow-hidden group select-none`}
       style={{
-        transform: 'translate3d(0, 0, 0)',
-        willChange: 'opacity, transform',
+        left: position.x === -1 ? 'auto' : `${position.x}px`,
+        right: position.x === -1 ? '24px' : 'auto',
+        top: position.x === -1 ? '0px' : `${position.y}px`,
+        willChange: 'opacity, left, top',
       }}
     >
       {/* 头部标题与统计 */}
