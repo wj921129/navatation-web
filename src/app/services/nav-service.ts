@@ -139,6 +139,22 @@ export const navService = {
   // 分类
   /** 获取当前用户的所有导航分类列表 */
   getCategories(): Promise<ApiResponse<NavCategory[]>> {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      const guestCategories = localStorage.getItem('navatation_guest_categories');
+      if (guestCategories) {
+        try {
+          return Promise.resolve({
+            code: 200,
+            message: 'success',
+            data: JSON.parse(guestCategories)
+          });
+        } catch (e) {
+          // ignore
+        }
+      }
+      return Promise.resolve({ code: 200, message: 'success', data: [] });
+    }
     return api.get('/nav/categories');
   },
   /** 创建新导航分类 */

@@ -24,6 +24,7 @@ export function useAppInit(
     if (!authState.isLoggedIn) {
       setIsEditMode(false);
       localStorage.removeItem('navatation_wallpaper');
+      localStorage.removeItem('navatation_guest_categories');
       setBackgroundImage(DEFAULT_WALLPAPER);
       setShortcuts([]);
       setTempShortcuts([]);
@@ -98,6 +99,11 @@ export function useAppInit(
             // 写入壁纸本地缓存，避免壁纸闪烁
             localStorage.setItem('navatation_wallpaper', config.settings.backgroundImage);
           }
+        }
+
+        if (config.categories && config.categories.length > 0) {
+          // 写入本地游客分类缓存
+          localStorage.setItem('navatation_guest_categories', JSON.stringify(config.categories));
         }
       } catch (err) {
         console.error('Failed to load guest config:', err);
