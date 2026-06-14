@@ -45,7 +45,18 @@ class TodoStore {
   private getLocalTodos(): TodoItem[] {
     try {
       const raw = localStorage.getItem('navatation_todos');
-      return raw ? JSON.parse(raw) : [];
+      if (raw) return JSON.parse(raw);
+      
+      const defaultTodo: TodoItem = {
+        todoId: "TD-local-default",
+        content: "👋 欢迎使用 Navatation！这是一个本地示例待办。",
+        completed: false,
+        sortOrder: 0,
+        createdAt: new Date().toISOString(),
+        completedAt: null,
+      };
+      this.saveLocalTodos([defaultTodo]);
+      return [defaultTodo];
     } catch {
       return [];
     }
