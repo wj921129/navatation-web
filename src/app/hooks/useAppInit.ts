@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { toast } from 'sonner';
 import { publicService } from '../services/public-service';
 import { authStore } from '../stores/auth-store';
+import { todoStore } from '../stores/todo-store';
 import { DEFAULT_WALLPAPER } from '../../config/app.config';
 import { UserSettings } from '../services/settings-service';
 
@@ -51,11 +52,12 @@ export function useAppInit(
 
     const fetchGuestConfig = async () => {
       try {
-        const [settingsRes, widgetsRes, categoriesRes, shortcutsRes] = await Promise.allSettled([
+        const [settingsRes, widgetsRes, categoriesRes, shortcutsRes, todosRes] = await Promise.allSettled([
           publicService.getGuestSettings(),
           publicService.getGuestWidgets(),
           publicService.getGuestCategories(),
-          publicService.getGuestShortcuts()
+          publicService.getGuestShortcuts(),
+          publicService.getGuestTodos()
         ]);
 
         if (shortcutsRes.status === 'fulfilled' && shortcutsRes.value.code === 200 && shortcutsRes.value.data?.length > 0) {
@@ -103,6 +105,16 @@ export function useAppInit(
         if (categoriesRes.status === 'fulfilled' && categoriesRes.value.code === 200 && categoriesRes.value.data?.length > 0) {
           const configCategories = categoriesRes.value.data;
           localStorage.setItem('navatation_guest_categories', JSON.stringify(configCategories));
+        }
+
+        if (todosRes.status === 'fulfilled' && todosRes.value.code === 200 && todosRes.value.data?.length > 0) {
+          const configTodos = todosRes.value.data;
+          // 只在没有本地 Todos 缓存时做一次初始化克隆
+          if (!localStorage.getItem('navatation_todos')) {
+            localStorage.setItem('navatation_todos', JSON.stringify(configTodos));
+            // 触发 TodoStore 的重新加载或者让它自己在初始化时读取
+            todoStore.loadTodos(false);
+          }
         }
       } catch (err) {
         console.error('Failed to load guest config:', err);
