@@ -3,18 +3,19 @@ import { UserSettings } from './settings-service';
 import { WidgetItemDTO } from './widget-service';
 import { NavCategory, NavShortcut } from './nav-service';
 
-/**
- * GuestConfig 组件/功能描述
- */
-export interface GuestConfig {
-  settings: UserSettings;
-  widgets: WidgetItemDTO[];
-  categories: NavCategory[];
-  shortcuts: NavShortcut[];
-}
+
 
 export const publicService = {
-  getGuestConfig(): Promise<ApiResponse<GuestConfig>> {
-    return api.get('/public/guest-config');
+  getGuestSettings(): Promise<ApiResponse<UserSettings>> {
+    return api.get('/public/guest-settings');
+  },
+  getGuestWidgets(): Promise<ApiResponse<WidgetItemDTO[]>> {
+    return api.get('/public/guest-widgets');
+  },
+  getGuestCategories(): Promise<ApiResponse<NavCategory[]>> {
+    return api.get('/public/guest-categories');
+  },
+  getGuestShortcuts(): Promise<ApiResponse<NavShortcut[]>> {
+    return api.get('/public/guest-shortcuts');
   },
 };

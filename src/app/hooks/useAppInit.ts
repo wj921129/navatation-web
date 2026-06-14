@@ -51,15 +51,16 @@ export function useAppInit(
 
     const fetchGuestConfig = async () => {
       try {
-        const res = await publicService.getGuestConfig();
-        if (res.code !== 200 || !res.data) {
-          return;
-        }
+        const [settingsRes, widgetsRes, categoriesRes, shortcutsRes] = await Promise.allSettled([
+          publicService.getGuestSettings(),
+          publicService.getGuestWidgets(),
+          publicService.getGuestCategories(),
+          publicService.getGuestShortcuts()
+        ]);
 
-        const config = res.data;
-
-        if (config.shortcuts?.length > 0) {
-          const loaded = config.shortcuts.map((item: any) => ({
+        if (shortcutsRes.status === 'fulfilled' && shortcutsRes.value.code === 200 && shortcutsRes.value.data?.length > 0) {
+          const configShortcuts = shortcutsRes.value.data;
+          const loaded = configShortcuts.map((item: any) => ({
             id: item.shortcutId,
             categoryId: item.categoryId,
             name: item.name,
@@ -71,12 +72,12 @@ export function useAppInit(
           }));
           setShortcuts(loaded);
           setTempShortcuts(loaded);
-          // 写入本地游客快捷方式缓存，防止首屏加载闪跃
           localStorage.setItem('navatation_guest_shortcuts', JSON.stringify(loaded));
         }
 
-        if (config.widgets?.length > 0) {
-          const loadedW = config.widgets.map((w: any) => ({
+        if (widgetsRes.status === 'fulfilled' && widgetsRes.value.code === 200 && widgetsRes.value.data?.length > 0) {
+          const configWidgets = widgetsRes.value.data;
+          const loadedW = configWidgets.map((w: any) => ({
             id: w.widgetId ?? `clock-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
             type: w.type,
             style: w.style,
@@ -86,24 +87,22 @@ export function useAppInit(
           }));
           setWidgets(loadedW);
           setTempWidgets(loadedW);
-          // 写入小组件物理位置本地缓存，消灭首屏浮现跳跃 Bug
           localStorage.setItem('navatation_widgets', JSON.stringify(loadedW));
         }
 
-        if (config.settings) {
-          setSettings(config.settings);
-          // 写入设置本地缓存
-          localStorage.setItem('navatation_settings', JSON.stringify(config.settings));
-          if (config.settings.backgroundImage) {
-            setBackgroundImage(config.settings.backgroundImage);
-            // 写入壁纸本地缓存，避免壁纸闪烁
-            localStorage.setItem('navatation_wallpaper', config.settings.backgroundImage);
+        if (settingsRes.status === 'fulfilled' && settingsRes.value.code === 200 && settingsRes.value.data) {
+          const configSettings = settingsRes.value.data;
+          setSettings(configSettings);
+          localStorage.setItem('navatation_settings', JSON.stringify(configSettings));
+          if (configSettings.backgroundImage) {
+            setBackgroundImage(configSettings.backgroundImage);
+            localStorage.setItem('navatation_wallpaper', configSettings.backgroundImage);
           }
         }
 
-        if (config.categories && config.categories.length > 0) {
-          // 写入本地游客分类缓存
-          localStorage.setItem('navatation_guest_categories', JSON.stringify(config.categories));
+        if (categoriesRes.status === 'fulfilled' && categoriesRes.value.code === 200 && categoriesRes.value.data?.length > 0) {
+          const configCategories = categoriesRes.value.data;
+          localStorage.setItem('navatation_guest_categories', JSON.stringify(configCategories));
         }
       } catch (err) {
         console.error('Failed to load guest config:', err);
