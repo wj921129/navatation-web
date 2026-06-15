@@ -126,6 +126,32 @@ export interface RecommendSiteRequest {
   sortOrder: number;
 }
 
+// ---- 首页图标 ----
+/**
+ * HomeShortcut 首页图标项（admin/游客首页已添加的网页图标）
+ */
+export interface HomeShortcut {
+  shortcutId: string;
+  name: string;
+  url: string;
+  iconType: IconType;
+  iconValue: string | null;
+  iconColor: string | null;
+  sortOrder: number;
+}
+
+/**
+ * HomeShortcutRequest 首页图标创建/更新请求
+ */
+export interface HomeShortcutRequest {
+  name: string;
+  url: string;
+  iconType?: IconType;
+  iconValue?: string;
+  iconColor?: string;
+  sortOrder?: number;
+}
+
 // ---- Favicon ----
 /**
  * FaviconResult 组件/功能描述
@@ -209,6 +235,24 @@ export const navService = {
     const formData = new FormData();
     formData.append('file', file);
     return api.upload('/nav/icon/upload', formData);
+  },
+
+  // 首页图标
+  /** 获取首页图标列表 */
+  getHomeShortcuts(): Promise<ApiResponse<HomeShortcut[]>> {
+    return api.get('/nav/home-shortcuts');
+  },
+  /** 添加首页图标 */
+  addHomeShortcut(data: HomeShortcutRequest): Promise<ApiResponse<HomeShortcut>> {
+    return api.post('/nav/home-shortcuts', data);
+  },
+  /** 更新首页图标 */
+  updateHomeShortcut(shortcutId: string, data: Partial<HomeShortcutRequest>): Promise<ApiResponse<HomeShortcut>> {
+    return api.put(`/nav/home-shortcuts/${shortcutId}`, data);
+  },
+  /** 删除首页图标 */
+  deleteHomeShortcut(shortcutId: string): Promise<ApiResponse<null>> {
+    return api.delete(`/nav/home-shortcuts/${shortcutId}`);
   },
 
   // 推荐

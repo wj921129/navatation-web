@@ -1,7 +1,7 @@
 import { api, ApiResponse } from './api-client';
 import { UserSettings } from './settings-service';
 import { WidgetItemDTO } from './widget-service';
-import { NavCategory, NavShortcut } from './nav-service';
+import { NavCategory, NavShortcut, HomeShortcut } from './nav-service';
 import { TodoItem } from './todo-service';
 
 
@@ -21,5 +21,8 @@ export const publicService = {
   },
   getGuestTodos(): Promise<ApiResponse<TodoItem[]>> {
     return api.get('/public/guest-todos');
+  },
+  getGuestHomeShortcuts(): Promise<ApiResponse<HomeShortcut[]>> {
+    return api.get('/public/guest-home-shortcuts');
   },
 };

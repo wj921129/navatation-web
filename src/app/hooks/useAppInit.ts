@@ -18,7 +18,9 @@ export function useAppInit(
   setTempShortcuts: (v: any[]) => void,
   setWidgets: (v: any[]) => void,
   setTempWidgets: (v: any[]) => void,
-  setSettings: (v: UserSettings) => void
+  setSettings: (v: UserSettings) => void,
+  setHomeShortcuts: (v: any[]) => void,
+  setTempHomeShortcuts: (v: any[]) => void
 ) {
   // 当用户登出（未登录）时，强制退出编辑模式，清空临时状态与壁纸缓存，回归游客初始数据
   useEffect(() => {
@@ -29,8 +31,10 @@ export function useAppInit(
       setBackgroundImage(DEFAULT_WALLPAPER);
       setShortcuts([]);
       setTempShortcuts([]);
+      setHomeShortcuts([]);
+      setTempHomeShortcuts([]);
     }
-  }, [authState.isLoggedIn, setBackgroundImage, setShortcuts, setTempShortcuts, setIsEditMode]);
+  }, [authState.isLoggedIn, setBackgroundImage, setShortcuts, setTempShortcuts, setHomeShortcuts, setTempHomeShortcuts, setIsEditMode]);
 
   // 初始化挂载：如果本地存在 Token，则尝试获取用户信息
   useEffect(() => {
@@ -52,12 +56,13 @@ export function useAppInit(
 
     const fetchGuestConfig = async () => {
       try {
-        const [settingsRes, widgetsRes, categoriesRes, shortcutsRes, todosRes] = await Promise.allSettled([
+        const [settingsRes, widgetsRes, categoriesRes, shortcutsRes, todosRes, homeShortcutsRes] = await Promise.allSettled([
           publicService.getGuestSettings(),
           publicService.getGuestWidgets(),
           publicService.getGuestCategories(),
           publicService.getGuestShortcuts(),
-          publicService.getGuestTodos()
+          publicService.getGuestTodos(),
+          publicService.getGuestHomeShortcuts()
         ]);
 
         if (shortcutsRes.status === 'fulfilled' && shortcutsRes.value.code === 200 && shortcutsRes.value.data?.length > 0) {
@@ -116,6 +121,22 @@ export function useAppInit(
             todoStore.loadTodos(false);
           }
         }
+
+        // 加载游客首页图标数据
+        if (homeShortcutsRes.status === 'fulfilled' && homeShortcutsRes.value.code === 200 && homeShortcutsRes.value.data?.length > 0) {
+          const configHomeShortcuts = homeShortcutsRes.value.data;
+          const loaded = configHomeShortcuts.map((item: any) => ({
+            id: item.shortcutId,
+            dragId: item.shortcutId,
+            name: item.name,
+            url: item.url,
+            color: item.iconColor ?? '#fff',
+            iconType: item.iconType,
+            iconValue: item.iconValue ?? 'Link',
+          }));
+          setHomeShortcuts(loaded);
+          setTempHomeShortcuts(loaded);
+        }
       } catch (err) {
         console.error('Failed to load guest config:', err);
         toast.error('拉取游客配置失败');
@@ -123,5 +144,5 @@ export function useAppInit(
     };
 
     fetchGuestConfig();
-  }, [authState.isLoggedIn, setShortcuts, setTempShortcuts, setWidgets, setTempWidgets, setSettings, setBackgroundImage]);
+  }, [authState.isLoggedIn, setShortcuts, setTempShortcuts, setWidgets, setTempWidgets, setSettings, setBackgroundImage, setHomeShortcuts, setTempHomeShortcuts]);
 }

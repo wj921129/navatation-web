@@ -50,6 +50,7 @@ import { BrightnessPanel } from './components/dock/BrightnessPanel';
 import { useBrightness } from './hooks/useBrightness';
 import { useSettings } from './hooks/useSettings';
 import { useShortcuts } from './hooks/useShortcuts';
+import { useHomeShortcuts } from './hooks/useHomeShortcuts';
 import { useAppInit } from './hooks/useAppInit';
 
 
@@ -119,12 +120,10 @@ export default function App() {
 
   // 2. 调用自定义业务逻辑 Hooks
   const shortcutsData = useShortcuts(authState);
+  const homeShortcutsData = useHomeShortcuts(authState);
   // 3. 解构解耦业务逻辑
   const {
-    shortcuts,
-    fetchShortcuts,
     setShortcuts,
-    tempShortcuts,
     setTempShortcuts,
     isEditMode,
     setIsEditMode,
@@ -136,15 +135,19 @@ export default function App() {
     setIsLoginOpen,
     isLogoutConfirmOpen,
     setIsLogoutConfirmOpen,
-    moveShortcut,
-    handleAddShortcuts,
     handleStartEdit,
-    handleSaveEdits: saveShortcutsEdits,
-    handleCancelEdits: cancelShortcutsEdits,
-    handleDeleteShortcut,
     handleEditShortcut,
-    handleSaveEdit,
   } = shortcutsData;
+
+  // 解构首页图标数据
+  const {
+    homeShortcuts,
+    setHomeShortcuts,
+    tempHomeShortcuts,
+    setTempHomeShortcuts,
+    fetchHomeShortcuts,
+    handleSaveHomeShortcuts,
+  } = homeShortcutsData;
 
   const settingsData = useSettings(authState, theme || 'light', setTheme, searchEngine, setSearchEngine);
   const brightnessData = useBrightness(theme || 'light', setTheme, authState);
@@ -202,19 +205,21 @@ export default function App() {
     setTempShortcuts,
     setWidgets,
     setTempWidgets,
-    setSettings
+    setSettings,
+    setHomeShortcuts,
+    setTempHomeShortcuts
   );
 
   // 统一保存与取消逻辑
   const handleSaveEdits = useCallback(async () => {
     saveWidgets();
-    await saveShortcutsEdits();
-  }, [saveShortcutsEdits, saveWidgets]);
+    await handleSaveHomeShortcuts();
+  }, [handleSaveHomeShortcuts, saveWidgets]);
 
   const handleCancelEdits = useCallback(() => {
-    cancelShortcutsEdits();
+    setTempHomeShortcuts([...homeShortcuts]);
     cancelWidgets();
-  }, [cancelShortcutsEdits, cancelWidgets]);
+  }, [homeShortcuts, setTempHomeShortcuts, cancelWidgets]);
 
   // 全局键盘交互优化：编辑模式下且无弹窗遮挡时，支持 ESC 取消、Enter 保存
   useEffect(() => {
@@ -293,6 +298,30 @@ export default function App() {
   /**
    * 处理搜索引擎变更
    */
+  // 首页图标添加处理（添加到 tempHomeShortcuts）
+  const handleAddHomeShortcuts = useCallback((newShortcuts: any[]) => {
+    const formatted = newShortcuts.map(s => {
+      let iconName = 'Link';
+      if (s.iconType && s.iconType !== 'BUILTIN') {
+        iconName = s.iconValue;
+      } else if (s.icon && s.icon.displayName) {
+        iconName = s.icon.displayName;
+      } else if (s.icon && s.icon.name) {
+        iconName = s.icon.name;
+      } else if (typeof s.iconValue === 'string') {
+        iconName = s.iconValue;
+      }
+      return {
+        name: s.name,
+        url: s.url,
+        color: s.color || '#fff',
+        iconType: s.iconType || 'BUILTIN',
+        iconValue: iconName,
+      };
+    });
+    setTempHomeShortcuts(prev => [...prev, ...formatted]);
+  }, [setTempHomeShortcuts]);
+
   const handleSearchEngineChange = (engine: string) => {
     setSearchEngine(engine);
     localStorage.setItem('navatation_search_engine', engine);
@@ -312,8 +341,8 @@ export default function App() {
   const iconInnerSize = settings.iconSize * 0.5;
   const borderRadius = `${settings.iconRadius}%`;
 
-  // 编辑模式下使用临时草稿列表，非编辑模式下使用确认生效列表
-  const displayShortcuts = isEditMode ? tempShortcuts : shortcuts;
+  // 首页图标使用 home shortcuts 数据
+  const displayShortcuts = isEditMode ? tempHomeShortcuts : homeShortcuts;
 
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
 
@@ -342,13 +371,13 @@ export default function App() {
       if (oldIndex !== -1 && newIndex !== -1) {
         const newItems = arrayMove(displayShortcuts, oldIndex, newIndex);
         if (isEditMode) {
-          setTempShortcuts(newItems);
+          setTempHomeShortcuts(newItems);
         } else {
-          setShortcuts(newItems);
+          setHomeShortcuts(newItems);
         }
       }
     }
-  }, [isEditMode, displayShortcuts, setTempShortcuts, setShortcuts]);
+  }, [isEditMode, displayShortcuts, setTempHomeShortcuts, setHomeShortcuts]);
 
   /**
    * 处理网格捷径拖拽取消
@@ -356,6 +385,29 @@ export default function App() {
   const handleDragCancelGrid = useCallback(() => {
     setActiveDragId(null);
   }, []);
+
+  // 首页图标删除处理（操作 tempHomeShortcuts）
+  const handleDeleteHomeShortcut = useCallback((index: number) => {
+    setTempHomeShortcuts(prev => prev.filter((_, i) => i !== index));
+  }, [setTempHomeShortcuts]);
+
+  // 首页图标单项编辑保存（操作 tempHomeShortcuts）
+  const handleSaveHomeShortcutEdit = useCallback((updatedShortcut: { name: string; url: string; iconType: string; iconValue: string }) => {
+    if (editingShortcut) {
+      setTempHomeShortcuts(prev => {
+        const newShortcuts = [...prev];
+        newShortcuts[editingShortcut.index] = {
+          ...newShortcuts[editingShortcut.index],
+          name: updatedShortcut.name,
+          url: updatedShortcut.url,
+          iconType: updatedShortcut.iconType,
+          iconValue: updatedShortcut.iconValue,
+        };
+        return newShortcuts;
+      });
+      setEditingShortcut(null);
+    }
+  }, [editingShortcut, setTempHomeShortcuts, setEditingShortcut]);
 
   const activeDragShortcut = activeDragId ? displayShortcuts.find((s, idx) => (s.dragId || `shortcut-edit-${idx}`) === activeDragId) : null;
 
@@ -482,7 +534,7 @@ export default function App() {
             handleDragCancelGrid={handleDragCancelGrid}
             activeDragShortcut={activeDragShortcut}
             handleEditShortcut={handleEditShortcut}
-            handleDeleteShortcut={handleDeleteShortcut}
+            handleDeleteShortcut={handleDeleteHomeShortcut}
             setIsAddShortcutOpen={setIsAddShortcutOpen}
           />
         </div>
@@ -521,14 +573,14 @@ export default function App() {
           authState={authState}
           isAddShortcutOpen={isAddShortcutOpen}
           setIsAddShortcutOpen={setIsAddShortcutOpen}
-          handleAddShortcuts={handleAddShortcuts}
+          handleAddShortcuts={handleAddHomeShortcuts}
           editingShortcut={editingShortcut}
           setEditingShortcut={setEditingShortcut}
-          handleSaveEdit={handleSaveEdit}
+          handleSaveEdit={handleSaveHomeShortcutEdit}
           isManageHomepageOpen={isManageHomepageOpen}
           setIsManageHomepageOpen={setIsManageHomepageOpen}
-          shortcuts={shortcuts}
-          fetchShortcuts={fetchShortcuts}
+          shortcuts={homeShortcuts}
+          fetchShortcuts={fetchHomeShortcuts}
           isAiSearchOpen={isAiSearchOpen}
           setIsAiSearchOpen={setIsAiSearchOpen}
           aiSearchQuery={aiSearchQuery}

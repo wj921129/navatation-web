@@ -167,56 +167,33 @@ export function ManageHomepageShortcutsDialog({
       const added = editData.filter(t => !t.id);
 
       const writePromises: Promise<any>[] = [
-        ...deleted.map(s => navService.deleteShortcut(s.id)),
-        ...updated.map(t => navService.updateShortcut(t.id, {
+        ...deleted.map(s => navService.deleteHomeShortcut(s.id)),
+        ...updated.map((t, i) => {
+          const finalIndex = editData.findIndex(e => e.id === t.id);
+          return navService.updateHomeShortcut(t.id, {
+            name: t.name,
+            url: t.url,
+            iconType: t.iconType || 'FAVICON',
+            iconValue: t.iconValue || '',
+            iconColor: t.color || '#ffffff',
+            sortOrder: finalIndex >= 0 ? finalIndex : i,
+          });
+        }),
+      ];
+      await Promise.all(writePromises);
+
+      // 逐一创建新增项（含排序位）
+      for (let i = 0; i < added.length; i++) {
+        const t = added[i];
+        const finalIndex = editData.findIndex(e => e.dragId === t.dragId);
+        await navService.addHomeShortcut({
           name: t.name,
           url: t.url,
           iconType: t.iconType || 'FAVICON',
           iconValue: t.iconValue || '',
-          iconColor: t.color || '#ffffff'
-        })),
-      ];
-      await Promise.all(writePromises);
-
-      if (added.length > 0) {
-        const catRes = await navService.getCategories();
-        const categoryId = catRes.code === 200 && catRes.data.length > 0 ? catRes.data[0].categoryId : undefined;
-        const addedPayload = added.map(s => ({
-          name: s.name,
-          url: s.url,
-          iconType: s.iconType || 'FAVICON',
-          iconValue: s.iconValue || '',
-          iconColor: s.color || '#ffffff'
-        }));
-        await navService.batchCreateShortcuts({ categoryId: categoryId as any, shortcuts: addedPayload });
-      }
-
-      const res = await navService.getShortcuts();
-      if (res.code === 200 && res.data) {
-        const loaded = res.data.map((item: any) => ({
-          id: item.shortcutId,
-          name: item.name,
-          url: item.url,
-        }));
-        const orderedShortcuts: any[] = [];
-        editData.forEach((temp) => {
-          let matched: any = null;
-          if (temp.id) matched = loaded.find((l: any) => l.id === temp.id);
-          else matched = loaded.find((l: any) => l.name === temp.name && l.url === temp.url && !orderedShortcuts.some(o => o.id === l.id));
-          if (matched) orderedShortcuts.push(matched);
+          iconColor: t.color || '#ffffff',
+          sortOrder: finalIndex >= 0 ? finalIndex : editData.length + i,
         });
-
-        loaded.forEach((l: any) => {
-          if (!orderedShortcuts.some(o => o.id === l.id)) orderedShortcuts.push(l);
-        });
-
-        const sortItems = orderedShortcuts.map((item, idx) => ({
-          shortcutId: item.id,
-          sortOrder: idx
-        }));
-        if (sortItems.length > 0) {
-          await navService.sortShortcuts(sortItems);
-        }
       }
 
       toast.success('已保存', { duration: 2000 });
