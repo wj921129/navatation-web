@@ -168,7 +168,6 @@ export function WidgetGalleryModal({ isOpen, onClose, onDragStart, isHidden }: W
             </div>
           </div>
         </div>
-      </div>
     </BaseModal>
   );
 }
