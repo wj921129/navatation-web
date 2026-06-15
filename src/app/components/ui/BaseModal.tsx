@@ -133,17 +133,16 @@ export function BaseModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div 
+        <motion.div 
           className={`fixed inset-0 flex ${getPositionClasses(position)}`}
           style={{ zIndex }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
         >
-          {/* 遮罩层 (独立渲染，保证动效不受子级影响) */}
-          <motion.div
-            variants={overlayVariants}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            transition={{ duration: 0.2 }}
+          {/* 遮罩层 (采用原生div即可，随外层容器透明度整体渐变) */}
+          <div
             className={`absolute inset-0 ${overlayClassName}`}
             onClick={handleOverlayClick}
           />
@@ -162,7 +161,7 @@ export function BaseModal({
           >
             {children}
           </motion.div>
-        </div>
+        </motion.div>
       )}
     </AnimatePresence>
   );
