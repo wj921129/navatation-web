@@ -395,6 +395,12 @@ export default function App() {
     setTempHomeShortcuts(prev => prev.filter((_, i) => i !== index));
   }, [setTempHomeShortcuts]);
 
+  // 首页图标单项编辑触发（操作 tempHomeShortcuts）
+  const handleEditHomeShortcut = useCallback((index: number) => {
+    setEditingShortcut({ index, shortcut: tempHomeShortcuts[index] });
+  }, [tempHomeShortcuts, setEditingShortcut]);
+
+
   // 首页图标单项编辑保存（操作 tempHomeShortcuts）
   const handleSaveHomeShortcutEdit = useCallback((updatedShortcut: { name: string; url: string; iconType: string; iconValue: string }) => {
     if (editingShortcut) {
@@ -537,7 +543,7 @@ export default function App() {
             handleDragEndGrid={handleDragEndGrid}
             handleDragCancelGrid={handleDragCancelGrid}
             activeDragShortcut={activeDragShortcut}
-            handleEditShortcut={handleEditShortcut}
+            handleEditShortcut={handleEditHomeShortcut}
             handleDeleteShortcut={handleDeleteHomeShortcut}
             setIsAddShortcutOpen={setIsAddShortcutOpen}
           />
