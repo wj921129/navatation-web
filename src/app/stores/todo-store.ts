@@ -18,6 +18,9 @@ class TodoStore {
 
   private listeners: Set<TodoListener> = new Set();
 
+  /** 加载请求序列号，用于防止并发 loadTodos 导致 loading 状态错乱 */
+  private loadSeq = 0;
+
   /** 返回当前状态快照（浅拷贝） */
   getState(): TodoState {
     return { ...this.state };
@@ -58,18 +61,24 @@ class TodoStore {
 
   /**
    * 将游客本地待办事项同步到云端（首次登录且云端为空时触发）。
-   * 逐条创建后拉取最新列表并更新状态。
+   * 并行创建后拉取最新列表并更新状态，保留 completed 状态。
    */
   private async syncLocalToCloud(local: TodoItem[]): Promise<void> {
-    for (const item of local) {
-      await todoService.create(item.content);
+    await Promise.all(local.map(item => todoService.create(item.content)));
+    // 对已完成的本地待办，逐条 toggle 云端对应事项为已完成
+    const cloudRes = await todoService.getList();
+    if (cloudRes.code === 200) {
+      const completedContents = new Set(local.filter(t => t.completed).map(t => t.content));
+      await Promise.all(
+        cloudRes.data
+          .filter(t => completedContents.has(t.content) && !t.completed)
+          .map(t => todoService.toggle(t.todoId))
+      );
     }
     // 同步完成后清除本地缓存，避免下次重复同步
     localStorage.removeItem('navatation_todos');
     const newRes = await todoService.getList();
-    if (newRes.code === 200) {
-      this.setState({ todos: newRes.data, loading: false });
-    }
+    this.setState({ todos: newRes.code === 200 ? newRes.data : [], loading: false });
   }
 
   /**
@@ -78,19 +87,18 @@ class TodoStore {
    * 未登录时从 localStorage 读取。
    */
   async loadTodos(isLoggedIn: boolean): Promise<void> {
+    const seq = ++this.loadSeq;
     this.setState({ loading: true });
     try {
       if (!isLoggedIn) {
-        this.setState({ todos: this.getLocalTodos(), loading: false });
+        if (seq === this.loadSeq) this.setState({ todos: this.getLocalTodos(), loading: false });
         return;
       }
 
       // 已登录：从云端拉取数据
       const res = await todoService.getList();
-      if (res.code !== 200) {
-        this.setState({ loading: false });
-        return;
-      }
+      // 如果期间有更新的 loadTodos 调用，丢弃本次结果
+      if (seq !== this.loadSeq) return;
 
       // 云端为空时，尝试将本地游客数据同步到云端
       if (res.data.length === 0) {
@@ -104,7 +112,7 @@ class TodoStore {
       this.setState({ todos: res.data, loading: false });
     } catch (err) {
       console.error('获取待办事项失败', err);
-      this.setState({ loading: false });
+      if (seq === this.loadSeq) this.setState({ loading: false });
     }
   }
 
@@ -115,8 +123,7 @@ class TodoStore {
         const res = await todoService.create(content);
         if (res.code === 200) await this.loadTodos(isLoggedIn);
       } else {
-        // 游客本地 ID 使用字符串前缀加上随机值
-        const localId = "TD-local-" + Math.floor(Math.random() * 100_000_000);
+        const localId = `TD-local-${crypto.randomUUID()}`;
         const newTodo: TodoItem = {
           todoId: localId,
           content,
