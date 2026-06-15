@@ -46,9 +46,9 @@ const overlayVariants = {
 // 后期扩展动效：只需在此对象中添加新的 variant 配置即可
 const modalVariants: Record<AnimationType, any> = {
   scale: {
-    hidden: { opacity: 0, scale: 0.95 },
-    visible: { opacity: 1, scale: 1 },
-    exit: { opacity: 0, scale: 0.95 }
+    hidden: { opacity: 0, scale: 0.9, y: 15 },
+    visible: { opacity: 1, scale: 1, y: 0 },
+    exit: { opacity: 0, scale: 0.9, y: 15 }
   },
   'slide-right': {
     hidden: { opacity: 0, x: '100%' },
@@ -154,8 +154,8 @@ export function BaseModal({
             initial="hidden"
             animate="visible"
             exit="exit"
-            // 采用 spring 弹性动画使得交互更具质感，不僵硬
-            transition={{ type: 'spring', damping: 25, stiffness: 300, mass: 0.8 }}
+            // 采用高级的 spring 弹性动画，轻量化质量并适度降低阻尼，增加丝滑的回弹特效
+            transition={{ type: 'spring', damping: 20, stiffness: 350, mass: 0.6 }}
             className={`relative ${containerClassName}`}
             // 阻止点击穿透到外层遮罩触发关闭
             onClick={(e) => e.stopPropagation()}
