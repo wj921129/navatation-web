@@ -214,12 +214,16 @@ export default function App() {
   const handleSaveEdits = useCallback(async () => {
     saveWidgets();
     await handleSaveHomeShortcuts();
-  }, [handleSaveHomeShortcuts, saveWidgets]);
+    setIsEditMode(false);
+    setEditingShortcut(null);
+  }, [handleSaveHomeShortcuts, saveWidgets, setIsEditMode, setEditingShortcut]);
 
   const handleCancelEdits = useCallback(() => {
     setTempHomeShortcuts([...homeShortcuts]);
     cancelWidgets();
-  }, [homeShortcuts, setTempHomeShortcuts, cancelWidgets]);
+    setIsEditMode(false);
+    setEditingShortcut(null);
+  }, [homeShortcuts, setTempHomeShortcuts, cancelWidgets, setIsEditMode, setEditingShortcut]);
 
   // 全局键盘交互优化：编辑模式下且无弹窗遮挡时，支持 ESC 取消、Enter 保存
   useEffect(() => {
