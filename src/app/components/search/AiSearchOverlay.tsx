@@ -222,21 +222,7 @@ export function AiSearchOverlay({ isOpen, onClose, initialQuery, initialEngine }
 
 
 
-  if (!engines || !activeEngine || !engines[activeEngine]) {
-    return (
-      <BaseModal
-        isOpen={isOpen}
-        onClose={onClose}
-        animationType="scale"
-        position="center"
-        containerClassName="flex flex-col bg-[#08080f]/90 dark:bg-[#030308]/96 text-slate-200 overflow-hidden font-sans backdrop-blur-2xl w-full h-full"
-        overlayClassName="bg-transparent"
-        zIndex={50}
-      >
-        <div />
-      </BaseModal>
-    );
-  }
+
 
   return (
     <BaseModal
@@ -427,61 +413,68 @@ export function AiSearchOverlay({ isOpen, onClose, initialQuery, initialEngine }
             </div>
 
             {/* 右侧主对话详情 */}
-            <div className="flex-1 flex flex-col rounded-3xl border border-white/5 bg-slate-950/45 dark:bg-black/55 backdrop-blur-xl overflow-hidden shadow-2xl">
-              
-              {/* 对话卡头部 */}
-              <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between bg-white/2 backdrop-blur-md">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center border border-white/10">
-                    <img src={`/icons/${activeEngine}.svg`} className="w-4 h-4 object-contain" alt="" />
+            {engines[activeEngine] ? (
+              <div className="flex-1 flex flex-col rounded-3xl border border-white/5 bg-slate-950/45 dark:bg-black/55 backdrop-blur-xl overflow-hidden shadow-2xl">
+                
+                {/* 对话卡头部 */}
+                <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between bg-white/2 backdrop-blur-md">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center border border-white/10">
+                      <img src={`/icons/${activeEngine}.svg`} className="w-4 h-4 object-contain" alt="" />
+                    </div>
+                    <div>
+                      <span className="font-bold text-sm text-slate-100">{engines[activeEngine].name}</span>
+                      <span className="text-[10px] text-slate-400 ml-3 font-mono">
+                        LATENCY: {engines[activeEngine].speed}ms | TOKENS: {engines[activeEngine].tokenCount}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="font-bold text-sm text-slate-100">{engines[activeEngine].name}</span>
-                    <span className="text-[10px] text-slate-400 ml-3 font-mono">
-                      LATENCY: {engines[activeEngine].speed}ms | TOKENS: {engines[activeEngine].tokenCount}
-                    </span>
-                  </div>
+
+                  <Tooltip content="复制原文" side="top">
+                    <button 
+                      onClick={() => handleCopy(engines[activeEngine].streamedContent, activeEngine)}
+                      className="flex items-center justify-center w-8 h-8 text-slate-400 hover:text-slate-200 bg-white/5 hover:bg-white/10 rounded-full border border-white/5 transition-all active:scale-95"
+                    >
+                      {copiedIndex === activeEngine ? (
+                        <Check className="w-4 h-4 text-emerald-400" />
+                      ) : (
+                        <Copy className="w-4 h-4" />
+                      )}
+                    </button>
+                  </Tooltip>
                 </div>
 
-                <Tooltip content="复制原文" side="top">
-                  <button 
-                    onClick={() => handleCopy(engines[activeEngine].streamedContent, activeEngine)}
-                    className="flex items-center justify-center w-8 h-8 text-slate-400 hover:text-slate-200 bg-white/5 hover:bg-white/10 rounded-full border border-white/5 transition-all active:scale-95"
-                  >
-                    {copiedIndex === activeEngine ? (
-                      <Check className="w-4 h-4 text-emerald-400" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-                  </button>
-                </Tooltip>
+                {/* 对话流区域 */}
+                <div className="flex-1 p-6 overflow-y-auto space-y-6 max-h-[500px]">
+                  {engines[activeEngine].streamedContent ? (
+                    <div className="text-sm leading-relaxed text-slate-200 space-y-4 prose prose-invert">
+                      {engines[activeEngine].streamedContent.split('\n').map((line, idx) => {
+                        if (line.startsWith('###')) return <h4 key={idx} className={`text-base font-extrabold ${engines[activeEngine].textGlow} mt-6 first:mt-0`}>{line.replace('###', '').trim()}</h4>;
+                        if (line.startsWith('####')) return <h5 key={idx} className="text-sm font-bold text-slate-100 mt-4">{line.replace('####', '').trim()}</h5>;
+                        if (line.startsWith('-')) return <li key={idx} className="text-slate-300 ml-5 list-disc">{line.replace('-', '').trim()}</li>;
+                        if (line.startsWith('`') || line.includes('```')) {
+                          if (line.includes('```') && !line.endsWith('```')) return null;
+                          if (line.includes('```') && line.endsWith('```')) return null;
+                          return <pre key={idx} className="bg-slate-900/80 border border-white/5 p-4 rounded-2xl font-mono text-xs text-slate-300 my-3 overflow-x-auto whitespace-pre">{line.replace(/`/g, '')}</pre>;
+                        }
+                        return <p key={idx} className="text-slate-300 text-sm leading-relaxed">{line}</p>;
+                      })}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full py-28 text-slate-500 text-sm gap-3">
+                      <RefreshCw className="w-6 h-6 animate-spin text-slate-600" />
+                      等待回答生成中...
+                    </div>
+                  )}
+                  <div ref={chatEndRefs[activeEngine]} />
+                </div>
               </div>
-
-              {/* 对话流区域 */}
-              <div className="flex-1 p-6 overflow-y-auto space-y-6 max-h-[500px]">
-                {engines[activeEngine].streamedContent ? (
-                  <div className="text-sm leading-relaxed text-slate-200 space-y-4 prose prose-invert">
-                    {engines[activeEngine].streamedContent.split('\n').map((line, idx) => {
-                      if (line.startsWith('###')) return <h4 key={idx} className={`text-base font-extrabold ${engines[activeEngine].textGlow} mt-6 first:mt-0`}>{line.replace('###', '').trim()}</h4>;
-                      if (line.startsWith('####')) return <h5 key={idx} className="text-sm font-bold text-slate-100 mt-4">{line.replace('####', '').trim()}</h5>;
-                      if (line.startsWith('-')) return <li key={idx} className="text-slate-300 ml-5 list-disc">{line.replace('-', '').trim()}</li>;
-                      if (line.startsWith('`') || line.includes('```')) {
-                        if (line.includes('```') && !line.endsWith('```')) return null;
-                        if (line.includes('```') && line.endsWith('```')) return null;
-                        return <pre key={idx} className="bg-slate-900/80 border border-white/5 p-4 rounded-2xl font-mono text-xs text-slate-300 my-3 overflow-x-auto whitespace-pre">{line.replace(/`/g, '')}</pre>;
-                      }
-                      return <p key={idx} className="text-slate-300 text-sm leading-relaxed">{line}</p>;
-                    })}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-full py-28 text-slate-500 text-sm gap-3">
-                    <RefreshCw className="w-6 h-6 animate-spin text-slate-600" />
-                    等待回答生成中...
-                  </div>
-                )}
-                <div ref={chatEndRefs[activeEngine]} />
+            ) : (
+              <div className="flex-1 flex flex-col rounded-3xl border border-white/5 bg-slate-950/45 dark:bg-black/55 backdrop-blur-xl overflow-hidden shadow-2xl items-center justify-center">
+                <RefreshCw className="w-8 h-8 animate-spin text-slate-600" />
+                <span className="mt-4 text-sm font-medium text-slate-500">正在初始化 AI 引擎数据...</span>
               </div>
-            </div>
+            )}
 
           </div>
         )}

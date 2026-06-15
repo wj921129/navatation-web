@@ -1,5 +1,6 @@
 import { ReactNode, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { SPRING_TRANSITIONS, OPACITY_TRANSITIONS } from '../../constants/animations';
 
 /**
  * AnimationType 组件/功能描述
@@ -142,7 +143,7 @@ export function BaseModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={OPACITY_TRANSITIONS.FAST}
             className={`absolute inset-0 ${overlayClassName}`}
             onClick={handleOverlayClick}
           />
@@ -153,8 +154,8 @@ export function BaseModal({
             initial="hidden"
             animate="visible"
             exit="exit"
-            // 采用高级的 spring 弹性动画，轻量化质量并适度降低阻尼，增加丝滑的回弹特效
-            transition={{ type: 'spring', damping: 20, stiffness: 350, mass: 0.6 }}
+            // 统一采用全局的弹簧物理反馈参数
+            transition={SPRING_TRANSITIONS.MODAL}
             className={`relative ${containerClassName}`}
             // 阻止点击穿透到外层遮罩触发关闭
             onClick={(e) => e.stopPropagation()}
