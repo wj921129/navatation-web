@@ -211,7 +211,9 @@ export function TodoListWidget({ onOpenTodoPanel }: TodoListWidgetProps) {
             <div
               key={todo.todoId}
               onClick={(e) => handleToggle(e, todo.todoId)}
-              className="flex items-start gap-2 py-1 px-1.5 rounded hover:bg-input-bg group/item transition-colors"
+              onPointerDown={(e) => e.stopPropagation()}
+              onPointerUp={(e) => e.stopPropagation()}
+              className="flex items-start gap-2 py-1 px-1.5 rounded hover:bg-input-bg group/item transition-colors cursor-pointer"
             >
               {/* 一键勾选圆环 */}
               <div className="flex-shrink-0 mt-0.5 cursor-pointer">
