@@ -3,7 +3,7 @@
  * @date 2026-06-10
  */
 import { X } from 'lucide-react';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import AnalogClock from './AnalogClock';
 import DigitalClock from './DigitalClock';
 import FlipClock from './FlipClock';
@@ -36,6 +36,7 @@ export default function ClockWidget({
   isDragging = false, // 解构并默认赋值为 false
 }: ClockWidgetProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isClosing, setIsClosing] = useState(false);
 
   /**
    * 指针按下开始拖动处理器
@@ -92,7 +93,9 @@ export default function ClockWidget({
     <div
       ref={containerRef}
       onPointerDown={handlePointerDown}
-      className={`absolute select-none z-20 group touch-none isolate ${
+      className={`absolute select-none z-20 group touch-none isolate transition-all duration-300 ease-in-out ${
+        isClosing ? 'scale-50 opacity-0' : 'scale-100 opacity-100'
+      } ${
         isEditMode ? 'cursor-pointer' : ''
       }`}
       style={{
@@ -114,7 +117,10 @@ export default function ClockWidget({
       {/* 编辑模式下的删除按钮 */}
       {isEditMode && (
         <button
-          onClick={() => onDelete(id)}
+          onClick={() => {
+            setIsClosing(true);
+            setTimeout(() => onDelete(id), 300);
+          }}
           className="delete-clock-btn absolute -top-2.5 -right-2.5 w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg flex items-center justify-center cursor-pointer scale-0 group-hover:scale-100 transition-all duration-200 z-30"
           aria-label="删除时钟"
         >

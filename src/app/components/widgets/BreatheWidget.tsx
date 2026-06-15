@@ -25,6 +25,7 @@ export default function BreatheWidget({
   isDragging = false,
 }: BreatheWidgetProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isClosing, setIsClosing] = useState(false);
   const [phase, setPhase] = useState<'idle' | 'inhale' | 'hold' | 'exhale'>('idle');
 
   // 在副作用中处理呼吸状态切换
@@ -107,7 +108,9 @@ export default function BreatheWidget({
     <div
       ref={containerRef}
       onPointerDown={handlePointerDown}
-      className={`absolute select-none z-20 group touch-none isolate ${
+      className={`absolute select-none z-20 group touch-none isolate transition-all duration-300 ease-in-out ${
+        isClosing ? 'scale-50 opacity-0' : 'scale-100 opacity-100'
+      } ${
         isEditMode ? 'cursor-pointer' : ''
       }`}
       style={{
@@ -125,7 +128,10 @@ export default function BreatheWidget({
 
       {isEditMode && (
         <button
-          onClick={() => onDelete(id)}
+          onClick={() => {
+            setIsClosing(true);
+            setTimeout(() => onDelete(id), 300);
+          }}
           className="no-drag absolute -top-2.5 -right-2.5 w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg flex items-center justify-center cursor-pointer scale-0 group-hover:scale-100 transition-all duration-200 z-30"
           aria-label="删除冥想组件"
         >
