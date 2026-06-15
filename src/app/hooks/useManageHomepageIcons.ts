@@ -88,8 +88,8 @@ export function useManageHomepageIcons(
     img.src = ddgCdn;
 
     navService.fetchFavicon(fullUrl).then(res => {
-      if (res.code === 200 && res.data?.faviconUrl) {
-        updateIcon(res.data.faviconUrl);
+      if (res.code === 200 && res.data?.faviconUrls) {
+        res.data.faviconUrls.forEach(url => updateIcon(url));
       }
       checkDone();
     }).catch(checkDone);
@@ -173,16 +173,17 @@ export function useManageHomepageIcons(
         tasks.forEach(({ idx, url, site }) => {
           const rowKey = `${idx}`;
           const result = res.data[url];
-          if (result && result.faviconUrl) {
-            const nativeIcon = result.faviconUrl;
-            setRowDetectedIcons(prev => {
-              const current = prev[rowKey] || [];
-              if (current.includes(nativeIcon)) return prev;
-              const newIcons = [...current, nativeIcon];
-              if (newIcons.length === 1 && (!site.iconValue || site.iconValue === 'Link')) {
-                updateSite(idx, { iconType: 'FAVICON', iconValue: nativeIcon });
-              }
-              return { ...prev, [rowKey]: newIcons };
+          if (result && result.faviconUrls) {
+            result.faviconUrls.forEach((nativeIcon: string) => {
+              setRowDetectedIcons(prev => {
+                const current = prev[rowKey] || [];
+                if (current.includes(nativeIcon)) return prev;
+                const newIcons = [...current, nativeIcon];
+                if (newIcons.length === 1 && (!site.iconValue || site.iconValue === 'Link')) {
+                  updateSite(idx, { iconType: 'FAVICON', iconValue: nativeIcon });
+                }
+                return { ...prev, [rowKey]: newIcons };
+              });
             });
           }
         });

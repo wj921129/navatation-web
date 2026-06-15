@@ -157,7 +157,7 @@ export interface HomeShortcutRequest {
  * FaviconResult 组件/功能描述
  */
 export interface FaviconResult {
-  faviconUrl: string;
+  faviconUrls: string[];
   sourceUrl: string;
 }
 

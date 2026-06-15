@@ -174,8 +174,8 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
 
     // 3. 后端抓取
     navService.fetchFavicon(fullUrl).then(res => {
-      if (res?.code === 200 && res?.data?.faviconUrl) {
-        handleIconResult(res.data.faviconUrl);
+      if (res?.code === 200 && res?.data?.faviconUrls) {
+        res.data.faviconUrls.forEach((url: string) => handleIconResult(url));
       }
     }).catch(e => {
       // 忽略后台抓取失败，不影响主流程

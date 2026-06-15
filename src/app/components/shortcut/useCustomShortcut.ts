@@ -73,8 +73,8 @@ export function useCustomShortcut(
     img.src = ddgCdn;
 
     navService.fetchFavicon(fullUrl).then(res => {
-      if (res.code === 200 && res.data?.faviconUrl) {
-        handleIconResult(res.data.faviconUrl);
+      if (res.code === 200 && res.data?.faviconUrls) {
+        res.data.faviconUrls.forEach((url: string) => handleIconResult(url));
       }
     }).catch(() => {});
   };
