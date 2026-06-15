@@ -110,7 +110,7 @@ export function AddShortcutDialog({
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
+
 
   const handleRemoveFromPending = (index: number) => {
     setPendingShortcuts(pendingShortcuts.filter((_, i) => i !== index));

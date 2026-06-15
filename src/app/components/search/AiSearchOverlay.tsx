@@ -220,7 +220,7 @@ export function AiSearchOverlay({ isOpen, onClose, initialQuery, initialEngine }
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
-  if (!isOpen) return null;
+
 
   return (
     <BaseModal

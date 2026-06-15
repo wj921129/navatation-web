@@ -219,9 +219,7 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
     };
   }, [url, shortcut.url, iconType]);
 
-  if (!isOpen) {
-    return null;
-  }
+
 
   /**
    * 上传自定义图标并更新图标的值与类型

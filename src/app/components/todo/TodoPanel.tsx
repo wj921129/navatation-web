@@ -151,7 +151,7 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
     await todoStore.clearCompleted(authState.isLoggedIn);
   };
 
-  if (!isOpen) return null;
+
 
   const completedCount = todoState.todos.filter(t => t.completed).length;
   const hasCompleted = completedCount > 0;

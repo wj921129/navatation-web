@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @description 退出登录确认对话框组件
  * @date 2026-06-09
  */
@@ -41,9 +41,7 @@ export function LogoutConfirmDialog({ isOpen, onClose, onConfirm, username }: Lo
     }
   }, [isOpen]);
 
-  if (!isOpen) {
-    return null;
-  }
+
 
   /**
    * 处理密码修改逻辑

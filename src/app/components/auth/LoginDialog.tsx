@@ -20,7 +20,7 @@ export function LoginDialog({ isOpen, onClose }: LoginDialogProps) {
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
-  if (!isOpen) return null;
+
 
   const reset = () => {
     setUsername('');

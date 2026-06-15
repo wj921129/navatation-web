@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @description 设置对话框组件
  * @date 2026-06-09
  */
@@ -51,9 +51,7 @@ export function SettingsDialog({ isOpen, onClose, onSave, onPreview, settings, b
     }
   }, [isOpen]);
 
-  if (!isOpen) {
-    return null;
-  }
+
 
   /**
    * 处理设置项变更
