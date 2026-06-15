@@ -239,7 +239,7 @@ export function ManageHomepageShortcutsDialog({
       overlayClassName="bg-black/50 backdrop-blur-sm"
       zIndex={50}
     >
-      <div className="interactive-glass-panel absolute top-8 -left-[71px] w-[72px] border border-border hover:border-border/80 border-r-0 rounded-l-3xl p-3 py-6 flex flex-col items-center gap-4 z-50 animate-in fade-in slide-in-from-right-4 shadow-[-10px_10px_20px_-5px_rgba(0,0,0,0.08)] hover:shadow-[-12px_12px_24px_-5px_rgba(0,0,0,0.15)] dark:shadow-[-10px_10px_20px_-5px_rgba(0,0,0,0.5)] dark:hover:shadow-[-12px_12px_24px_-5px_rgba(0,0,0,0.7)] cursor-default">
+      <div className="interactive-glass-panel absolute top-8 -left-[71px] w-[72px] border border-border hover:border-border/80 border-r-0 rounded-l-3xl p-3 py-6 flex flex-col items-center gap-4 z-50 shadow-[-10px_10px_20px_-5px_rgba(0,0,0,0.08)] hover:shadow-[-12px_12px_24px_-5px_rgba(0,0,0,0.15)] dark:shadow-[-10px_10px_20px_-5px_rgba(0,0,0,0.5)] dark:hover:shadow-[-12px_12px_24px_-5px_rgba(0,0,0,0.7)] cursor-default">
         <div className="group relative flex items-center justify-center">
           <button
             onClick={() => setIsBatchMode(!isBatchMode)}

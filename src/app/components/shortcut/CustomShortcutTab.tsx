@@ -41,7 +41,7 @@ export function CustomShortcutTab({
   const showImagePreview = iconFromUpload || (customIconUrl && customIconUrl !== 'Link');
 
   return (
-    <div className="p-8 h-full flex items-center justify-center animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="p-8 h-full flex items-center justify-center">
       <div 
         className="w-full max-w-md bg-card/95 border border-border backdrop-blur-xl rounded-3xl shadow-2xl p-8 flex flex-col relative overflow-hidden"
         onKeyDown={(e) => {

@@ -244,12 +244,12 @@ export function AddShortcutDialog({
                 {activeTab === 'recommended' ? (
                   <div className="p-6 space-y-8 relative">
                     {isBatchMode ? (
-                      <div key="list-mode" className="space-y-8 relative animate-in fade-in slide-in-from-right-4 duration-500">
+                      <div key="list-mode" className="space-y-8 relative">
                         <input type="file" ref={batchCategoryControls.rowFileInputRef} onChange={batchCategoryControls.handleRowIconUpload} className="hidden" accept="image/*" />
                         <BatchCategoryList {...batchCategoryControls} />
                       </div>
                     ) : (
-                      <div key="grid-mode" className="h-full animate-in fade-in slide-in-from-left-4 duration-500">
+                      <div key="grid-mode" className="h-full">
                         <RecommendedTabGrid
                           categories={categories}
                           setCategories={setCategories}
