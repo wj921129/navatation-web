@@ -104,14 +104,12 @@ export function AppDialogs({
         textSize={settings.textSize}
         userRole={authState.user?.role}
       />
-      {editingShortcut ? (
-        <EditShortcutDialog
-          isOpen={!!editingShortcut}
-          onClose={() => setEditingShortcut(null)}
-          onSave={handleSaveEdit}
-          shortcut={editingShortcut.shortcut}
-        />
-      ) : null}
+      <EditShortcutDialog
+        isOpen={!!editingShortcut}
+        onClose={() => setEditingShortcut(null)}
+        onSave={handleSaveEdit}
+        shortcut={editingShortcut ? editingShortcut.shortcut : { name: '', url: '' }}
+      />
       <ManageHomepageShortcutsDialog
         isOpen={isManageHomepageOpen}
         onClose={() => setIsManageHomepageOpen(false)}

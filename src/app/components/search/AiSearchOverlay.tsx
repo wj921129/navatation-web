@@ -222,6 +222,22 @@ export function AiSearchOverlay({ isOpen, onClose, initialQuery, initialEngine }
 
 
 
+  if (!engines || !activeEngine || !engines[activeEngine]) {
+    return (
+      <BaseModal
+        isOpen={isOpen}
+        onClose={onClose}
+        animationType="scale"
+        position="center"
+        containerClassName="flex flex-col bg-[#08080f]/90 dark:bg-[#030308]/96 text-slate-200 overflow-hidden font-sans backdrop-blur-2xl w-full h-full"
+        overlayClassName="bg-transparent"
+        zIndex={50}
+      >
+        <div />
+      </BaseModal>
+    );
+  }
+
   return (
     <BaseModal
       isOpen={isOpen}
