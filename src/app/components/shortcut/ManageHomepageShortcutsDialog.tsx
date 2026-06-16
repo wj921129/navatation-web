@@ -344,7 +344,7 @@ export function ManageHomepageShortcutsDialog({
                                   <div className="flex-shrink-0 flex items-center justify-center bg-card shadow-inner border border-border overflow-hidden w-10 h-10 rounded-full">
                                     {isLoading ? <Loader2 className="w-4 h-4 text-blue-500 animate-spin" /> : (() => {
                                       if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
-                                        return <img src={site.iconValue} alt={site.name} className="w-[24px] h-[24px] object-contain" onError={(e) => { (e.target as any).style.display = 'none'; }} />;
+                                        return <img key={site.iconValue} src={site.iconValue} alt={site.name} className="w-[24px] h-[24px] object-contain" onLoad={(e) => { (e.target as any).style.display = ''; }} onError={(e) => { (e.target as any).style.display = 'none'; }} />;
                                       }
                                       const IconComponent = IconMap[site.iconValue || 'Link'] || Link;
                                       return <IconComponent style={{ color: site.color || '#333', width: '24px', height: '24px' }} strokeWidth={2} />;
@@ -463,7 +463,7 @@ function GridItemInner({
       <div className="bg-card border border-border flex items-center justify-center shadow-md overflow-hidden pointer-events-none" style={{ width: `${iconSize}px`, height: `${iconSize}px`, borderRadius: borderRadiusCss }}>
         {(() => {
           if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
-            return <img src={site.iconValue} alt={site.name} style={{ width: '50%', height: '50%', objectFit: 'contain' }} onError={(e) => { (e.target as any).style.display = 'none'; }} />;
+            return <img key={site.iconValue} src={site.iconValue} alt={site.name} style={{ width: '50%', height: '50%', objectFit: 'contain' }} onLoad={(e) => { (e.target as any).style.display = ''; }} onError={(e) => { (e.target as any).style.display = 'none'; }} />;
           }
           const IconComponent = IconMap[site.iconValue || 'Link'] || Link;
           return <IconComponent style={{ color: site.color || '#333', width: `${iconSize * 0.5}px`, height: `${iconSize * 0.5}px` }} strokeWidth={2} />;

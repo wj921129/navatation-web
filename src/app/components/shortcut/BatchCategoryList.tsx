@@ -179,7 +179,7 @@ export function BatchCategoryList({
                                     ) : (
                                       (() => {
                                         if (site.iconType === 'CUSTOM_URL' || site.iconType === 'FAVICON' || site.iconType === 'CUSTOM_UPLOAD') {
-                                          return <img src={site.iconValue} alt={site.name} className="w-[24px] h-[24px] object-contain" onError={(e) => {
+                                          return <img key={site.iconValue} src={site.iconValue} alt={site.name} className="w-[24px] h-[24px] object-contain" onLoad={(e) => { (e.target as any).style.display = ''; }} onError={(e) => {
                                             (e.target as any).style.display = 'none';
                                           }} />;
                                         }
