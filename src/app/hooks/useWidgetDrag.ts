@@ -43,6 +43,8 @@ export function useWidgetDrag({
   const menuDragStartPosRef = useRef({ x: 0, y: 0 })
   const menuDragHasMovedRef = useRef(false)
   const menuDraggingStyleRef = useRef<WidgetStyle>(null)
+  
+  const rafRef = useRef<number | null>(null)
 
   const getWidgetDimensions = (style: WidgetStyle) => {
     let w = 220,
@@ -94,25 +96,31 @@ export function useWidgetDrag({
       return
     }
 
-    const dx = e.clientX - menuDragStartPosRef.current.x
-    const dy = e.clientY - menuDragStartPosRef.current.y
-    const distance = Math.sqrt(dx * dx + dy * dy)
-
-    if (distance > 5) {
-      if (!menuDragHasMovedRef.current) {
-        triggerCloseClock()
-      }
-      menuDragHasMovedRef.current = true
-      setMenuDragHasMoved(true)
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current)
     }
 
-    const { w, h } = getWidgetDimensions(style)
-    let newX = e.clientX - w / 2
-    let newY = e.clientY - h / 2
-    newX = Math.max(0, Math.min(newX, window.innerWidth - w))
-    newY = Math.max(0, Math.min(newY, window.innerHeight - h))
+    rafRef.current = requestAnimationFrame(() => {
+      const dx = e.clientX - menuDragStartPosRef.current.x
+      const dy = e.clientY - menuDragStartPosRef.current.y
+      const distance = Math.sqrt(dx * dx + dy * dy)
 
-    setMenuDragPos({ x: newX, y: newY })
+      if (distance > 5) {
+        if (!menuDragHasMovedRef.current) {
+          triggerCloseClock()
+        }
+        menuDragHasMovedRef.current = true
+        setMenuDragHasMoved(true)
+      }
+
+      const { w, h } = getWidgetDimensions(style)
+      let newX = e.clientX - w / 2
+      let newY = e.clientY - h / 2
+      newX = Math.max(0, Math.min(newX, window.innerWidth - w))
+      newY = Math.max(0, Math.min(newY, window.innerHeight - h))
+
+      setMenuDragPos({ x: newX, y: newY })
+    })
   }, [])
 
   const handleMenuDragUp = useCallback(
@@ -197,16 +205,23 @@ export function useWidgetDrag({
       if (!activeDraggingId || !activeDraggingStyleRef.current) {
         return
       }
-      const { w, h } = getWidgetDimensions(activeDraggingStyleRef.current)
-      const newX = Math.max(0, Math.min(e.clientX - dragOffset.x, window.innerWidth - w))
-      const newY = Math.max(0, Math.min(e.clientY - dragOffset.y, window.innerHeight - h))
 
-      lastDragPosRef.current = { x: newX, y: newY }
-      updateWidgetPosition(
-        activeDraggingId,
-        (newX / window.innerWidth) * 100,
-        (newY / window.innerHeight) * 100,
-      )
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current)
+      }
+
+      rafRef.current = requestAnimationFrame(() => {
+        const { w, h } = getWidgetDimensions(activeDraggingStyleRef.current!)
+        const newX = Math.max(0, Math.min(e.clientX - dragOffset.x, window.innerWidth - w))
+        const newY = Math.max(0, Math.min(e.clientY - dragOffset.y, window.innerHeight - h))
+
+        lastDragPosRef.current = { x: newX, y: newY }
+        updateWidgetPosition(
+          activeDraggingId,
+          (newX / window.innerWidth) * 100,
+          (newY / window.innerHeight) * 100,
+        )
+      })
     },
     [activeDraggingId, dragOffset, updateWidgetPosition],
   )

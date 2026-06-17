@@ -95,12 +95,28 @@ export function AddShortcutDialog({
           }))
           setCategories(mapped)
         } else {
-          setCategories(recommendedCategories)
+          setCategories(
+            recommendedCategories.map((cat) => ({
+              ...cat,
+              sites: cat.sites.map((site) => ({
+                ...site,
+                dragId: site.name || Math.random().toString(36).substring(7),
+              })),
+            })),
+          )
         }
       })
       .catch((err) => {
         console.error('Failed to load recommended sites:', err)
-        setCategories(recommendedCategories)
+        setCategories(
+          recommendedCategories.map((cat) => ({
+            ...cat,
+            sites: cat.sites.map((site) => ({
+              ...site,
+              dragId: site.name || Math.random().toString(36).substring(7),
+            })),
+          })),
+        )
       })
   }
 

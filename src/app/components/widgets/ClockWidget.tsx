@@ -98,7 +98,7 @@ export default function ClockWidget({
     <div
       ref={containerRef}
       onPointerDown={handlePointerDown}
-      className={`absolute select-none z-20 group touch-none isolate transition-all duration-300 ease-in-out ${
+      className={`absolute select-none z-20 group touch-none isolate ${isDragging ? '!transition-none' : 'transition-all duration-300 ease-in-out'} ${
         isClosing ? 'scale-50 opacity-0' : 'scale-100 opacity-100'
       } ${isEditMode ? 'cursor-pointer' : ''}`}
       style={{
