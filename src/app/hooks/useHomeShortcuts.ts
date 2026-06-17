@@ -80,16 +80,18 @@ export function useHomeShortcuts(authState: { isLoggedIn: boolean; user: any }) 
     try {
       // 1. 删除的项
       const deleted = homeShortcuts.filter(s => s.id && !tempHomeShortcuts.some(t => t.id === s.id));
-      // 2. 修改的项
-      const updated = tempHomeShortcuts.filter(t => {
+      // 2. 修改的项（包含属性修改和顺序修改）
+      const updated = tempHomeShortcuts.filter((t, index) => {
         if (!t.id) return false;
-        const original = homeShortcuts.find(s => s.id === t.id);
+        const originalIndex = homeShortcuts.findIndex(s => s.id === t.id);
+        const original = homeShortcuts[originalIndex];
         return original && (
           original.name !== t.name ||
           original.url !== t.url ||
           original.iconType !== t.iconType ||
           original.iconValue !== t.iconValue ||
-          original.color !== t.color
+          original.color !== t.color ||
+          originalIndex !== index
         );
       });
       // 3. 新增的项
@@ -98,24 +100,30 @@ export function useHomeShortcuts(authState: { isLoggedIn: boolean; user: any }) 
       // 4. 并发执行删除与更新
       const writePromises: Promise<any>[] = [
         ...deleted.map(s => navService.deleteHomeShortcut(s.id)),
-        ...updated.map(t => navService.updateHomeShortcut(t.id, {
-          name: t.name,
-          url: t.url,
-          iconType: t.iconType,
-          iconValue: t.iconValue,
-          iconColor: t.color,
-        })),
+        ...updated.map(t => {
+          const newIndex = tempHomeShortcuts.findIndex(temp => temp.id === t.id);
+          return navService.updateHomeShortcut(t.id, {
+            name: t.name,
+            url: t.url,
+            iconType: t.iconType,
+            iconValue: t.iconValue,
+            iconColor: t.color,
+            sortOrder: newIndex,
+          });
+        }),
       ];
       await Promise.all(writePromises);
 
       // 5. 逐一创建新增项
       for (const s of added) {
+        const newIndex = tempHomeShortcuts.findIndex(temp => temp === s);
         await navService.addHomeShortcut({
           name: s.name,
           url: s.url,
           iconType: s.iconType,
           iconValue: s.iconValue,
           iconColor: s.color,
+          sortOrder: newIndex,
         });
       }
 
