@@ -1,14 +1,14 @@
-import { X, Play, Pause, RotateCcw, Coffee, Briefcase } from 'lucide-react';
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { Briefcase, Coffee, Pause, Play, RotateCcw, X } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface PomodoroWidgetProps {
-  id: string;
-  x: number;
-  y: number;
-  isEditMode: boolean;
-  onStartDrag: (id: string, type: string, offsetX: number, offsetY: number) => void;
-  onDelete: (id: string) => void;
-  isDragging?: boolean;
+  id: string
+  x: number
+  y: number
+  isEditMode: boolean
+  onStartDrag: (id: string, type: string, offsetX: number, offsetY: number) => void
+  onDelete: (id: string) => void
+  isDragging?: boolean
 }
 
 /**
@@ -23,60 +23,60 @@ export default function PomodoroWidget({
   onDelete,
   isDragging = false,
 }: PomodoroWidgetProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isClosing, setIsClosing] = useState(false);
-  const [mode, setMode] = useState<'work' | 'break'>('work');
-  const [timeLeft, setTimeLeft] = useState(25 * 60);
-  const [isRunning, setIsRunning] = useState(false);
-  
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [isClosing, setIsClosing] = useState(false)
+  const [mode, setMode] = useState<'work' | 'break'>('work')
+  const [timeLeft, setTimeLeft] = useState(25 * 60)
+  const [isRunning, setIsRunning] = useState(false)
+
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   /**
    * 切换计时器运行状态
    */
   const toggleTimer = useCallback(() => {
-    setIsRunning(prev => !prev);
-  }, []);
+    setIsRunning((prev) => !prev)
+  }, [])
 
   /**
    * 重置计时器
    */
   const resetTimer = useCallback(() => {
-    setIsRunning(false);
-    setTimeLeft(mode === 'work' ? 25 * 60 : 5 * 60);
-  }, [mode]);
+    setIsRunning(false)
+    setTimeLeft(mode === 'work' ? 25 * 60 : 5 * 60)
+  }, [mode])
 
   /**
    * 切换工作/休息模式
    */
   const switchMode = useCallback(() => {
-    const newMode = mode === 'work' ? 'break' : 'work';
-    setMode(newMode);
-    setIsRunning(false);
-    setTimeLeft(newMode === 'work' ? 25 * 60 : 5 * 60);
-  }, [mode]);
+    const newMode = mode === 'work' ? 'break' : 'work'
+    setMode(newMode)
+    setIsRunning(false)
+    setTimeLeft(newMode === 'work' ? 25 * 60 : 5 * 60)
+  }, [mode])
 
   useEffect(() => {
     if (isRunning) {
       timerRef.current = setInterval(() => {
-        setTimeLeft(prev => {
+        setTimeLeft((prev) => {
           if (prev <= 1) {
-            setIsRunning(false);
+            setIsRunning(false)
             // 这里可以加入提示音或通知
-            return 0;
+            return 0
           }
-          return prev - 1;
-        });
-      }, 1000);
+          return prev - 1
+        })
+      }, 1000)
     } else if (timerRef.current) {
-      clearInterval(timerRef.current);
+      clearInterval(timerRef.current)
     }
     return () => {
       if (timerRef.current) {
-        clearInterval(timerRef.current);
+        clearInterval(timerRef.current)
       }
-    };
-  }, [isRunning]);
+    }
+  }, [isRunning])
 
   /**
    * 处理指针按下事件，用于拖拽
@@ -84,25 +84,25 @@ export default function PomodoroWidget({
    */
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isEditMode) {
-      return;
+      return
     }
-    const target = e.target as HTMLElement;
+    const target = e.target as HTMLElement
     if (target.closest('.no-drag')) {
-      return;
+      return
     }
 
-    e.preventDefault();
-    const container = containerRef.current;
+    e.preventDefault()
+    const container = containerRef.current
     if (!container) {
-      return;
+      return
     }
 
-    const rect = container.getBoundingClientRect();
-    const offsetX = e.clientX - rect.left;
-    const offsetY = e.clientY - rect.top;
+    const rect = container.getBoundingClientRect()
+    const offsetX = e.clientX - rect.left
+    const offsetY = e.clientY - rect.top
 
-    onStartDrag(id, 'pomodoro', offsetX, offsetY);
-  };
+    onStartDrag(id, 'pomodoro', offsetX, offsetY)
+  }
 
   /**
    * 格式化时间为 mm:ss
@@ -110,13 +110,13 @@ export default function PomodoroWidget({
    * @returns 格式化后的字符串
    */
   const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  };
+    const m = Math.floor(seconds / 60)
+    const s = seconds % 60
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+  }
 
-  const totalSeconds = mode === 'work' ? 25 * 60 : 5 * 60;
-  const progress = ((totalSeconds - timeLeft) / totalSeconds) * 100;
+  const totalSeconds = mode === 'work' ? 25 * 60 : 5 * 60
+  const progress = ((totalSeconds - timeLeft) / totalSeconds) * 100
 
   return (
     <div
@@ -124,9 +124,7 @@ export default function PomodoroWidget({
       onPointerDown={handlePointerDown}
       className={`absolute select-none z-20 group touch-none isolate transition-all duration-300 ease-in-out ${
         isClosing ? 'scale-50 opacity-0' : 'scale-100 opacity-100'
-      } ${
-        isEditMode ? 'cursor-pointer' : ''
-      }`}
+      } ${isEditMode ? 'cursor-pointer' : ''}`}
       style={{
         left: `${x}%`,
         top: `${y}%`,
@@ -143,8 +141,8 @@ export default function PomodoroWidget({
       {isEditMode && (
         <button
           onClick={() => {
-            setIsClosing(true);
-            setTimeout(() => onDelete(id), 300);
+            setIsClosing(true)
+            setTimeout(() => onDelete(id), 300)
           }}
           className="no-drag absolute -top-2.5 -right-2.5 w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg flex items-center justify-center cursor-pointer scale-0 group-hover:scale-100 transition-all duration-200 z-30"
           aria-label="删除番茄钟"
@@ -158,11 +156,18 @@ export default function PomodoroWidget({
           <span className="text-[10px] font-medium tracking-wider text-text-secondary uppercase">
             {mode === 'work' ? '专注时间' : '休息时间'}
           </span>
-          <button onClick={switchMode} className="no-drag text-text-secondary hover:text-text-primary transition-colors cursor-pointer">
-            {mode === 'work' ? <Coffee className="w-3.5 h-3.5" /> : <Briefcase className="w-3.5 h-3.5" />}
+          <button
+            onClick={switchMode}
+            className="no-drag text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+          >
+            {mode === 'work' ? (
+              <Coffee className="w-3.5 h-3.5" />
+            ) : (
+              <Briefcase className="w-3.5 h-3.5" />
+            )}
           </button>
         </div>
-        
+
         <div className="relative w-[110px] h-[110px] flex flex-col items-center justify-center">
           {/* 进度环 */}
           <svg className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none">
@@ -185,7 +190,7 @@ export default function PomodoroWidget({
               strokeWidth="4"
               strokeLinecap="round"
               strokeDasharray={48 * 2 * Math.PI}
-              strokeDashoffset={(48 * 2 * Math.PI) * (1 - progress / 100)}
+              strokeDashoffset={48 * 2 * Math.PI * (1 - progress / 100)}
               style={{ transition: 'stroke-dashoffset 1s linear' }}
             />
           </svg>
@@ -214,5 +219,5 @@ export default function PomodoroWidget({
         </div>
       </div>
     </div>
-  );
+  )
 }

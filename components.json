@@ -1,0 +1,40 @@
+{
+  // shadcn UI CLI 配置文件 schema
+  "$schema": "https://ui.shadcn.com/schema.json",
+  // shadcn 官方设计的组件风格
+  "style": "new-york",
+  // 项目不使用 React Server Components，故设为 false
+  "rsc": false,
+  // 启用 tsx 格式生成代码
+  "tsx": true,
+  // Tailwind CSS 配置关联
+  "tailwind": {
+    // 项目使用 Tailwind v4.x，通过 Vite 插件配置，故无需单独的配置文件路径
+    "config": "",
+    // 全局样式入口文件路径
+    "css": "src/styles/global.css",
+    // 基础颜色设定
+    "baseColor": "zinc",
+    // 启用 CSS 变量，便于实现主题灵活切换
+    "cssVariables": true
+  },
+  // 路径映射别名，自动匹配并在导入组件时还原，对齐项目 src 下的文件架构
+  "aliases": {
+    "components": "@/app/components",
+    "utils": "@/app/components/ui/utils",
+    "ui": "@/app/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/app/hooks"
+  },
+  // 配置第三方注册表 (Registries)，支持直接拉取 Aceternity UI 与 Magic UI 组件
+  "registries": {
+    // 注册 Aceternity UI 组件源
+    "@aceternity": {
+      "url": "https://ui.aceternity.com/registry"
+    },
+    // 注册 Magic UI 组件源
+    "@magicui": {
+      "url": "https://magicui.design/r"
+    }
+  }
+}

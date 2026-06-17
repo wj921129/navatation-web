@@ -1,25 +1,25 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { widgetService } from '../services/widget-service';
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { widgetService } from '../services/widget-service'
 
 /**
  * WidgetItem 组件/功能描述
  */
 export interface WidgetItem {
-  id: string;
-  type: string; // e.g., 'clock'
-  style: string; // e.g., 'analog' | 'digital' | 'flip' | 'traditional'
-  x: number; // percentage from left (0 - 100)
-  y: number; // percentage from top (0 - 100)
-  meta?: Record<string, any>;
+  id: string
+  type: string // e.g., 'clock'
+  style: string // e.g., 'analog' | 'digital' | 'flip' | 'traditional'
+  x: number // percentage from left (0 - 100)
+  y: number // percentage from top (0 - 100)
+  meta?: Record<string, any>
 }
 
 /**
  * AuthState 组件/功能描述
  */
 export interface AuthState {
-  isLoggedIn: boolean;
-  user?: any;
-  loading?: boolean;
+  isLoggedIn: boolean
+  user?: any
+  loading?: boolean
 }
 
 /**
@@ -34,20 +34,20 @@ export interface AuthState {
 export function useWidgets(isEditMode: boolean, authState: AuthState) {
   // 保存组件的主状态
   const [widgets, setWidgets] = useState<WidgetItem[]>(() => {
-    const savedWidgets = localStorage.getItem('navatation_widgets');
+    const savedWidgets = localStorage.getItem('navatation_widgets')
     if (savedWidgets) {
       try {
-        return JSON.parse(savedWidgets);
+        return JSON.parse(savedWidgets)
       } catch (e) {
-        console.error('Failed to parse saved widgets, resetting to empty', e);
+        console.error('Failed to parse saved widgets, resetting to empty', e)
       }
     }
 
     // 历史数据兼容：自动迁移旧版 navatation_clocks
-    const savedClocks = localStorage.getItem('navatation_clocks');
+    const savedClocks = localStorage.getItem('navatation_clocks')
     if (savedClocks) {
       try {
-        const clocks = JSON.parse(savedClocks);
+        const clocks = JSON.parse(savedClocks)
         if (Array.isArray(clocks)) {
           const migrated: WidgetItem[] = clocks.map((clock) => ({
             id: clock.id || `clock-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
@@ -56,22 +56,22 @@ export function useWidgets(isEditMode: boolean, authState: AuthState) {
             x: clock.x,
             y: clock.y,
             meta: {},
-          }));
-          localStorage.setItem('navatation_widgets', JSON.stringify(migrated));
-          return migrated;
+          }))
+          localStorage.setItem('navatation_widgets', JSON.stringify(migrated))
+          return migrated
         }
       } catch (e) {
-        console.error('Failed to migrate historic clocks to widgets', e);
+        console.error('Failed to migrate historic clocks to widgets', e)
       }
     }
 
-    return [];
-  });
+    return []
+  })
 
   // 保存组件的编辑态草稿状态
-  const [tempWidgets, setTempWidgets] = useState<WidgetItem[]>([]);
+  const [tempWidgets, setTempWidgets] = useState<WidgetItem[]>([])
   // 用于记录前一次的登录状态，用以检测从未登录向登录的过渡
-  const prevIsLoggedInRef = useRef(authState.isLoggedIn);
+  const prevIsLoggedInRef = useRef(authState.isLoggedIn)
 
   /**
    * 拉取云端组件数据，并执行本地游客数据迁移上云或覆写本地缓存
@@ -79,24 +79,24 @@ export function useWidgets(isEditMode: boolean, authState: AuthState) {
   const fetchWidgets = useCallback(async () => {
     // 卫语句：若用户未登录，不拉取云端数据，直接返回
     if (!authState.isLoggedIn) {
-      return;
+      return
     }
 
     // 在进行异步操作前，同步记录当前是否为未登录切换到登录态
-    const isTransitioningLogin = !prevIsLoggedInRef.current;
+    const isTransitioningLogin = !prevIsLoggedInRef.current
 
     try {
       // 从后端接口拉取最新的云端小组件配置
-      const res = await widgetService.getWidgets();
-      
+      const res = await widgetService.getWidgets()
+
       // 卫语句：若响应失败，直接返回
       if (res.code !== 200) {
-        return;
+        return
       }
 
       // 获取当前 LocalStorage 中的本地缓存组件数据（主要用于游客态迁移）
-      const local = localStorage.getItem('navatation_widgets');
-      const localWidgets: WidgetItem[] = local ? JSON.parse(local) : [];
+      const local = localStorage.getItem('navatation_widgets')
+      const localWidgets: WidgetItem[] = local ? JSON.parse(local) : []
 
       // 卫语句判断：如果属于首次从游客态切换至登录态，且云端数据为空但本地有添加的组件数据，则自动迁移数据上云
       if (isTransitioningLogin && res.data.length === 0 && localWidgets.length > 0) {
@@ -106,13 +106,13 @@ export function useWidgets(isEditMode: boolean, authState: AuthState) {
           x: w.x,
           y: w.y,
           meta: w.meta ?? {},
-        }));
-        
+        }))
+
         // 调用接口全量保存组件，实现无缝上云
-        await widgetService.saveWidgets(uploadPayload);
-        
+        await widgetService.saveWidgets(uploadPayload)
+
         // 迁移保存后，再次重新拉取以获取含有后端权威 ID 的最新列表
-        const finalRes = await widgetService.getWidgets();
+        const finalRes = await widgetService.getWidgets()
         if (finalRes.code === 200) {
           const loaded = finalRes.data.map((w) => ({
             id: w.widgetId ?? `clock-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
@@ -121,11 +121,11 @@ export function useWidgets(isEditMode: boolean, authState: AuthState) {
             x: Number(w.x),
             y: Number(w.y),
             meta: w.meta ?? {},
-          }));
-          setWidgets(loaded);
-          localStorage.setItem('navatation_widgets', JSON.stringify(loaded));
+          }))
+          setWidgets(loaded)
+          localStorage.setItem('navatation_widgets', JSON.stringify(loaded))
         }
-        return;
+        return
       }
 
       // 正常流程：直接使用云端权威数据覆写本地 state 与 LocalStorage 缓存
@@ -136,64 +136,67 @@ export function useWidgets(isEditMode: boolean, authState: AuthState) {
         x: Number(w.x),
         y: Number(w.y),
         meta: w.meta ?? {},
-      }));
-      setWidgets(loaded);
-      localStorage.setItem('navatation_widgets', JSON.stringify(loaded));
+      }))
+      setWidgets(loaded)
+      localStorage.setItem('navatation_widgets', JSON.stringify(loaded))
     } catch (err) {
       // 捕获网络请求等异步错误，防异常逃逸
-      console.error('[useWidgets] 同步云端组件配置出错:', err);
+      console.error('[useWidgets] 同步云端组件配置出错:', err)
     }
-  }, [authState.isLoggedIn]);
+  }, [authState.isLoggedIn])
 
   // 监听登录态变化，处理拉取与迁移
   useEffect(() => {
     // 卫语句：若已登录，执行拉取云端组件逻辑
     if (authState.isLoggedIn) {
-      fetchWidgets();
-      prevIsLoggedInRef.current = true;
-      return;
+      fetchWidgets()
+      prevIsLoggedInRef.current = true
+      return
     }
-    
+
     // 卫语句：若之前是登录态而现在退出了，则清空内存状态与 LocalStorage 缓存
     if (prevIsLoggedInRef.current) {
-      localStorage.removeItem('navatation_widgets');
-      setWidgets([]);
-      setTempWidgets([]);
+      localStorage.removeItem('navatation_widgets')
+      setWidgets([])
+      setTempWidgets([])
     }
-    prevIsLoggedInRef.current = false;
-  }, [authState.isLoggedIn, fetchWidgets]);
+    prevIsLoggedInRef.current = false
+  }, [authState.isLoggedIn, fetchWidgets])
 
   // 进入编辑模式时，同步备份当前生效 of 组件数据到临时草稿态
   useEffect(() => {
     // 卫语句：若未开启编辑模式，则无需同步，直接返回
     if (!isEditMode) {
-      return;
+      return
     }
-    setTempWidgets(widgets.map((w) => ({ ...w, meta: w.meta ? { ...w.meta } : {} })));
-  }, [isEditMode, widgets]);
+    setTempWidgets(widgets.map((w) => ({ ...w, meta: w.meta ? { ...w.meta } : {} })))
+  }, [isEditMode, widgets])
 
-  const persistWidgets = useCallback(async (data: WidgetItem[]) => {
-    localStorage.setItem('navatation_widgets', JSON.stringify(data));
-    if (!authState.isLoggedIn) {
-      return;
-    }
-    try {
-      const uploadPayload = data.map((w) => {
-        const widgetId = w.id.startsWith('WG') ? w.id : undefined;
-        return {
-          widgetId,
-          type: w.type,
-          style: w.style,
-          x: w.x,
-          y: w.y,
-          meta: w.meta ?? {},
-        };
-      });
-      await widgetService.saveWidgets(uploadPayload);
-    } catch (err) {
-      console.error('[useWidgets] 保存云端组件配置出错:', err);
-    }
-  }, [authState.isLoggedIn]);
+  const persistWidgets = useCallback(
+    async (data: WidgetItem[]) => {
+      localStorage.setItem('navatation_widgets', JSON.stringify(data))
+      if (!authState.isLoggedIn) {
+        return
+      }
+      try {
+        const uploadPayload = data.map((w) => {
+          const widgetId = w.id.startsWith('WG') ? w.id : undefined
+          return {
+            widgetId,
+            type: w.type,
+            style: w.style,
+            x: w.x,
+            y: w.y,
+            meta: w.meta ?? {},
+          }
+        })
+        await widgetService.saveWidgets(uploadPayload)
+      } catch (err) {
+        console.error('[useWidgets] 保存云端组件配置出错:', err)
+      }
+    },
+    [authState.isLoggedIn],
+  )
 
   /**
    * 新增组件至草稿态或生效态
@@ -207,68 +210,75 @@ export function useWidgets(isEditMode: boolean, authState: AuthState) {
         x: initialX,
         y: initialY,
         meta,
-      };
-      
+      }
+
       if (isEditMode) {
-        setTempWidgets((prev) => [...prev, newWidget]);
+        setTempWidgets((prev) => [...prev, newWidget])
       } else {
         setWidgets((prev) => {
-          const next = [...prev, newWidget];
-          persistWidgets(next);
-          return next;
-        });
+          const next = [...prev, newWidget]
+          persistWidgets(next)
+          return next
+        })
       }
-      return newWidget.id;
+      return newWidget.id
     },
-    [isEditMode, persistWidgets]
-  );
+    [isEditMode, persistWidgets],
+  )
 
   /**
    * 删除组件
    */
-  const removeWidget = useCallback((id: string) => {
-    if (isEditMode) {
-      setTempWidgets((prev) => prev.filter((w) => w.id !== id));
-    } else {
-      setWidgets((prev) => {
-        const next = prev.filter((w) => w.id !== id);
-        persistWidgets(next);
-        return next;
-      });
-    }
-  }, [isEditMode, persistWidgets]);
+  const removeWidget = useCallback(
+    (id: string) => {
+      if (isEditMode) {
+        setTempWidgets((prev) => prev.filter((w) => w.id !== id))
+      } else {
+        setWidgets((prev) => {
+          const next = prev.filter((w) => w.id !== id)
+          persistWidgets(next)
+          return next
+        })
+      }
+    },
+    [isEditMode, persistWidgets],
+  )
 
   /**
    * 更新组件位置
    */
-  const updateWidgetPosition = useCallback((id: string, x: number, y: number) => {
-    if (isEditMode) {
-      setTempWidgets((prev) =>
-        prev.map((w) => (w.id === id ? { ...w, x, y } : w))
-      );
-    } else {
-      setWidgets((prev) =>
-        prev.map((w) => (w.id === id ? { ...w, x, y } : w))
-      );
-    }
-  }, [isEditMode]);
+  const updateWidgetPosition = useCallback(
+    (id: string, x: number, y: number) => {
+      if (isEditMode) {
+        setTempWidgets((prev) => prev.map((w) => (w.id === id ? { ...w, x, y } : w)))
+      } else {
+        setWidgets((prev) => prev.map((w) => (w.id === id ? { ...w, x, y } : w)))
+      }
+    },
+    [isEditMode],
+  )
 
   /**
    * 更新组件的 meta 数据（例如天气组件的选定城市）
    */
-  const updateWidgetMeta = useCallback((id: string, metaUpdater: (prevMeta: Record<string, any>) => Record<string, any>) => {
-    if (isEditMode) {
-      setTempWidgets((prev) =>
-        prev.map((w) => (w.id === id ? { ...w, meta: metaUpdater(w.meta || {}) } : w))
-      );
-    } else {
-      setWidgets((prev) => {
-        const next = prev.map((w) => (w.id === id ? { ...w, meta: metaUpdater(w.meta || {}) } : w));
-        persistWidgets(next);
-        return next;
-      });
-    }
-  }, [isEditMode, persistWidgets]);
+  const updateWidgetMeta = useCallback(
+    (id: string, metaUpdater: (prevMeta: Record<string, any>) => Record<string, any>) => {
+      if (isEditMode) {
+        setTempWidgets((prev) =>
+          prev.map((w) => (w.id === id ? { ...w, meta: metaUpdater(w.meta || {}) } : w)),
+        )
+      } else {
+        setWidgets((prev) => {
+          const next = prev.map((w) =>
+            w.id === id ? { ...w, meta: metaUpdater(w.meta || {}) } : w,
+          )
+          persistWidgets(next)
+          return next
+        })
+      }
+    },
+    [isEditMode, persistWidgets],
+  )
 
   /**
    * 保存组件配置
@@ -276,24 +286,24 @@ export function useWidgets(isEditMode: boolean, authState: AuthState) {
   const saveWidgets = useCallback(async () => {
     if (isEditMode) {
       setTempWidgets((prevTemp) => {
-        setWidgets(prevTemp);
-        persistWidgets(prevTemp);
-        return prevTemp;
-      });
+        setWidgets(prevTemp)
+        persistWidgets(prevTemp)
+        return prevTemp
+      })
     } else {
       setWidgets((prevWidgets) => {
-        persistWidgets(prevWidgets);
-        return prevWidgets;
-      });
+        persistWidgets(prevWidgets)
+        return prevWidgets
+      })
     }
-  }, [isEditMode, persistWidgets]);
+  }, [isEditMode, persistWidgets])
 
   /**
    * 取消编辑，丢弃临时草稿并从当前生效的 widgets 列表中重置回滚
    */
   const cancelWidgets = useCallback(() => {
-    setTempWidgets(widgets.map((w) => ({ ...w, meta: w.meta ? { ...w.meta } : {} })));
-  }, [widgets]);
+    setTempWidgets(widgets.map((w) => ({ ...w, meta: w.meta ? { ...w.meta } : {} })))
+  }, [widgets])
 
   return {
     widgets,
@@ -306,6 +316,5 @@ export function useWidgets(isEditMode: boolean, authState: AuthState) {
     updateWidgetMeta,
     saveWidgets,
     cancelWidgets,
-  };
+  }
 }
-

@@ -3,19 +3,19 @@
  * 描述：应用右下角操作栏（编辑、设置、账号等按钮）
  * 创建时间：2026-06-09
  */
-import { Plus, Edit3, Save, Settings, User, LayoutGrid } from 'lucide-react';
-import { Tooltip } from '../ui/Tooltip';
+import { Edit3, LayoutGrid, Plus, Save, Settings, User } from 'lucide-react'
+import { Tooltip } from '../ui/Tooltip'
 
 interface BottomRightDockProps {
-  isEditMode: boolean;
-  authState: any;
-  handleCancelEdits: () => void;
-  handleSaveEdits: () => void;
-  handleStartEdit: () => void;
-  handleOpenSettings: () => void;
-  setIsLogoutConfirmOpen: (val: boolean) => void;
-  setIsLoginOpen: (val: boolean) => void;
-  setIsManageHomepageOpen: (val: boolean) => void;
+  isEditMode: boolean
+  authState: any
+  handleCancelEdits: () => void
+  handleSaveEdits: () => void
+  handleStartEdit: () => void
+  handleOpenSettings: () => void
+  setIsLogoutConfirmOpen: (val: boolean) => void
+  setIsLoginOpen: (val: boolean) => void
+  setIsManageHomepageOpen: (val: boolean) => void
 }
 
 export function BottomRightDock({
@@ -27,7 +27,7 @@ export function BottomRightDock({
   handleOpenSettings,
   setIsLogoutConfirmOpen,
   setIsLoginOpen,
-  setIsManageHomepageOpen
+  setIsManageHomepageOpen,
 }: BottomRightDockProps) {
   return (
     <div className="fixed bottom-8 right-8 flex items-center gap-4 z-30">
@@ -91,13 +91,17 @@ export function BottomRightDock({
           </Tooltip>
 
           {/* Account Button */}
-          <Tooltip content={authState.isLoggedIn ? "账号设置" : "登录/注册"} side="top">
+          <Tooltip content={authState.isLoggedIn ? '账号设置' : '登录/注册'} side="top">
             <button
-              onClick={() => authState.isLoggedIn ? setIsLogoutConfirmOpen(true) : setIsLoginOpen(true)}
+              onClick={() =>
+                authState.isLoggedIn ? setIsLogoutConfirmOpen(true) : setIsLoginOpen(true)
+              }
               className="w-12 h-12 rounded-full glass-button flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-lg hover:shadow-xl relative"
             >
               {authState.isLoggedIn && authState.user ? (
-                <span className="text-white text-sm font-medium">{authState.user.username.charAt(0).toUpperCase()}</span>
+                <span className="text-white text-sm font-medium">
+                  {authState.user.username.charAt(0).toUpperCase()}
+                </span>
               ) : (
                 <User className="w-5 h-5 text-white" />
               )}
@@ -109,5 +113,5 @@ export function BottomRightDock({
         </>
       )}
     </div>
-  );
+  )
 }

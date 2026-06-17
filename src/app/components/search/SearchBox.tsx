@@ -2,53 +2,61 @@
  * @description 搜索框组件
  * @date 2026-06-09
  */
-import { Search } from 'lucide-react';
-import { useState } from 'react';
-import { SearchEngineSelect, searchEngines } from './SearchEngineSelect';
-import { Tooltip } from '../ui/Tooltip';
+import { Search } from 'lucide-react'
+import { useState } from 'react'
+import { Tooltip } from '../ui/Tooltip'
+import { SearchEngineSelect, searchEngines } from './SearchEngineSelect'
 
 interface SearchBoxProps {
-  searchEngine: string;
-  onSearchEngineChange: (engine: string) => void;
-  onAiSearch?: (query: string, engine: string) => void;
+  searchEngine: string
+  onSearchEngineChange: (engine: string) => void
+  onAiSearch?: (query: string, engine: string) => void
   settings: {
-    searchBoxWidth: number;
-    searchBoxHeight: number;
-    iconsMarginTop: number;
-  };
+    searchBoxWidth: number
+    searchBoxHeight: number
+    iconsMarginTop: number
+  }
 }
 
 /**
  * 隔离搜索输入框状态的局部组件，防止打字输入时导致整个 App 巨型组件频繁重渲染。
  */
-export function SearchBox({ searchEngine, onSearchEngineChange, onAiSearch, settings }: SearchBoxProps) {
-  const [query, setQuery] = useState('');
+export function SearchBox({
+  searchEngine,
+  onSearchEngineChange,
+  onAiSearch,
+  settings,
+}: SearchBoxProps) {
+  const [query, setQuery] = useState('')
 
   /**
    * 处理搜索提交事件
    */
   const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmedQuery = query.trim();
+    e.preventDefault()
+    const trimmedQuery = query.trim()
     if (!trimmedQuery) {
-      return;
+      return
     }
 
-    const engine = searchEngines.find(ev => ev.value === searchEngine);
+    const engine = searchEngines.find((ev) => ev.value === searchEngine)
     if (!engine) {
-      return;
+      return
     }
 
     if (engine.url.startsWith('ai://')) {
-      onAiSearch?.(trimmedQuery, engine.value);
+      onAiSearch?.(trimmedQuery, engine.value)
     } else {
-      window.open(`${engine.url}${encodeURIComponent(trimmedQuery)}`, '_blank');
+      window.open(`${engine.url}${encodeURIComponent(trimmedQuery)}`, '_blank')
     }
-  };
+  }
 
   return (
     <form onSubmit={handleSearch} style={{ marginBottom: `${settings.iconsMarginTop}px` }}>
-      <div className="relative mx-auto flex items-center" style={{ width: `${settings.searchBoxWidth}%` }}>
+      <div
+        className="relative mx-auto flex items-center"
+        style={{ width: `${settings.searchBoxWidth}%` }}
+      >
         <div className="relative w-full">
           <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10">
             <SearchEngineSelect value={searchEngine} onChange={onSearchEngineChange} />
@@ -74,6 +82,5 @@ export function SearchBox({ searchEngine, onSearchEngineChange, onAiSearch, sett
         </div>
       </div>
     </form>
-  );
+  )
 }
-

@@ -2,40 +2,40 @@
  * @description 前端自定义钩子：useSettings.ts
  * @date 2026-06-10
  */
-import { useState, useCallback, useEffect } from 'react';
-import { toast } from 'sonner';
-import { settingsService } from '../services/settings-service';
-import { DEFAULT_SETTINGS, DEFAULT_WALLPAPER } from '../../config/app.config';
+import { useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
+import { DEFAULT_SETTINGS, DEFAULT_WALLPAPER } from '../../config/app.config'
+import { settingsService } from '../services/settings-service'
 
 export function useSettings(
   authState: any,
   theme: string,
   setTheme: (theme: string) => void,
   searchEngine: string,
-  setSearchEngine: (engine: string) => void
+  setSearchEngine: (engine: string) => void,
 ) {
   const [backgroundImage, setBackgroundImage] = useState(() => {
-    return localStorage.getItem('navatation_wallpaper') ?? DEFAULT_WALLPAPER;
-  });
-  
+    return localStorage.getItem('navatation_wallpaper') ?? DEFAULT_WALLPAPER
+  })
+
   const [settings, setSettings] = useState(() => {
-    const local = localStorage.getItem('navatation_settings');
+    const local = localStorage.getItem('navatation_settings')
     if (local) {
       try {
-        return { ...DEFAULT_SETTINGS, ...JSON.parse(local) };
+        return { ...DEFAULT_SETTINGS, ...JSON.parse(local) }
       } catch {
-        return DEFAULT_SETTINGS;
+        return DEFAULT_SETTINGS
       }
     }
-    return DEFAULT_SETTINGS;
-  });
+    return DEFAULT_SETTINGS
+  })
 
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
   // 草稿备份
-  const [backupSettings, setBackupSettings] = useState<any>(null);
-  const [backupBackgroundImage, setBackupBackgroundImage] = useState('');
-  const [backupTheme, setBackupTheme] = useState('');
+  const [backupSettings, setBackupSettings] = useState<any>(null)
+  const [backupBackgroundImage, setBackupBackgroundImage] = useState('')
+  const [backupTheme, setBackupTheme] = useState('')
 
   /**
    * 获取用户的个性化设置。
@@ -43,17 +43,17 @@ export function useSettings(
    */
   const fetchSettings = useCallback(async () => {
     if (!authState.isLoggedIn) {
-      return;
+      return
     }
-    
+
     try {
       // 请求用户个性化配置接口
-      const res = await settingsService.getSettings();
+      const res = await settingsService.getSettings()
       if (res?.code !== 200 || !res?.data) {
-        return;
+        return
       }
-      
-      const data = res.data;
+
+      const data = res.data
       const serverSettings = {
         searchBoxWidth: data.searchBoxWidth,
         searchBoxHeight: data.searchBoxHeight,
@@ -66,131 +66,143 @@ export function useSettings(
         textSize: data.textSize,
         iconsMarginTop: data.iconsMarginTop,
         iconsMarginX: data.iconsMarginX ?? 0,
-      };
+      }
       // 更新前端对应的主题与尺寸配置并缓存至本地
-      setSettings(serverSettings);
-      localStorage.setItem('navatation_settings', JSON.stringify(serverSettings));
-      
+      setSettings(serverSettings)
+      localStorage.setItem('navatation_settings', JSON.stringify(serverSettings))
+
       // 单独更新背景图和默认搜索引擎
       if (data.backgroundImage) {
-        setBackgroundImage(data.backgroundImage);
-        localStorage.setItem('navatation_wallpaper', data.backgroundImage);
+        setBackgroundImage(data.backgroundImage)
+        localStorage.setItem('navatation_wallpaper', data.backgroundImage)
       }
       if (data.searchEngine) {
-        setSearchEngine(data.searchEngine);
-        localStorage.setItem('navatation_search_engine', data.searchEngine);
+        setSearchEngine(data.searchEngine)
+        localStorage.setItem('navatation_search_engine', data.searchEngine)
       }
     } catch (err) {
-      console.error('Failed to fetch settings', err);
-      toast.error('拉取个性化设置失败');
+      console.error('Failed to fetch settings', err)
+      toast.error('拉取个性化设置失败')
     }
-  }, [authState.isLoggedIn, setSearchEngine]);
+  }, [authState.isLoggedIn, setSearchEngine])
 
   // 当登录状态改变时，自动拉取后端配置，并在登出时回滚至本地或默认配置
   useEffect(() => {
     if (authState.isLoggedIn) {
-      fetchSettings();
+      fetchSettings()
     } else {
-      const local = localStorage.getItem('navatation_settings');
+      const local = localStorage.getItem('navatation_settings')
       if (local) {
         try {
-          setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(local) });
+          setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(local) })
         } catch {
-          setSettings(DEFAULT_SETTINGS);
+          setSettings(DEFAULT_SETTINGS)
         }
       } else {
-        setSettings(DEFAULT_SETTINGS);
+        setSettings(DEFAULT_SETTINGS)
       }
-      const localWallpaper = localStorage.getItem('navatation_wallpaper');
-      setBackgroundImage(localWallpaper || DEFAULT_WALLPAPER);
+      const localWallpaper = localStorage.getItem('navatation_wallpaper')
+      setBackgroundImage(localWallpaper || DEFAULT_WALLPAPER)
     }
-  }, [authState.isLoggedIn, fetchSettings]);
+  }, [authState.isLoggedIn, fetchSettings])
 
   /**
    * 打开设置面板，备份当前生效状态以供取消时回滚。
    */
   const handleOpenSettings = useCallback(() => {
-    setBackupSettings(settings);
-    setBackupBackgroundImage(backgroundImage);
-    setBackupTheme(theme || 'light');
-    setIsSettingsOpen(true);
-  }, [settings, backgroundImage, theme]);
+    setBackupSettings(settings)
+    setBackupBackgroundImage(backgroundImage)
+    setBackupTheme(theme || 'light')
+    setIsSettingsOpen(true)
+  }, [settings, backgroundImage, theme])
 
   /**
    * 关闭设置面板（不保存），回滚所有预览配置。
    */
   const handleCloseSettings = useCallback(() => {
-    if (backupSettings !== null) { setSettings(backupSettings); }
-    if (backupBackgroundImage) { setBackgroundImage(backupBackgroundImage); }
-    if (backupTheme) { setTheme(backupTheme); }
-    setIsSettingsOpen(false);
-  }, [backupSettings, backupBackgroundImage, backupTheme, setTheme]);
+    if (backupSettings !== null) {
+      setSettings(backupSettings)
+    }
+    if (backupBackgroundImage) {
+      setBackgroundImage(backupBackgroundImage)
+    }
+    if (backupTheme) {
+      setTheme(backupTheme)
+    }
+    setIsSettingsOpen(false)
+  }, [backupSettings, backupBackgroundImage, backupTheme, setTheme])
 
   /**
    * 实时预览设置（不落盘、不保存到数据库）。
    */
-  const handlePreviewSettings = useCallback((previewSettings: any, previewBg: string, previewTheme: string) => {
-    setSettings(previewSettings);
-    setBackgroundImage(previewBg);
-    setTheme(previewTheme);
-  }, [setTheme]);
+  const handlePreviewSettings = useCallback(
+    (previewSettings: any, previewBg: string, previewTheme: string) => {
+      setSettings(previewSettings)
+      setBackgroundImage(previewBg)
+      setTheme(previewTheme)
+    },
+    [setTheme],
+  )
 
   /**
    * 保存个性化设置。
    * 支持本地草稿批量保存及后端持久化。
    */
-  const handleSaveSettings = useCallback(async (draftSettings: any, draftBackgroundImage: string, draftTheme: string) => {
-    // 1. 同步更新前端生效状态与本地缓存
-    setSettings(draftSettings);
-    localStorage.setItem('navatation_settings', JSON.stringify(draftSettings));
-    setBackgroundImage(draftBackgroundImage);
-    localStorage.setItem('navatation_wallpaper', draftBackgroundImage);
-    setTheme(draftTheme);
+  const handleSaveSettings = useCallback(
+    async (draftSettings: any, draftBackgroundImage: string, draftTheme: string) => {
+      // 1. 同步更新前端生效状态与本地缓存
+      setSettings(draftSettings)
+      localStorage.setItem('navatation_settings', JSON.stringify(draftSettings))
+      setBackgroundImage(draftBackgroundImage)
+      localStorage.setItem('navatation_wallpaper', draftBackgroundImage)
+      setTheme(draftTheme)
 
-    // 2. 异步保存至后端数据库 (若登录)
-    if (authState.isLoggedIn) {
-      try {
-        await settingsService.saveSettings({
-          ...draftSettings,
-          backgroundImage: draftBackgroundImage,
-          backgroundType: 'URL',
-          searchEngine: searchEngine,
-          theme: draftTheme
-        });
-      } catch (err) {
-        console.error('Save settings error:', err);
-        toast.error('保存个性化设置失败');
+      // 2. 异步保存至后端数据库 (若登录)
+      if (authState.isLoggedIn) {
+        try {
+          await settingsService.saveSettings({
+            ...draftSettings,
+            backgroundImage: draftBackgroundImage,
+            backgroundType: 'URL',
+            searchEngine: searchEngine,
+            theme: draftTheme,
+          })
+        } catch (err) {
+          console.error('Save settings error:', err)
+          toast.error('保存个性化设置失败')
+        }
       }
-    }
 
-    // 3. 清除备份数据并关闭对话框
-    setBackupSettings(null);
-    setBackupBackgroundImage('');
-    setBackupTheme('');
-    setIsSettingsOpen(false);
-  }, [authState.isLoggedIn, searchEngine, setTheme]);
+      // 3. 清除备份数据并关闭对话框
+      setBackupSettings(null)
+      setBackupBackgroundImage('')
+      setBackupTheme('')
+      setIsSettingsOpen(false)
+    },
+    [authState.isLoggedIn, searchEngine, setTheme],
+  )
 
   /**
    * 随机更换壁纸
    */
   const handleRandomWallpaper = useCallback(async () => {
     try {
-      const res = await settingsService.getRandomWallpaper();
+      const res = await settingsService.getRandomWallpaper()
       if (res?.code !== 200 || !res?.data) {
-        return;
+        return
       }
-      
-      const newBg = res.data.wallpaperUrl;
-      setBackgroundImage(newBg);
-      localStorage.setItem('navatation_wallpaper', newBg);
+
+      const newBg = res.data.wallpaperUrl
+      setBackgroundImage(newBg)
+      localStorage.setItem('navatation_wallpaper', newBg)
       if (authState.isLoggedIn) {
-        await settingsService.patchSettings({ backgroundImage: newBg });
+        await settingsService.patchSettings({ backgroundImage: newBg })
       }
     } catch (err) {
-      console.error('Failed to trigger random wallpaper', err);
-      toast.error('随机更换壁纸失败');
+      console.error('Failed to trigger random wallpaper', err)
+      toast.error('随机更换壁纸失败')
     }
-  }, [authState.isLoggedIn]);
+  }, [authState.isLoggedIn])
 
   return {
     backgroundImage,
@@ -205,5 +217,5 @@ export function useSettings(
     handlePreviewSettings,
     handleSaveSettings,
     handleRandomWallpaper,
-  };
+  }
 }

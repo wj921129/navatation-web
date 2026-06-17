@@ -2,20 +2,20 @@
  * @description 可拖拽快捷方式组件
  * @date 2026-06-09
  */
-import { X as XIcon } from 'lucide-react';
-import { IconMap } from '../ui/IconMap';
+import { X as XIcon } from 'lucide-react'
+import { IconMap } from '../ui/IconMap'
 
 interface DraggableShortcutProps {
-  shortcut: any;
-  index: number;
-  moveShortcut: (from: number, to: number) => void;
-  iconInnerSize: number;
-  iconSize: number;
-  iconRadius: number;
-  iconTextGap: number;
-  textSize: number;
-  onEdit: () => void;
-  onDelete: () => void;
+  shortcut: any
+  index: number
+  moveShortcut: (from: number, to: number) => void
+  iconInnerSize: number
+  iconSize: number
+  iconRadius: number
+  iconTextGap: number
+  textSize: number
+  onEdit: () => void
+  onDelete: () => void
 }
 
 /**
@@ -44,9 +44,9 @@ export function DraggableShortcut({
       {/* 删除按钮 */}
       <button
         onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onDelete();
+          e.preventDefault()
+          e.stopPropagation()
+          onDelete()
         }}
         className="absolute -top-2 -right-2 z-10 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center shadow-lg transition-all"
       >
@@ -67,26 +67,34 @@ export function DraggableShortcut({
           }}
         >
           {(() => {
-            if (shortcut.iconType === 'CUSTOM_URL' || shortcut.iconType === 'FAVICON' || shortcut.iconType === 'CUSTOM_UPLOAD') {
+            if (
+              shortcut.iconType === 'CUSTOM_URL' ||
+              shortcut.iconType === 'FAVICON' ||
+              shortcut.iconType === 'CUSTOM_UPLOAD'
+            ) {
               return (
                 <img
                   src={shortcut.iconValue}
                   alt={shortcut.name}
                   style={{ width: '50%', height: '50%', objectFit: 'contain' }}
                 />
-              );
+              )
             }
-            let IconComp = IconMap.Link;
-            const iconName = shortcut.iconValue;
+            let IconComp = IconMap.Link
+            const iconName = shortcut.iconValue
             if (iconName && IconMap[iconName]) {
-              IconComp = IconMap[iconName];
+              IconComp = IconMap[iconName]
             }
             return (
               <IconComp
-                style={{ color: shortcut.color || '#333', width: `${iconInnerSize}px`, height: `${iconInnerSize}px` }}
+                style={{
+                  color: shortcut.color || '#333',
+                  width: `${iconInnerSize}px`,
+                  height: `${iconInnerSize}px`,
+                }}
                 strokeWidth={2}
               />
-            );
+            )
           })()}
         </div>
         <span
@@ -97,5 +105,5 @@ export function DraggableShortcut({
         </span>
       </div>
     </div>
-  );
+  )
 }

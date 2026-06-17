@@ -2,23 +2,28 @@
  * @description 前端UI组件：ClockWidget.tsx
  * @date 2026-06-10
  */
-import { X } from 'lucide-react';
-import { useRef, useState } from 'react';
-import AnalogClock from './AnalogClock';
-import DigitalClock from './DigitalClock';
-import FlipClock from './FlipClock';
-import FlipClockSeconds from './FlipClockSeconds';
-import TraditionalClock from './TraditionalClock';
+import { X } from 'lucide-react'
+import { useRef, useState } from 'react'
+import AnalogClock from './AnalogClock'
+import DigitalClock from './DigitalClock'
+import FlipClock from './FlipClock'
+import FlipClockSeconds from './FlipClockSeconds'
+import TraditionalClock from './TraditionalClock'
 
 interface ClockWidgetProps {
-  id: string;
-  style: 'analog' | 'digital' | 'flip' | 'flip-seconds' | 'traditional';
-  x: number; // percentage from left
-  y: number; // percentage from top
-  isEditMode: boolean;
-  onStartDrag: (id: string, style: 'analog' | 'digital' | 'flip' | 'flip-seconds' | 'traditional', offsetX: number, offsetY: number) => void;
-  onDelete: (id: string) => void;
-  isDragging?: boolean; // 新增可选属性，代表当前时钟是否正在被拖拽
+  id: string
+  style: 'analog' | 'digital' | 'flip' | 'flip-seconds' | 'traditional'
+  x: number // percentage from left
+  y: number // percentage from top
+  isEditMode: boolean
+  onStartDrag: (
+    id: string,
+    style: 'analog' | 'digital' | 'flip' | 'flip-seconds' | 'traditional',
+    offsetX: number,
+    offsetY: number,
+  ) => void
+  onDelete: (id: string) => void
+  isDragging?: boolean // 新增可选属性，代表当前时钟是否正在被拖拽
 }
 
 /**
@@ -35,8 +40,8 @@ export default function ClockWidget({
   onDelete,
   isDragging = false, // 解构并默认赋值为 false
 }: ClockWidgetProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isClosing, setIsClosing] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [isClosing, setIsClosing] = useState(false)
 
   /**
    * 指针按下开始拖动处理器
@@ -44,29 +49,29 @@ export default function ClockWidget({
    */
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isEditMode) {
-      return;
+      return
     }
-    const target = e.target as HTMLElement;
+    const target = e.target as HTMLElement
     if (target.closest('.delete-clock-btn')) {
-      return;
+      return
     }
 
-    e.preventDefault();
-    const container = containerRef.current;
+    e.preventDefault()
+    const container = containerRef.current
     if (!container) {
-      return;
+      return
     }
 
     // 记录初始按下时指针坐标及组件边框尺寸
-    const rect = container.getBoundingClientRect();
+    const rect = container.getBoundingClientRect()
 
     // 鼠标在组件内部的相对偏置偏移量
-    const offsetX = e.clientX - rect.left;
-    const offsetY = e.clientY - rect.top;
+    const offsetX = e.clientX - rect.left
+    const offsetY = e.clientY - rect.top
 
     // 触发全局拖拽开始回调，传入时钟样式
-    onStartDrag(id, style, offsetX, offsetY);
-  };
+    onStartDrag(id, style, offsetX, offsetY)
+  }
 
   /**
    * 根据样式渲染具体时钟组件
@@ -75,19 +80,19 @@ export default function ClockWidget({
   const renderClockStyle = () => {
     switch (style) {
       case 'analog':
-        return <AnalogClock />;
+        return <AnalogClock />
       case 'digital':
-        return <DigitalClock />;
+        return <DigitalClock />
       case 'flip':
-        return <FlipClock />;
+        return <FlipClock />
       case 'flip-seconds':
-        return <FlipClockSeconds />;
+        return <FlipClockSeconds />
       case 'traditional':
-        return <TraditionalClock />;
+        return <TraditionalClock />
       default:
-        return null;
+        return null
     }
-  };
+  }
 
   return (
     <div
@@ -95,9 +100,7 @@ export default function ClockWidget({
       onPointerDown={handlePointerDown}
       className={`absolute select-none z-20 group touch-none isolate transition-all duration-300 ease-in-out ${
         isClosing ? 'scale-50 opacity-0' : 'scale-100 opacity-100'
-      } ${
-        isEditMode ? 'cursor-pointer' : ''
-      }`}
+      } ${isEditMode ? 'cursor-pointer' : ''}`}
       style={{
         left: `${x}%`,
         top: `${y}%`,
@@ -118,8 +121,8 @@ export default function ClockWidget({
       {isEditMode && (
         <button
           onClick={() => {
-            setIsClosing(true);
-            setTimeout(() => onDelete(id), 300);
+            setIsClosing(true)
+            setTimeout(() => onDelete(id), 300)
           }}
           className="delete-clock-btn absolute -top-2.5 -right-2.5 w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg flex items-center justify-center cursor-pointer scale-0 group-hover:scale-100 transition-all duration-200 z-30"
           aria-label="删除时钟"
@@ -131,5 +134,5 @@ export default function ClockWidget({
       {/* 渲染具体时钟样式 */}
       {renderClockStyle()}
     </div>
-  );
+  )
 }

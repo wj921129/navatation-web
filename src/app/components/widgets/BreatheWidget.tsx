@@ -1,15 +1,15 @@
-import { X } from 'lucide-react';
-import { useRef, useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion'
+import { X } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 
 interface BreatheWidgetProps {
-  id: string;
-  x: number;
-  y: number;
-  isEditMode: boolean;
-  onStartDrag: (id: string, type: string, offsetX: number, offsetY: number) => void;
-  onDelete: (id: string) => void;
-  isDragging?: boolean;
+  id: string
+  x: number
+  y: number
+  isEditMode: boolean
+  onStartDrag: (id: string, type: string, offsetX: number, offsetY: number) => void
+  onDelete: (id: string) => void
+  isDragging?: boolean
 }
 
 /**
@@ -24,40 +24,40 @@ export default function BreatheWidget({
   onDelete,
   isDragging = false,
 }: BreatheWidgetProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isClosing, setIsClosing] = useState(false);
-  const [phase, setPhase] = useState<'idle' | 'inhale' | 'hold' | 'exhale'>('idle');
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [isClosing, setIsClosing] = useState(false)
+  const [phase, setPhase] = useState<'idle' | 'inhale' | 'hold' | 'exhale'>('idle')
 
   // 在副作用中处理呼吸状态切换
   useEffect(() => {
     if (phase === 'idle') {
-      return;
+      return
     }
 
-    let timeout: NodeJS.Timeout;
+    let timeout: NodeJS.Timeout
     if (phase === 'inhale') {
-      timeout = setTimeout(() => setPhase('hold'), 4000); // 吸气 4 秒
+      timeout = setTimeout(() => setPhase('hold'), 4000) // 吸气 4 秒
     } else if (phase === 'hold') {
-      timeout = setTimeout(() => setPhase('exhale'), 4000); // 屏气 4 秒
+      timeout = setTimeout(() => setPhase('exhale'), 4000) // 屏气 4 秒
     } else if (phase === 'exhale') {
-      timeout = setTimeout(() => setPhase('inhale'), 4000); // 呼气 4 秒
+      timeout = setTimeout(() => setPhase('inhale'), 4000) // 呼气 4 秒
     }
 
     return () => {
-      clearTimeout(timeout);
-    };
-  }, [phase]);
+      clearTimeout(timeout)
+    }
+  }, [phase])
 
   /**
    * 切换呼吸状态
    */
   const toggleBreathe = () => {
     if (phase === 'idle') {
-      setPhase('inhale');
+      setPhase('inhale')
     } else {
-      setPhase('idle');
+      setPhase('idle')
     }
-  };
+  }
 
   /**
    * 处理指针按下事件，用于拖拽
@@ -65,25 +65,25 @@ export default function BreatheWidget({
    */
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isEditMode) {
-      return;
+      return
     }
-    const target = e.target as HTMLElement;
+    const target = e.target as HTMLElement
     if (target.closest('.no-drag')) {
-      return;
+      return
     }
 
-    e.preventDefault();
-    const container = containerRef.current;
+    e.preventDefault()
+    const container = containerRef.current
     if (!container) {
-      return;
+      return
     }
 
-    const rect = container.getBoundingClientRect();
-    const offsetX = e.clientX - rect.left;
-    const offsetY = e.clientY - rect.top;
+    const rect = container.getBoundingClientRect()
+    const offsetX = e.clientX - rect.left
+    const offsetY = e.clientY - rect.top
 
-    onStartDrag(id, 'breathe', offsetX, offsetY);
-  };
+    onStartDrag(id, 'breathe', offsetX, offsetY)
+  }
 
   /**
    * 获取当前呼吸阶段提示文本
@@ -91,18 +91,18 @@ export default function BreatheWidget({
    */
   const getPhaseText = () => {
     switch (phase) {
-      case 'idle': 
-        return '点击开始';
-      case 'inhale': 
-        return '吸气...';
-      case 'hold': 
-        return '屏气...';
-      case 'exhale': 
-        return '呼气...';
-      default: 
-        return '';
+      case 'idle':
+        return '点击开始'
+      case 'inhale':
+        return '吸气...'
+      case 'hold':
+        return '屏气...'
+      case 'exhale':
+        return '呼气...'
+      default:
+        return ''
     }
-  };
+  }
 
   return (
     <div
@@ -110,9 +110,7 @@ export default function BreatheWidget({
       onPointerDown={handlePointerDown}
       className={`absolute select-none z-20 group touch-none isolate transition-all duration-300 ease-in-out ${
         isClosing ? 'scale-50 opacity-0' : 'scale-100 opacity-100'
-      } ${
-        isEditMode ? 'cursor-pointer' : ''
-      }`}
+      } ${isEditMode ? 'cursor-pointer' : ''}`}
       style={{
         left: `${x}%`,
         top: `${y}%`,
@@ -129,8 +127,8 @@ export default function BreatheWidget({
       {isEditMode && (
         <button
           onClick={() => {
-            setIsClosing(true);
-            setTimeout(() => onDelete(id), 300);
+            setIsClosing(true)
+            setTimeout(() => onDelete(id), 300)
           }}
           className="no-drag absolute -top-2.5 -right-2.5 w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg flex items-center justify-center cursor-pointer scale-0 group-hover:scale-100 transition-all duration-200 z-30"
           aria-label="删除冥想组件"
@@ -139,7 +137,7 @@ export default function BreatheWidget({
         </button>
       )}
 
-      <div 
+      <div
         className="w-[160px] h-[160px] rounded-[2rem] widget-private-control flex flex-col items-center justify-center gap-2 cursor-pointer no-drag"
         onClick={toggleBreathe}
       >
@@ -148,11 +146,11 @@ export default function BreatheWidget({
             initial={false}
             animate={{
               scale: phase === 'inhale' || phase === 'hold' ? 1.5 : 0.8,
-              opacity: phase === 'idle' ? 0.3 : (phase === 'exhale' ? 0.5 : 1),
+              opacity: phase === 'idle' ? 0.3 : phase === 'exhale' ? 0.5 : 1,
             }}
             transition={{
               duration: 4,
-              ease: "easeInOut"
+              ease: 'easeInOut',
             }}
             className="absolute w-12 h-12 rounded-full bg-teal-400/40 blur-md"
           />
@@ -164,7 +162,7 @@ export default function BreatheWidget({
             }}
             transition={{
               duration: 4,
-              ease: "easeInOut"
+              ease: 'easeInOut',
             }}
             className="absolute w-12 h-12 rounded-full bg-teal-500/60 backdrop-blur-sm border border-teal-300/30 shadow-[0_0_15px_rgba(45,212,191,0.5)]"
           />
@@ -183,5 +181,5 @@ export default function BreatheWidget({
         </AnimatePresence>
       </div>
     </div>
-  );
+  )
 }

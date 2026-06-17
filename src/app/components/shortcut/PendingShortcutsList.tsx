@@ -1,14 +1,14 @@
-import { Trash2 } from 'lucide-react';
-import React from 'react';
+import { Trash2 } from 'lucide-react'
+import React from 'react'
 
 /**
  * 待添加捷径列表组件，展示当前选中的拟添加网站
  * 创建日期: 2026-06-09
  */
 interface PendingShortcutsListProps {
-  pendingShortcuts: any[];
-  iconRadius: number;
-  handleRemoveFromPending: (index: number) => void;
+  pendingShortcuts: any[]
+  iconRadius: number
+  handleRemoveFromPending: (index: number) => void
 }
 
 export function PendingShortcutsList({
@@ -37,11 +37,17 @@ export function PendingShortcutsList({
                     borderRadius: `${iconRadius}%`,
                   }}
                 >
-                  {shortcut.iconType === 'FAVICON' || shortcut.iconType === 'CUSTOM_URL' || shortcut.iconType === 'CUSTOM_UPLOAD' ? (
+                  {shortcut.iconType === 'FAVICON' ||
+                  shortcut.iconType === 'CUSTOM_URL' ||
+                  shortcut.iconType === 'CUSTOM_UPLOAD' ? (
                     <img
                       src={shortcut.iconValue}
                       alt={shortcut.name}
-                      style={{ width: '50%', height: '50%', objectFit: 'contain' }}
+                      style={{
+                        width: '50%',
+                        height: '50%',
+                        objectFit: 'contain',
+                      }}
                     />
                   ) : (
                     <shortcut.icon
@@ -55,8 +61,12 @@ export function PendingShortcutsList({
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-700 dark:text-gray-300 truncate">{shortcut.name}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{shortcut.url}</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 truncate">
+                    {shortcut.name}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    {shortcut.url}
+                  </p>
                 </div>
                 <button
                   onClick={() => handleRemoveFromPending(index)}
@@ -70,5 +80,5 @@ export function PendingShortcutsList({
         )}
       </div>
     </div>
-  );
+  )
 }

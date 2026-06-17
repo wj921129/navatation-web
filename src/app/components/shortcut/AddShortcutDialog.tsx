@@ -2,36 +2,40 @@
  * @description 前端UI组件：AddShortcutDialog.tsx
  * @date 2026-06-09
  */
-import React, { useState, useEffect } from 'react';
-import { X, Link, Check, Settings } from 'lucide-react';
-import { toast } from 'sonner';
-import { BaseModal } from '../ui/BaseModal';
-import { IconMap } from '../ui/IconMap';
-import { navService, IconType } from '../../services/nav-service';
-import { recommendedCategories, RecommendedSite, CategoryGroup } from '../../constants/recommendedSitesData';
 
-import { CustomShortcutTab } from './CustomShortcutTab';
-import { RecommendSiteItem } from './RecommendSiteItem';
-import { AdminDock } from './AdminDock';
-import { PendingShortcutsList } from './PendingShortcutsList';
-import { BatchCategoryList } from './BatchCategoryList';
-import { useCustomShortcut } from './useCustomShortcut';
-import { RecommendedTabGrid } from './RecommendedTabGrid';
-import { useBatchCategory } from './useBatchCategory';
-import { EditShortcutDialog } from './EditShortcutDialog';
-import { RecommendCategorySortDialog } from './RecommendCategorySortDialog';
+import { Check, Link, Settings, X } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
+import { toast } from 'sonner'
+import {
+  type CategoryGroup,
+  type RecommendedSite,
+  recommendedCategories,
+} from '../../constants/recommendedSitesData'
+import { type IconType, navService } from '../../services/nav-service'
+import { BaseModal } from '../ui/BaseModal'
+import { IconMap } from '../ui/IconMap'
+import { AdminDock } from './AdminDock'
+import { BatchCategoryList } from './BatchCategoryList'
+import { CustomShortcutTab } from './CustomShortcutTab'
+import { EditShortcutDialog } from './EditShortcutDialog'
+import { PendingShortcutsList } from './PendingShortcutsList'
+import { RecommendCategorySortDialog } from './RecommendCategorySortDialog'
+import { RecommendedTabGrid } from './RecommendedTabGrid'
+import { RecommendSiteItem } from './RecommendSiteItem'
+import { useBatchCategory } from './useBatchCategory'
+import { useCustomShortcut } from './useCustomShortcut'
 
 interface AddShortcutDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onAdd: (shortcuts: { name: string; icon: any; color: string; url: string }[]) => void;
-  iconSize: number;
-  iconRadius: number;
-  iconSpacingX?: number;
-  iconSpacingY?: number;
-  iconTextGap?: number;
-  textSize?: number;
-  userRole?: string;
+  isOpen: boolean
+  onClose: () => void
+  onAdd: (shortcuts: { name: string; icon: any; color: string; url: string }[]) => void
+  iconSize: number
+  iconRadius: number
+  iconSpacingX?: number
+  iconSpacingY?: number
+  iconTextGap?: number
+  textSize?: number
+  userRole?: string
 }
 
 export function AddShortcutDialog({
@@ -46,90 +50,93 @@ export function AddShortcutDialog({
   textSize = 12,
   userRole,
 }: AddShortcutDialogProps) {
-  const [activeTab, setActiveTab] = useState<'recommended' | 'custom'>('recommended');
-  const [isAdminMode, setIsAdminMode] = useState(false);
-  const [isGridAdmin, setIsGridAdmin] = useState(false);
-  const [pendingShortcuts, setPendingShortcuts] = useState<RecommendedSite[]>([]);
-  const [categories, setCategories] = useState<CategoryGroup[]>([]);
-  
+  const [activeTab, setActiveTab] = useState<'recommended' | 'custom'>('recommended')
+  const [isAdminMode, setIsAdminMode] = useState(false)
+  const [isGridAdmin, setIsGridAdmin] = useState(false)
+  const [pendingShortcuts, setPendingShortcuts] = useState<RecommendedSite[]>([])
+  const [categories, setCategories] = useState<CategoryGroup[]>([])
+
   const handleAddRecommendedToPending = (site: RecommendedSite) => {
-    setPendingShortcuts([...pendingShortcuts, site]);
-  };
-  
-  const customShortcutControls = useCustomShortcut(handleAddRecommendedToPending);
+    setPendingShortcuts([...pendingShortcuts, site])
+  }
+
+  const customShortcutControls = useCustomShortcut(handleAddRecommendedToPending)
 
   // 管理员编辑状态
-  const [editingCategory, setEditingCategory] = useState<any>(null);
-  const [editingSite, setEditingSite] = useState<any>(null);
-  const [isSortDialogOpen, setIsSortDialogOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<any>(null)
+  const [editingSite, setEditingSite] = useState<any>(null)
+  const [isSortDialogOpen, setIsSortDialogOpen] = useState(false)
 
   const loadRecommended = () => {
-    navService.getRecommended().then(res => {
-      if (res.code === 200 && res.data && res.data.length > 0) {
-        const mapped = res.data.map(cat => ({
-          categoryId: cat.categoryId,
-          category: cat.categoryName,
-          icon: IconMap[cat.categoryIcon] || IconMap.Folder,
-          iconType: 'BUILTIN',
-          iconValue: cat.categoryIcon,
-          sortOrder: cat.sortOrder,
-          sites: Array.isArray(cat.sites) ? cat.sites.map((site: any) => ({
-            siteId: site.siteId,
-            name: site.name,
-            url: site.url,
-            color: site.iconColor || '#333',
-            iconColor: site.iconColor || '#333',
-            icon: IconMap[site.iconValue] || IconMap.Link,
-            iconType: site.iconType,
-            iconValue: site.iconValue,
-            dragId: site.siteId || Math.random().toString(36).substring(7)
-          })) : []
-        }));
-        setCategories(mapped);
-      } else {
-        setCategories(recommendedCategories);
-      }
-    }).catch(err => {
-      console.error('Failed to load recommended sites:', err);
-      setCategories(recommendedCategories);
-    });
-  };
+    navService
+      .getRecommended()
+      .then((res) => {
+        if (res.code === 200 && res.data && res.data.length > 0) {
+          const mapped = res.data.map((cat) => ({
+            categoryId: cat.categoryId,
+            category: cat.categoryName,
+            icon: IconMap[cat.categoryIcon] || IconMap.Folder,
+            iconType: 'BUILTIN',
+            iconValue: cat.categoryIcon,
+            sortOrder: cat.sortOrder,
+            sites: Array.isArray(cat.sites)
+              ? cat.sites.map((site: any) => ({
+                  siteId: site.siteId,
+                  name: site.name,
+                  url: site.url,
+                  color: site.iconColor || '#333',
+                  iconColor: site.iconColor || '#333',
+                  icon: IconMap[site.iconValue] || IconMap.Link,
+                  iconType: site.iconType,
+                  iconValue: site.iconValue,
+                  dragId: site.siteId || Math.random().toString(36).substring(7),
+                }))
+              : [],
+          }))
+          setCategories(mapped)
+        } else {
+          setCategories(recommendedCategories)
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load recommended sites:', err)
+        setCategories(recommendedCategories)
+      })
+  }
 
-  const batchCategoryControls = useBatchCategory(categories, loadRecommended);
-  const { isBatchMode, setIsBatchMode, batchEditData, setBatchEditData } = batchCategoryControls;
+  const batchCategoryControls = useBatchCategory(categories, loadRecommended)
+  const { isBatchMode, setIsBatchMode, batchEditData, setBatchEditData } = batchCategoryControls
 
   useEffect(() => {
     if (isOpen) {
-      customShortcutControls.resetCustomState();
-      setActiveTab('recommended');
-      setIsAdminMode(false);
-      setIsGridAdmin(false);
-      setIsBatchMode(false);
-      setBatchEditData([]);
-      loadRecommended();
+      customShortcutControls.resetCustomState()
+      setActiveTab('recommended')
+      setIsAdminMode(false)
+      setIsGridAdmin(false)
+      setIsBatchMode(false)
+      setBatchEditData([])
+      loadRecommended()
     }
-  }, [isOpen]);
-
-
+  }, [isOpen])
 
   const handleRemoveFromPending = (index: number) => {
-    setPendingShortcuts(pendingShortcuts.filter((_, i) => i !== index));
-  };
+    setPendingShortcuts(pendingShortcuts.filter((_, i) => i !== index))
+  }
 
   const handleSave = () => {
     if (pendingShortcuts.length > 0) {
-      onAdd(pendingShortcuts);
-      setPendingShortcuts([]);
-      customShortcutControls.resetCustomState();
-      onClose();
+      onAdd(pendingShortcuts)
+      setPendingShortcuts([])
+      customShortcutControls.resetCustomState()
+      onClose()
     }
-  };
+  }
 
   const handleCancel = () => {
-    setPendingShortcuts([]);
-    customShortcutControls.resetCustomState();
-    onClose();
-  };
+    setPendingShortcuts([])
+    customShortcutControls.resetCustomState()
+    onClose()
+  }
 
   return (
     <>
@@ -193,18 +200,18 @@ export function AddShortcutDialog({
                   <button
                     onClick={() => {
                       if (!isAdminMode) {
-                        setIsAdminMode(true);
-                        setTimeout(() => setIsGridAdmin(true), 300);
+                        setIsAdminMode(true)
+                        setTimeout(() => setIsGridAdmin(true), 300)
                       } else {
-                        setIsAdminMode(false);
-                        setIsGridAdmin(false);
-                        batchCategoryControls.toggleBatchMode(false);
+                        setIsAdminMode(false)
+                        setIsGridAdmin(false)
+                        batchCategoryControls.toggleBatchMode(false)
                       }
                     }}
                     title={isAdminMode ? '退出管理模式' : '管理推荐网址'}
                     className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm border cursor-pointer ${
-                      isAdminMode 
-                        ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-400' 
+                      isAdminMode
+                        ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-400'
                         : 'bg-background hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-600 dark:text-gray-400 border-border'
                     }`}
                   >
@@ -240,12 +247,20 @@ export function AddShortcutDialog({
 
           <div className="flex-1 overflow-hidden">
             <div className="grid grid-cols-3 h-full">
-              <div className={`${isBatchMode ? 'col-span-3' : 'col-span-2'} border-r border-border overflow-y-scroll`}>
+              <div
+                className={`${isBatchMode ? 'col-span-3' : 'col-span-2'} border-r border-border overflow-y-scroll`}
+              >
                 {activeTab === 'recommended' ? (
                   <div className="p-6 space-y-8 relative">
                     {isBatchMode ? (
                       <div key="list-mode" className="space-y-8 relative">
-                        <input type="file" ref={batchCategoryControls.rowFileInputRef} onChange={batchCategoryControls.handleRowIconUpload} className="hidden" accept="image/*" />
+                        <input
+                          type="file"
+                          ref={batchCategoryControls.rowFileInputRef}
+                          onChange={batchCategoryControls.handleRowIconUpload}
+                          className="hidden"
+                          accept="image/*"
+                        />
                         <BatchCategoryList {...batchCategoryControls} />
                       </div>
                     ) : (
@@ -269,10 +284,7 @@ export function AddShortcutDialog({
                     )}
                   </div>
                 ) : (
-                  <CustomShortcutTab
-                    {...customShortcutControls}
-                    iconRadius={iconRadius}
-                  />
+                  <CustomShortcutTab {...customShortcutControls} iconRadius={iconRadius} />
                 )}
               </div>
 
@@ -300,21 +312,22 @@ export function AddShortcutDialog({
         }}
         onSave={(shortcut) => {
           if (!editingSite.categoryId) {
-            toast.warning('分类ID丢失，请刷新页面重试');
-            return;
+            toast.warning('分类ID丢失，请刷新页面重试')
+            return
           }
-          
-          setCategories(prev => {
-            const copy = [...prev];
-            const catIdx = copy.findIndex(c => c.categoryId === editingSite.categoryId);
-            if (catIdx === -1) return copy;
-            
+
+          setCategories((prev) => {
+            const copy = [...prev]
+            const catIdx = copy.findIndex((c) => c.categoryId === editingSite.categoryId)
+            if (catIdx === -1) return copy
+
             if (editingSite.siteId || editingSite.dragId) {
-              const siteIdx = copy[catIdx].sites.findIndex(s => 
-                (editingSite.siteId && s.siteId === editingSite.siteId) || 
-                (editingSite.dragId && s.dragId === editingSite.dragId)
-              );
-              
+              const siteIdx = copy[catIdx].sites.findIndex(
+                (s) =>
+                  (editingSite.siteId && s.siteId === editingSite.siteId) ||
+                  (editingSite.dragId && s.dragId === editingSite.dragId),
+              )
+
               if (siteIdx !== -1) {
                 copy[catIdx].sites[siteIdx] = {
                   ...copy[catIdx].sites[siteIdx],
@@ -322,7 +335,7 @@ export function AddShortcutDialog({
                   url: shortcut.url,
                   iconType: (shortcut.iconType || 'FAVICON') as IconType,
                   iconValue: shortcut.iconValue || '',
-                };
+                }
               }
             } else {
               copy[catIdx].sites.push({
@@ -332,12 +345,12 @@ export function AddShortcutDialog({
                 iconValue: shortcut.iconValue || '',
                 color: '#4285F4',
                 icon: Link,
-                dragId: Math.random().toString(36).substring(7)
-              });
+                dragId: Math.random().toString(36).substring(7),
+              })
             }
-            return copy;
-          });
-          setEditingSite(null);
+            return copy
+          })
+          setEditingSite(null)
         }}
       />
 
@@ -348,5 +361,5 @@ export function AddShortcutDialog({
         onSaveComplete={loadRecommended}
       />
     </>
-  );
+  )
 }

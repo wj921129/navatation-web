@@ -1,20 +1,20 @@
-import { Grid, List, Check, RotateCw, FolderCog } from 'lucide-react';
-import React, { useTransition } from 'react';
+import { Check, FolderCog, Grid, List, RotateCw } from 'lucide-react'
+import React, { useTransition } from 'react'
 
 /**
  * 管理员侧边栏操作组件，提供切换模式、保存、新增分类和批量刷新图标功能
  * 创建日期: 2026-06-09
  */
 interface AdminDockProps {
-  isBatchMode: boolean;
-  setIsBatchMode: (val: boolean) => void;
-  toggleBatchMode: (val?: boolean) => void;
-  handleSaveAllCategories: () => void;
-  setEditingCategory: (cat: any) => void;
-  categoriesLength: number;
-  handleBatchRefreshAllIcons: () => void;
-  isAllRefreshing: boolean;
-  onSortCategories: () => void;
+  isBatchMode: boolean
+  setIsBatchMode: (val: boolean) => void
+  toggleBatchMode: (val?: boolean) => void
+  handleSaveAllCategories: () => void
+  setEditingCategory: (cat: any) => void
+  categoriesLength: number
+  handleBatchRefreshAllIcons: () => void
+  isAllRefreshing: boolean
+  onSortCategories: () => void
 }
 
 export function AdminDock({
@@ -28,18 +28,17 @@ export function AdminDock({
   isAllRefreshing,
   onSortCategories,
 }: AdminDockProps) {
-  const [isPending, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition()
 
   return (
     <div className="interactive-glass-panel absolute top-8 -left-[71px] w-[72px] border border-border hover:border-border/80 border-r-0 rounded-l-3xl p-3 py-6 flex flex-col items-center gap-4 z-50 shadow-[-10px_10px_20px_-5px_rgba(0,0,0,0.08)] hover:shadow-[-12px_12px_24px_-5px_rgba(0,0,0,0.15)] dark:shadow-[-10px_10px_20px_-5px_rgba(0,0,0,0.5)] dark:hover:shadow-[-12px_12px_24px_-5px_rgba(0,0,0,0.7)] cursor-default">
-      
       {/* 模式切换 (图标/列表) */}
       <div className="group relative flex items-center justify-center">
         <button
           onClick={() => startTransition(() => toggleBatchMode())}
           className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm border cursor-pointer hover:scale-105 hover:shadow-md ${
-            !isBatchMode 
-              ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-400' 
+            !isBatchMode
+              ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-400'
               : 'bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-900/30 dark:border-indigo-800 dark:text-indigo-400'
           }`}
         >
@@ -66,8 +65,6 @@ export function AdminDock({
           <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 border-y-4 border-y-transparent border-r-4 border-r-gray-800/95" />
         </div>
       </div>
-
-
 
       {/* 一键刷新全部图标 */}
       {isBatchMode && (
@@ -101,7 +98,6 @@ export function AdminDock({
           <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 border-y-4 border-y-transparent border-r-4 border-r-gray-800/95" />
         </div>
       </div>
-
     </div>
-  );
+  )
 }

@@ -22,7 +22,15 @@ export default defineConfig({
     figmaAssetResolver(),
     // The React and Tailwind plugins are both required for Make, even if
     // Tailwind is not being actively used – do not remove them
-    react(),
+    react({
+      // 集成 React Compiler 自动优化 useMemo 和 useCallback
+      babel: {
+        plugins: [
+          // 适配 React 18 版本，必须指定 target 为 '18'
+          ['babel-plugin-react-compiler', { target: '18' }],
+        ],
+      },
+    }),
     tailwindcss(),
   ],
   resolve: {

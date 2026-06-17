@@ -1,16 +1,16 @@
-import React from 'react';
-import { BaseModal } from '../ui/BaseModal';
-import { Check, X } from 'lucide-react';
-import { IconMap } from '../ui/IconMap';
+import { Check, X } from 'lucide-react'
+import React from 'react'
+import { BaseModal } from '../ui/BaseModal'
+import { IconMap } from '../ui/IconMap'
 
 /**
  * 分类编辑弹窗组件，用于新增或修改推荐分类
  * 创建日期: 2026-06-09
  */
 interface AdminCategoryModalProps {
-  editingCategory: any;
-  setEditingCategory: (cat: any) => void;
-  onSaveCategory: (cat: any) => void;
+  editingCategory: any
+  setEditingCategory: (cat: any) => void
+  onSaveCategory: (cat: any) => void
 }
 
 export function AdminCategoryModal({
@@ -18,13 +18,13 @@ export function AdminCategoryModal({
   setEditingCategory,
   onSaveCategory,
 }: AdminCategoryModalProps) {
-  const isOpen = !!editingCategory;
+  const isOpen = !!editingCategory
 
   const handleSave = () => {
-    if (!editingCategory) return;
-    onSaveCategory(editingCategory);
-    setEditingCategory(null);
-  };
+    if (!editingCategory) return
+    onSaveCategory(editingCategory)
+    setEditingCategory(null)
+  }
 
   return (
     <BaseModal
@@ -36,27 +36,43 @@ export function AdminCategoryModal({
       overlayClassName="bg-black/50 backdrop-blur-sm"
       zIndex={70}
     >
-      <h3 className="text-lg font-medium mb-4">{editingCategory?.categoryId ? '编辑分类' : '新增分类'}</h3>
+      <h3 className="text-lg font-medium mb-4">
+        {editingCategory?.categoryId ? '编辑分类' : '新增分类'}
+      </h3>
       <div className="space-y-4">
         <div>
           <label className="text-sm text-gray-500 mb-1 block">分类名称</label>
-          <input 
-            type="text" 
-            className="w-full px-3 py-2 border rounded-lg bg-background outline-none focus:border-blue-500" 
-            value={editingCategory?.category || ''} 
-            onChange={e => editingCategory && setEditingCategory({...editingCategory, category: e.target.value})} 
+          <input
+            type="text"
+            className="w-full px-3 py-2 border rounded-lg bg-background outline-none focus:border-blue-500"
+            value={editingCategory?.category || ''}
+            onChange={(e) =>
+              editingCategory &&
+              setEditingCategory({
+                ...editingCategory,
+                category: e.target.value,
+              })
+            }
           />
         </div>
         <div>
           <label className="text-sm text-gray-500 mb-2 block flex items-center justify-between">
             <span>图标选择</span>
-            <span className="text-xs bg-gray-100 dark:bg-neutral-800 px-2 py-0.5 rounded text-gray-400">{editingCategory?.iconValue || 'Folder'}</span>
+            <span className="text-xs bg-gray-100 dark:bg-neutral-800 px-2 py-0.5 rounded text-gray-400">
+              {editingCategory?.iconValue || 'Folder'}
+            </span>
           </label>
           <div className="grid grid-cols-4 sm:grid-cols-5 gap-3 max-h-64 overflow-y-auto p-3 border rounded-xl bg-background scrollbar-thin">
             {Object.entries(IconMap).map(([iconName, IconComp]) => (
               <button
                 key={iconName}
-                onClick={() => editingCategory && setEditingCategory({...editingCategory, iconValue: iconName})}
+                onClick={() =>
+                  editingCategory &&
+                  setEditingCategory({
+                    ...editingCategory,
+                    iconValue: iconName,
+                  })
+                }
                 className={`flex items-center justify-center p-3 rounded-xl transition-all cursor-pointer ${
                   (editingCategory?.iconValue || 'Folder') === iconName
                     ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/50 shadow-sm ring-2 ring-blue-500/50'
@@ -69,16 +85,23 @@ export function AdminCategoryModal({
             ))}
           </div>
         </div>
-
       </div>
       <div className="mt-6 flex justify-end gap-3">
-        <button onClick={() => setEditingCategory(null)} className="w-10 h-10 flex items-center justify-center border rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors cursor-pointer" title="取消">
+        <button
+          onClick={() => setEditingCategory(null)}
+          className="w-10 h-10 flex items-center justify-center border rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+          title="取消"
+        >
           <X className="w-4 h-4" />
         </button>
-        <button onClick={handleSave} className="w-10 h-10 flex items-center justify-center bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer" title="保存">
+        <button
+          onClick={handleSave}
+          className="w-10 h-10 flex items-center justify-center bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
+          title="保存"
+        >
           <Check className="w-4 h-4" />
         </button>
       </div>
     </BaseModal>
-  );
+  )
 }

@@ -1,27 +1,27 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'
 
 /**
  * 模拟时钟 (Analog Clock)
  * 使用 SVG 渲染，玻璃拟态表盘配合平滑的刻度和指针设计。
  */
 export default function AnalogClock() {
-  const [time, setTime] = useState(new Date());
+  const [time, setTime] = useState(new Date())
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTime(new Date());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+      setTime(new Date())
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
 
-  const hours = time.getHours();
-  const minutes = time.getMinutes();
-  const seconds = time.getSeconds();
+  const hours = time.getHours()
+  const minutes = time.getMinutes()
+  const seconds = time.getSeconds()
 
   // 指针旋转角度计算
-  const hourDeg = ((hours % 12) * 30) + (minutes * 0.5);
-  const minuteDeg = (minutes * 6) + (seconds * 0.1);
-  const secondDeg = seconds * 6;
+  const hourDeg = (hours % 12) * 30 + minutes * 0.5
+  const minuteDeg = minutes * 6 + seconds * 0.1
+  const secondDeg = seconds * 6
 
   return (
     <div className="w-[160px] h-[160px] flex items-center justify-center rounded-full widget-private-clock relative select-none">
@@ -29,14 +29,14 @@ export default function AnalogClock() {
       <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
         {/* 12个点 */}
         {[...Array(12)].map((_, i) => {
-          const angle = (i * 30 * Math.PI) / 180;
-          const isMajor = i % 3 === 0;
-          const r1 = isMajor ? 38 : 40;
-          const r2 = 43;
-          const x1 = 50 + r1 * Math.cos(angle);
-          const y1 = 50 + r1 * Math.sin(angle);
-          const x2 = 50 + r2 * Math.cos(angle);
-          const y2 = 50 + r2 * Math.sin(angle);
+          const angle = (i * 30 * Math.PI) / 180
+          const isMajor = i % 3 === 0
+          const r1 = isMajor ? 38 : 40
+          const r2 = 43
+          const x1 = 50 + r1 * Math.cos(angle)
+          const y1 = 50 + r1 * Math.sin(angle)
+          const x2 = 50 + r2 * Math.cos(angle)
+          const y2 = 50 + r2 * Math.sin(angle)
 
           return (
             <line
@@ -51,7 +51,7 @@ export default function AnalogClock() {
                   : 'stroke-white/40 dark:stroke-white/30 stroke-[0.8]'
               }
             />
-          );
+          )
         })}
 
         {/* 时针 */}
@@ -93,7 +93,8 @@ export default function AnalogClock() {
             transformOrigin: '50px 50px',
             transform: `rotate(${secondDeg}deg)`,
             // 每秒顺滑 ticking 的弹簧阻尼过渡
-            transition: secondDeg === 0 ? 'none' : 'transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+            transition:
+              secondDeg === 0 ? 'none' : 'transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
           }}
         />
 
@@ -102,5 +103,5 @@ export default function AnalogClock() {
         <circle cx="50" cy="50" r="1.2" className="fill-red-500" />
       </svg>
     </div>
-  );
+  )
 }

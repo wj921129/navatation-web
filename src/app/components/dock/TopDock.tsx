@@ -2,22 +2,22 @@
  * @description 顶部停靠栏组件
  * @date 2026-06-09
  */
-import { CheckSquare, Shuffle, Sun, Moon, Loader2, LayoutGrid } from 'lucide-react';
-import { useState, useRef } from 'react';
-import { toast } from 'sonner';
-import { Tooltip } from '../ui/Tooltip';
+import { CheckSquare, LayoutGrid, Loader2, Moon, Shuffle, Sun } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { toast } from 'sonner'
+import { Tooltip } from '../ui/Tooltip'
 
 interface TopDockProps {
-  theme: string;
-  onToggleTodo: () => void;
-  onRandomWallpaper: () => Promise<void>;
-  onToggleTheme: () => void;
-  onMouseEnterTheme?: () => void;
-  onMouseLeaveTheme?: () => void;
-  brightnessPanel?: React.ReactNode;
-  onMouseEnterOtherWidget?: () => void;
-  isHoveringBrightness?: boolean;
-  onOpenWidgetGallery?: () => void;
+  theme: string
+  onToggleTodo: () => void
+  onRandomWallpaper: () => Promise<void>
+  onToggleTheme: () => void
+  onMouseEnterTheme?: () => void
+  onMouseLeaveTheme?: () => void
+  brightnessPanel?: React.ReactNode
+  onMouseEnterOtherWidget?: () => void
+  isHoveringBrightness?: boolean
+  onOpenWidgetGallery?: () => void
 }
 
 /**
@@ -34,98 +34,92 @@ export function TopDock({
   brightnessPanel,
   onMouseEnterOtherWidget,
   isHoveringBrightness = false,
-  onOpenWidgetGallery
+  onOpenWidgetGallery,
 }: TopDockProps) {
-  const [shuffling, setShuffling] = useState(false);
+  const [shuffling, setShuffling] = useState(false)
 
   // 苹果鱼眼放大效果 (macOS Dock Magnification Effect) 相关 Refs 和事件处理器
-  const containerRef = useRef<HTMLDivElement>(null);
-  const item1Ref = useRef<HTMLDivElement>(null);
-  const item2Ref = useRef<HTMLDivElement>(null);
-  const item3Ref = useRef<HTMLDivElement>(null);
-  const item4Ref = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null)
+  const item1Ref = useRef<HTMLDivElement>(null)
+  const item2Ref = useRef<HTMLDivElement>(null)
+  const item3Ref = useRef<HTMLDivElement>(null)
+  const item4Ref = useRef<HTMLDivElement>(null)
 
   /**
    * 处理鼠标在 Dock 上移动的特效计算
    */
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const container = containerRef.current;
+    const container = containerRef.current
     if (!container) {
-      return;
+      return
     }
 
-    const mouseX = e.clientX;
-    const items = [
-      item1Ref.current,
-      item2Ref.current,
-      item3Ref.current,
-      item4Ref.current
-    ].filter(Boolean);
+    const mouseX = e.clientX
+    const items = [item1Ref.current, item2Ref.current, item3Ref.current, item4Ref.current].filter(
+      Boolean,
+    )
 
     items.forEach((item) => {
       if (!item) {
-        return;
+        return
       }
-      const rect = item.getBoundingClientRect();
-      const itemCenterX = rect.left + rect.width / 2;
-      const distance = Math.abs(mouseX - itemCenterX);
+      const rect = item.getBoundingClientRect()
+      const itemCenterX = rect.left + rect.width / 2
+      const distance = Math.abs(mouseX - itemCenterX)
 
       // 鱼眼效果参数：最大放大倍数为 1.45 倍，影响范围为水平方向 80 像素内
-      const maxScale = 1.45;
-      const range = 80;
+      const maxScale = 1.45
+      const range = 80
 
-      let scale = 1.0;
+      let scale = 1.0
       if (distance < range) {
         // 使用余弦函数（平滑钟形曲线）实现类似苹果 Dock 栏的丝滑过渡
-        const t = distance / range;
-        scale = 1 + (maxScale - 1) * Math.cos((t * Math.PI) / 2);
+        const t = distance / range
+        scale = 1 + (maxScale - 1) * Math.cos((t * Math.PI) / 2)
       }
 
-      const iconWrapper = item.querySelector('.dock-icon-wrapper') as HTMLElement;
+      const iconWrapper = item.querySelector('.dock-icon-wrapper') as HTMLElement
       if (iconWrapper) {
-        iconWrapper.style.transform = `scale(${scale})`;
+        iconWrapper.style.transform = `scale(${scale})`
       }
-    });
-  };
+    })
+  }
 
   /**
    * 处理鼠标离开 Dock 的恢复特效
    */
   const handleMouseLeave = () => {
-    const items = [
-      item1Ref.current,
-      item2Ref.current,
-      item3Ref.current,
-      item4Ref.current
-    ].filter(Boolean);
+    const items = [item1Ref.current, item2Ref.current, item3Ref.current, item4Ref.current].filter(
+      Boolean,
+    )
     items.forEach((item) => {
       if (!item) {
-        return;
+        return
       }
-      const iconWrapper = item.querySelector('.dock-icon-wrapper') as HTMLElement;
+      const iconWrapper = item.querySelector('.dock-icon-wrapper') as HTMLElement
       if (iconWrapper) {
-        iconWrapper.style.transform = 'scale(1)';
+        iconWrapper.style.transform = 'scale(1)'
       }
-    });
-  };
+    })
+  }
 
   /**
    * 处理随机壁纸点击事件
    */
   const handleRandomWallpaperClick = async () => {
     if (shuffling) {
-      return;
+      return
     }
-    setShuffling(true);
+    setShuffling(true)
     try {
-      await onRandomWallpaper();
+      await onRandomWallpaper()
     } catch (error: any) {
-      toast.error(error?.message ?? '获取随机壁纸失败');
+      toast.error(error?.message ?? '获取随机壁纸失败')
     } finally {
       // 保持旋转动画至少 800ms，以防接口速度过快没有视觉动效
-      setTimeout(() => setShuffling(false), 800);
+      setTimeout(() => setShuffling(false), 800)
     }
-  };
+  }
 
   return (
     <div
@@ -146,7 +140,10 @@ export function TopDock({
             className="p-2 rounded-full text-text-secondary hover:text-text-primary hover:bg-input-bg transition-all duration-200 active:scale-95 flex items-center justify-center cursor-pointer"
             aria-label="待办事项"
           >
-            <span className="dock-icon-wrapper transition-transform duration-150 ease-out flex items-center justify-center" style={{ willChange: 'transform' }}>
+            <span
+              className="dock-icon-wrapper transition-transform duration-150 ease-out flex items-center justify-center"
+              style={{ willChange: 'transform' }}
+            >
               <CheckSquare className="w-4 h-4" />
             </span>
           </button>
@@ -164,7 +161,10 @@ export function TopDock({
             aria-label="随机壁纸"
             disabled={shuffling}
           >
-            <span className="dock-icon-wrapper transition-transform duration-150 ease-out flex items-center justify-center" style={{ willChange: 'transform' }}>
+            <span
+              className="dock-icon-wrapper transition-transform duration-150 ease-out flex items-center justify-center"
+              style={{ willChange: 'transform' }}
+            >
               {shuffling ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
@@ -178,14 +178,22 @@ export function TopDock({
       <div className="w-[1px] h-4 bg-widget-border" />
 
       {/* 快速主题切换小组件 */}
-      <div ref={item3Ref} className="relative group" onMouseEnter={onMouseEnterTheme} onMouseLeave={onMouseLeaveTheme}>
+      <div
+        ref={item3Ref}
+        className="relative group"
+        onMouseEnter={onMouseEnterTheme}
+        onMouseLeave={onMouseLeaveTheme}
+      >
         <Tooltip content="切换主题" side="bottom" className={isHoveringBrightness ? 'hidden' : ''}>
           <button
             onClick={onToggleTheme}
             className="p-2 rounded-full text-text-secondary hover:text-text-primary hover:bg-input-bg transition-all duration-200 active:scale-95 flex items-center justify-center cursor-pointer"
             aria-label="切换主题"
           >
-            <span className="dock-icon-wrapper transition-transform duration-150 ease-out flex items-center justify-center" style={{ willChange: 'transform' }}>
+            <span
+              className="dock-icon-wrapper transition-transform duration-150 ease-out flex items-center justify-center"
+              style={{ willChange: 'transform' }}
+            >
               {theme === 'dark' ? (
                 <Sun className="w-4 h-4 transition-transform duration-300 group-hover:rotate-12" />
               ) : (
@@ -200,17 +208,17 @@ export function TopDock({
       <>
         <div className="w-[1px] h-4 bg-widget-border" />
         {/* 小组件中心按钮 - 编辑模式下点击弹出画廊，非编辑模式下点击切换显示/隐藏 */}
-        <div
-          ref={item4Ref}
-          className="relative group"
-        >
+        <div ref={item4Ref} className="relative group">
           <Tooltip content="小组件中心" side="bottom">
             <button
               onClick={onOpenWidgetGallery}
               className={`p-2 rounded-full transition-all duration-200 active:scale-95 flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-input-bg cursor-pointer`}
               aria-label="小组件中心"
             >
-              <span className="dock-icon-wrapper transition-transform duration-150 ease-out flex items-center justify-center" style={{ willChange: 'transform' }}>
+              <span
+                className="dock-icon-wrapper transition-transform duration-150 ease-out flex items-center justify-center"
+                style={{ willChange: 'transform' }}
+              >
                 <LayoutGrid className="w-4 h-4" />
               </span>
             </button>
@@ -218,6 +226,5 @@ export function TopDock({
         </div>
       </>
     </div>
-  );
+  )
 }
-

@@ -1,24 +1,39 @@
-import { X } from 'lucide-react';
-import { useRef, useState } from 'react';
-import MonthCalendar from './MonthCalendar';
+import { X } from 'lucide-react'
+import { useRef, useState } from 'react'
+import MonthCalendar from './MonthCalendar'
 
 interface CalendarWidgetProps {
-  id: string;
-  style: 'month' | 'agenda' | string;
-  x: number;
-  y: number;
-  isEditMode: boolean;
-  onStartDrag: (id: string, type: 'calendar', style: string, offsetX: number, offsetY: number) => void;
-  onDelete: (id: string) => void;
-  isDragging?: boolean;
+  id: string
+  style: 'month' | 'agenda' | string
+  x: number
+  y: number
+  isEditMode: boolean
+  onStartDrag: (
+    id: string,
+    type: 'calendar',
+    style: string,
+    offsetX: number,
+    offsetY: number,
+  ) => void
+  onDelete: (id: string) => void
+  isDragging?: boolean
 }
 
 /**
  * CalendarWidget 组件/功能描述
  */
-export default function CalendarWidget({ id, style, x, y, isEditMode, onStartDrag, onDelete, isDragging = false }: CalendarWidgetProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isClosing, setIsClosing] = useState(false);
+export default function CalendarWidget({
+  id,
+  style,
+  x,
+  y,
+  isEditMode,
+  onStartDrag,
+  onDelete,
+  isDragging = false,
+}: CalendarWidgetProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [isClosing, setIsClosing] = useState(false)
 
   /**
    * 处理指针按下事件，用于拖拽
@@ -26,25 +41,25 @@ export default function CalendarWidget({ id, style, x, y, isEditMode, onStartDra
    */
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isEditMode) {
-      return;
+      return
     }
-    const target = e.target as HTMLElement;
+    const target = e.target as HTMLElement
     if (target.closest('.delete-btn')) {
-      return;
+      return
     }
 
-    e.preventDefault();
-    const container = containerRef.current;
+    e.preventDefault()
+    const container = containerRef.current
     if (!container) {
-      return;
+      return
     }
 
-    const rect = container.getBoundingClientRect();
-    const offsetX = e.clientX - rect.left;
-    const offsetY = e.clientY - rect.top;
+    const rect = container.getBoundingClientRect()
+    const offsetX = e.clientX - rect.left
+    const offsetY = e.clientY - rect.top
 
-    onStartDrag(id, 'calendar', style, offsetX, offsetY);
-  };
+    onStartDrag(id, 'calendar', style, offsetX, offsetY)
+  }
 
   /**
    * 根据样式渲染日历组件
@@ -54,9 +69,9 @@ export default function CalendarWidget({ id, style, x, y, isEditMode, onStartDra
     switch (style) {
       case 'month':
       default:
-        return <MonthCalendar />;
+        return <MonthCalendar />
     }
-  };
+  }
 
   return (
     <div
@@ -64,9 +79,7 @@ export default function CalendarWidget({ id, style, x, y, isEditMode, onStartDra
       onPointerDown={handlePointerDown}
       className={`absolute select-none z-20 group touch-none isolate transition-all duration-300 ease-in-out ${
         isClosing ? 'scale-50 opacity-0' : 'scale-100 opacity-100'
-      } ${
-        isEditMode ? 'cursor-pointer' : ''
-      }`}
+      } ${isEditMode ? 'cursor-pointer' : ''}`}
       style={{
         left: `${x}%`,
         top: `${y}%`,
@@ -82,8 +95,8 @@ export default function CalendarWidget({ id, style, x, y, isEditMode, onStartDra
       {isEditMode && (
         <button
           onClick={() => {
-            setIsClosing(true);
-            setTimeout(() => onDelete(id), 300);
+            setIsClosing(true)
+            setTimeout(() => onDelete(id), 300)
           }}
           className="delete-btn absolute -top-2.5 -right-2.5 w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg flex items-center justify-center cursor-pointer scale-0 group-hover:scale-100 transition-all duration-200 z-30"
           aria-label="删除日历"
@@ -93,5 +106,5 @@ export default function CalendarWidget({ id, style, x, y, isEditMode, onStartDra
       )}
       {renderStyle()}
     </div>
-  );
+  )
 }

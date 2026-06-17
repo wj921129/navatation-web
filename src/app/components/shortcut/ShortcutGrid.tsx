@@ -1,62 +1,76 @@
-import React from 'react';
-import { Plus } from 'lucide-react';
-import { Tooltip } from '../ui/Tooltip';
-import { DndContext, closestCenter } from '@dnd-kit/core';
-import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
-import { SortableGridItem } from '../ui/SortableGridItem';
-import { GridDragOverlay, UnifiedDragItem } from '../ui/GridDragOverlay';
-import { DraggableShortcut } from './DraggableShortcut';
-import { IconMap } from '../ui/IconMap';
+import { closestCenter, DndContext } from '@dnd-kit/core'
+import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable'
+import { Plus } from 'lucide-react'
+import React from 'react'
+import { GridDragOverlay, UnifiedDragItem } from '../ui/GridDragOverlay'
+import { IconMap } from '../ui/IconMap'
+import { SortableGridItem } from '../ui/SortableGridItem'
+import { Tooltip } from '../ui/Tooltip'
+import { DraggableShortcut } from './DraggableShortcut'
 
 /**
  * ShortcutGridProps 组件/功能描述
  */
 export interface ShortcutGridProps {
-  settings: any;
-  isEditMode: boolean;
-  displayShortcuts: any[];
-  sensors: any;
-  handleDragStartGrid: (event: any) => void;
-  handleDragEndGrid: (event: any) => void;
-  handleDragCancelGrid: () => void;
-  activeDragShortcut: any;
-  handleEditShortcut: (index: number) => void;
-  handleDeleteShortcut: (index: number) => void;
-  setIsAddShortcutOpen: (v: boolean) => void;
+  settings: any
+  isEditMode: boolean
+  displayShortcuts: any[]
+  sensors: any
+  handleDragStartGrid: (event: any) => void
+  handleDragEndGrid: (event: any) => void
+  handleDragCancelGrid: () => void
+  activeDragShortcut: any
+  handleEditShortcut: (index: number) => void
+  handleDeleteShortcut: (index: number) => void
+  setIsAddShortcutOpen: (v: boolean) => void
 }
 
 /**
  * ShortcutGrid 组件/功能描述
  */
 export function ShortcutGrid({
-  settings, isEditMode, displayShortcuts, sensors,
-  handleDragStartGrid, handleDragEndGrid, handleDragCancelGrid,
-  activeDragShortcut, handleEditShortcut, handleDeleteShortcut, setIsAddShortcutOpen
+  settings,
+  isEditMode,
+  displayShortcuts,
+  sensors,
+  handleDragStartGrid,
+  handleDragEndGrid,
+  handleDragCancelGrid,
+  activeDragShortcut,
+  handleEditShortcut,
+  handleDeleteShortcut,
+  setIsAddShortcutOpen,
 }: ShortcutGridProps) {
-  const iconInnerSize = settings.iconSize * 0.5;
-  const borderRadius = `${settings.iconRadius}%`;
+  const iconInnerSize = settings.iconSize * 0.5
+  const borderRadius = `${settings.iconRadius}%`
 
   return (
-    <div 
-      className="flex flex-wrap justify-center w-full mx-auto" 
-      style={{ 
+    <div
+      className="flex flex-wrap justify-center w-full mx-auto"
+      style={{
         gap: `${settings.iconSpacingY}px ${settings.iconSpacingX}px`,
         maxWidth: '1200px',
         paddingLeft: `${settings.iconsMarginX}%`,
-        paddingRight: `${settings.iconsMarginX}%`
+        paddingRight: `${settings.iconsMarginX}%`,
       }}
     >
       {isEditMode ? (
-        <DndContext 
-          sensors={sensors} 
-          collisionDetection={closestCenter} 
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
           onDragStart={handleDragStartGrid}
           onDragEnd={handleDragEndGrid}
           onDragCancel={handleDragCancelGrid}
         >
-          <SortableContext items={displayShortcuts.map((s, idx) => s.dragId || `shortcut-edit-${idx}`)} strategy={rectSortingStrategy}>
+          <SortableContext
+            items={displayShortcuts.map((s, idx) => s.dragId || `shortcut-edit-${idx}`)}
+            strategy={rectSortingStrategy}
+          >
             {displayShortcuts.map((shortcut, globalIndex) => (
-              <SortableGridItem key={shortcut.dragId || `shortcut-edit-${globalIndex}`} id={shortcut.dragId || `shortcut-edit-${globalIndex}`}>
+              <SortableGridItem
+                key={shortcut.dragId || `shortcut-edit-${globalIndex}`}
+                id={shortcut.dragId || `shortcut-edit-${globalIndex}`}
+              >
                 <DraggableShortcut
                   shortcut={shortcut}
                   iconInnerSize={iconInnerSize}
@@ -72,10 +86,10 @@ export function ShortcutGrid({
           </SortableContext>
           <GridDragOverlay>
             {activeDragShortcut ? (
-              <UnifiedDragItem 
-                shortcut={activeDragShortcut} 
-                iconSize={settings.iconSize} 
-                borderRadius={borderRadius} 
+              <UnifiedDragItem
+                shortcut={activeDragShortcut}
+                iconSize={settings.iconSize}
+                borderRadius={borderRadius}
                 iconInnerSize={iconInnerSize}
                 showText={true}
                 textSize={settings.textSize}
@@ -104,30 +118,42 @@ export function ShortcutGrid({
                   style={{
                     width: `${settings.iconSize}px`,
                     height: `${settings.iconSize}px`,
-                    borderRadius: borderRadius
+                    borderRadius: borderRadius,
                   }}
                 >
                   {(() => {
-                    if (shortcut.iconType === 'CUSTOM_URL' || shortcut.iconType === 'FAVICON' || shortcut.iconType === 'CUSTOM_UPLOAD') {
+                    if (
+                      shortcut.iconType === 'CUSTOM_URL' ||
+                      shortcut.iconType === 'FAVICON' ||
+                      shortcut.iconType === 'CUSTOM_UPLOAD'
+                    ) {
                       return (
                         <img
                           src={shortcut.iconValue}
                           alt={shortcut.name}
-                          style={{ width: '50%', height: '50%', objectFit: 'contain' }}
+                          style={{
+                            width: '50%',
+                            height: '50%',
+                            objectFit: 'contain',
+                          }}
                         />
-                      );
+                      )
                     }
-                    let IconComp = IconMap.Link;
-                    const iconName = shortcut.iconValue;
+                    let IconComp = IconMap.Link
+                    const iconName = shortcut.iconValue
                     if (iconName && IconMap[iconName]) {
-                      IconComp = IconMap[iconName];
+                      IconComp = IconMap[iconName]
                     }
                     return (
                       <IconComp
-                        style={{ color: shortcut.color || '#333', width: `${iconInnerSize}px`, height: `${iconInnerSize}px` }}
+                        style={{
+                          color: shortcut.color || '#333',
+                          width: `${iconInnerSize}px`,
+                          height: `${iconInnerSize}px`,
+                        }}
                         strokeWidth={2}
                       />
-                    );
+                    )
                   })()}
                 </div>
                 <span
@@ -148,19 +174,25 @@ export function ShortcutGrid({
           <button
             onClick={() => setIsAddShortcutOpen(true)}
             className="flex flex-col items-center group"
-            style={{ gap: `${settings.iconTextGap}px`, width: `${settings.iconSize + 32}px` }}
+            style={{
+              gap: `${settings.iconTextGap}px`,
+              width: `${settings.iconSize + 32}px`,
+            }}
           >
             <div
               className="bg-icon-bg/80 border border-widget-border/80 flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer hover:bg-icon-bg hover:border-widget-border shrink-0"
               style={{
                 width: `${settings.iconSize}px`,
                 height: `${settings.iconSize}px`,
-                borderRadius: borderRadius
+                borderRadius: borderRadius,
               }}
             >
               <Plus
                 className="text-gray-400 group-hover:text-gray-600 transition-colors"
-                style={{ width: `${iconInnerSize}px`, height: `${iconInnerSize}px` }}
+                style={{
+                  width: `${iconInnerSize}px`,
+                  height: `${iconInnerSize}px`,
+                }}
                 strokeWidth={2}
               />
             </div>
@@ -168,5 +200,5 @@ export function ShortcutGrid({
         </Tooltip>
       ) : null}
     </div>
-  );
+  )
 }

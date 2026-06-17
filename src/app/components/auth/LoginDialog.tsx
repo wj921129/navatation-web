@@ -1,63 +1,61 @@
-import { X } from 'lucide-react';
-import { useState } from 'react';
-import { authStore } from '../../stores/auth-store';
-import { BaseModal } from '../ui/BaseModal';
-import { Tooltip } from '../ui/Tooltip';
+import { X } from 'lucide-react'
+import { useState } from 'react'
+import { authStore } from '../../stores/auth-store'
+import { BaseModal } from '../ui/BaseModal'
+import { Tooltip } from '../ui/Tooltip'
 
 interface LoginDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen: boolean
+  onClose: () => void
 }
 
 /**
  * LoginDialog 组件/功能描述
  */
 export function LoginDialog({ isOpen, onClose }: LoginDialogProps) {
-  const [tab, setTab] = useState<'login' | 'register'>('login');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [loading, setLoading] = useState(false);
-
-
+  const [tab, setTab] = useState<'login' | 'register'>('login')
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const reset = () => {
-    setUsername('');
-    setPassword('');
-    setError('');
-    setSuccessMessage('');
-    setLoading(false);
-  };
+    setUsername('')
+    setPassword('')
+    setError('')
+    setSuccessMessage('')
+    setLoading(false)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!username.trim() || !password.trim()) return;
+    e.preventDefault()
+    if (!username.trim() || !password.trim()) return
 
-    setError('');
-    setSuccessMessage('');
-    setLoading(true);
+    setError('')
+    setSuccessMessage('')
+    setLoading(true)
     try {
       if (tab === 'login') {
-        await authStore.login(username, password);
-        reset();
-        onClose();
+        await authStore.login(username, password)
+        reset()
+        onClose()
       } else if (tab === 'register') {
-        await authStore.register(username, password);
-        reset();
-        onClose();
+        await authStore.register(username, password)
+        reset()
+        onClose()
       }
     } catch (err: any) {
-      setError(err.message || '操作失败，请重试');
+      setError(err.message || '操作失败，请重试')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleClose = () => {
-    reset();
-    onClose();
-  };
+    reset()
+    onClose()
+  }
 
   return (
     <BaseModal
@@ -71,7 +69,11 @@ export function LoginDialog({ isOpen, onClose }: LoginDialogProps) {
       <div className="flex items-center justify-between mb-6">
         <div className="flex gap-4">
           <button
-            onClick={() => { setTab('login'); setError(''); setSuccessMessage(''); }}
+            onClick={() => {
+              setTab('login')
+              setError('')
+              setSuccessMessage('')
+            }}
             className={`text-lg font-semibold pb-1 border-b-2 transition-all duration-300 ${
               tab === 'login'
                 ? 'text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400 scale-105'
@@ -81,7 +83,11 @@ export function LoginDialog({ isOpen, onClose }: LoginDialogProps) {
             登录
           </button>
           <button
-            onClick={() => { setTab('register'); setError(''); setSuccessMessage(''); }}
+            onClick={() => {
+              setTab('register')
+              setError('')
+              setSuccessMessage('')
+            }}
             className={`text-lg font-semibold pb-1 border-b-2 transition-all duration-300 ${
               tab === 'register'
                 ? 'text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400 scale-105'
@@ -115,7 +121,9 @@ export function LoginDialog({ isOpen, onClose }: LoginDialogProps) {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-xs font-medium text-gray-600 dark:text-neutral-400 mb-1.5 ml-1">用户名</label>
+          <label className="block text-xs font-medium text-gray-600 dark:text-neutral-400 mb-1.5 ml-1">
+            用户名
+          </label>
           <input
             type="text"
             value={username}
@@ -155,5 +163,5 @@ export function LoginDialog({ isOpen, onClose }: LoginDialogProps) {
         </button>
       </form>
     </BaseModal>
-  );
+  )
 }

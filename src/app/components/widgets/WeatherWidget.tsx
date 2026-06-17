@@ -1,28 +1,45 @@
-import { X, Settings } from 'lucide-react';
-import { useRef, useState } from 'react';
-import SimpleWeather from './SimpleWeather';
-import { WeatherSettingsModal, LocationData } from './WeatherSettingsModal';
+import { Settings, X } from 'lucide-react'
+import { useRef, useState } from 'react'
+import SimpleWeather from './SimpleWeather'
+import { type LocationData, WeatherSettingsModal } from './WeatherSettingsModal'
 
 interface WeatherWidgetProps {
-  id: string;
-  style: 'simple' | string;
-  x: number;
-  y: number;
-  meta?: Record<string, any>;
-  isEditMode: boolean;
-  onStartDrag: (id: string, type: 'weather', style: string, offsetX: number, offsetY: number) => void;
-  onDelete: (id: string) => void;
-  updateWidgetMeta?: (id: string, updater: (prev: any) => any) => void;
-  isDragging?: boolean;
+  id: string
+  style: 'simple' | string
+  x: number
+  y: number
+  meta?: Record<string, any>
+  isEditMode: boolean
+  onStartDrag: (
+    id: string,
+    type: 'weather',
+    style: string,
+    offsetX: number,
+    offsetY: number,
+  ) => void
+  onDelete: (id: string) => void
+  updateWidgetMeta?: (id: string, updater: (prev: any) => any) => void
+  isDragging?: boolean
 }
 
 /**
  * WeatherWidget 组件/功能描述
  */
-export default function WeatherWidget({ id, style, x, y, meta, isEditMode, onStartDrag, onDelete, updateWidgetMeta, isDragging = false }: WeatherWidgetProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isClosing, setIsClosing] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+export default function WeatherWidget({
+  id,
+  style,
+  x,
+  y,
+  meta,
+  isEditMode,
+  onStartDrag,
+  onDelete,
+  updateWidgetMeta,
+  isDragging = false,
+}: WeatherWidgetProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [isClosing, setIsClosing] = useState(false)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
   /**
    * 处理指针按下事件，用于拖拽
@@ -30,25 +47,25 @@ export default function WeatherWidget({ id, style, x, y, meta, isEditMode, onSta
    */
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isEditMode) {
-      return;
+      return
     }
-    const target = e.target as HTMLElement;
+    const target = e.target as HTMLElement
     if (target.closest('.delete-btn') || target.closest('.settings-btn')) {
-      return;
+      return
     }
 
-    e.preventDefault();
-    const container = containerRef.current;
+    e.preventDefault()
+    const container = containerRef.current
     if (!container) {
-      return;
+      return
     }
 
-    const rect = container.getBoundingClientRect();
-    const offsetX = e.clientX - rect.left;
-    const offsetY = e.clientY - rect.top;
+    const rect = container.getBoundingClientRect()
+    const offsetX = e.clientX - rect.left
+    const offsetY = e.clientY - rect.top
 
-    onStartDrag(id, 'weather', style, offsetX, offsetY);
-  };
+    onStartDrag(id, 'weather', style, offsetX, offsetY)
+  }
 
   /**
    * 根据样式渲染天气组件
@@ -58,17 +75,17 @@ export default function WeatherWidget({ id, style, x, y, meta, isEditMode, onSta
     switch (style) {
       case 'simple':
       default:
-        return <SimpleWeather meta={meta} />;
+        return <SimpleWeather meta={meta} />
     }
-  };
+  }
 
-  const locations = meta?.locations || [];
+  const locations = meta?.locations || []
 
   const handleLocationsChange = (newLocations: LocationData[]) => {
     if (updateWidgetMeta) {
-      updateWidgetMeta(id, (prev) => ({ ...prev, locations: newLocations }));
+      updateWidgetMeta(id, (prev) => ({ ...prev, locations: newLocations }))
     }
-  };
+  }
 
   return (
     <>
@@ -77,9 +94,7 @@ export default function WeatherWidget({ id, style, x, y, meta, isEditMode, onSta
         onPointerDown={handlePointerDown}
         className={`absolute select-none z-20 group touch-none isolate transition-all duration-300 ease-in-out ${
           isClosing ? 'scale-50 opacity-0' : 'scale-100 opacity-100'
-        } ${
-          isEditMode ? 'cursor-pointer' : ''
-        }`}
+        } ${isEditMode ? 'cursor-pointer' : ''}`}
         style={{
           left: `${x}%`,
           top: `${y}%`,
@@ -96,8 +111,8 @@ export default function WeatherWidget({ id, style, x, y, meta, isEditMode, onSta
           <>
             <button
               onClick={() => {
-                setIsClosing(true);
-                setTimeout(() => onDelete(id), 300);
+                setIsClosing(true)
+                setTimeout(() => onDelete(id), 300)
               }}
               className="delete-btn absolute -top-2.5 -right-2.5 w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg flex items-center justify-center cursor-pointer scale-0 group-hover:scale-100 transition-all duration-200 z-30"
               aria-label="删除天气"
@@ -116,12 +131,12 @@ export default function WeatherWidget({ id, style, x, y, meta, isEditMode, onSta
         {renderStyle()}
       </div>
 
-      <WeatherSettingsModal 
-        isOpen={isSettingsOpen} 
-        onClose={() => setIsSettingsOpen(false)} 
-        locations={locations} 
+      <WeatherSettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        locations={locations}
         onLocationsChange={handleLocationsChange}
       />
     </>
-  );
+  )
 }

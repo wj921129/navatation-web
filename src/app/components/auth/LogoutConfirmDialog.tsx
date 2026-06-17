@@ -2,81 +2,84 @@
  * @description 退出登录确认对话框组件
  * @date 2026-06-09
  */
-import { LogOut, X, Key } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { authStore } from '../../stores/auth-store';
-import { BaseModal } from '../ui/BaseModal';
-import { Tooltip } from '../ui/Tooltip';
+import { Key, LogOut, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { authStore } from '../../stores/auth-store'
+import { BaseModal } from '../ui/BaseModal'
+import { Tooltip } from '../ui/Tooltip'
 
 interface LogoutConfirmDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  username?: string;
+  isOpen: boolean
+  onClose: () => void
+  onConfirm: () => void
+  username?: string
 }
 
 /**
  * 账号管理与确认登出提示对话框组件。
  * 提供账号确认、修改密码与登出操作。
  */
-export function LogoutConfirmDialog({ isOpen, onClose, onConfirm, username }: LogoutConfirmDialogProps) {
-  const [view, setView] = useState<'confirm' | 'changePassword'>('confirm');
-  const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [loading, setLoading] = useState(false);
+export function LogoutConfirmDialog({
+  isOpen,
+  onClose,
+  onConfirm,
+  username,
+}: LogoutConfirmDialogProps) {
+  const [view, setView] = useState<'confirm' | 'changePassword'>('confirm')
+  const [oldPassword, setOldPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+  const [loading, setLoading] = useState(false)
 
   // 当对话框关闭时，重置所有状态
   useEffect(() => {
     if (!isOpen) {
-      setView('confirm');
-      setOldPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-      setError('');
-      setSuccess('');
-      setLoading(false);
+      setView('confirm')
+      setOldPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+      setError('')
+      setSuccess('')
+      setLoading(false)
     }
-  }, [isOpen]);
-
-
+  }, [isOpen])
 
   /**
    * 处理密码修改逻辑
    */
   const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     if (!oldPassword.trim() || !newPassword.trim() || !confirmPassword.trim()) {
-      return;
+      return
     }
 
     if (newPassword !== confirmPassword) {
-      setError('两次输入新密码不一致');
-      return;
+      setError('两次输入新密码不一致')
+      return
     }
 
-    setError('');
-    setSuccess('');
-    setLoading(true);
+    setError('')
+    setSuccess('')
+    setLoading(true)
     try {
-      await authStore.changePassword(oldPassword, newPassword);
-      setSuccess('密码修改成功！');
-      setOldPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
+      await authStore.changePassword(oldPassword, newPassword)
+      setSuccess('密码修改成功！')
+      setOldPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
       // 成功后延迟切回主面板
       setTimeout(() => {
-        setView('confirm');
-        setSuccess('');
-      }, 1500);
+        setView('confirm')
+        setSuccess('')
+      }, 1500)
     } catch (err: any) {
-      setError(err?.message ?? '原密码错误或修改失败');
+      setError(err?.message ?? '原密码错误或修改失败')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <BaseModal
@@ -117,7 +120,7 @@ export function LogoutConfirmDialog({ isOpen, onClose, onConfirm, username }: Lo
               <Key className="w-4 h-4" />
               修改密码
             </button>
-            
+
             <div className="flex gap-4 mt-2">
               <button
                 onClick={onClose}
@@ -127,8 +130,8 @@ export function LogoutConfirmDialog({ isOpen, onClose, onConfirm, username }: Lo
               </button>
               <button
                 onClick={() => {
-                  onConfirm();
-                  onClose();
+                  onConfirm()
+                  onClose()
                 }}
                 className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-full transition-all duration-200 font-medium text-sm shadow-lg shadow-red-100/50 dark:shadow-none hover:shadow-red-200/50"
               >
@@ -158,7 +161,9 @@ export function LogoutConfirmDialog({ isOpen, onClose, onConfirm, username }: Lo
 
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-medium text-gray-600 dark:text-neutral-400 mb-1 ml-1">原密码</label>
+              <label className="block text-xs font-medium text-gray-600 dark:text-neutral-400 mb-1 ml-1">
+                原密码
+              </label>
               <input
                 type="password"
                 value={oldPassword}
@@ -170,7 +175,9 @@ export function LogoutConfirmDialog({ isOpen, onClose, onConfirm, username }: Lo
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-600 dark:text-neutral-400 mb-1 ml-1">新密码</label>
+              <label className="block text-xs font-medium text-gray-600 dark:text-neutral-400 mb-1 ml-1">
+                新密码
+              </label>
               <input
                 type="password"
                 value={newPassword}
@@ -184,7 +191,9 @@ export function LogoutConfirmDialog({ isOpen, onClose, onConfirm, username }: Lo
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-600 dark:text-neutral-400 mb-1 ml-1">确认新密码</label>
+              <label className="block text-xs font-medium text-gray-600 dark:text-neutral-400 mb-1 ml-1">
+                确认新密码
+              </label>
               <input
                 type="password"
                 value={confirmPassword}
@@ -215,6 +224,5 @@ export function LogoutConfirmDialog({ isOpen, onClose, onConfirm, username }: Lo
         </form>
       )}
     </BaseModal>
-  );
+  )
 }
-

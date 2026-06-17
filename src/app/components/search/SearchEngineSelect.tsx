@@ -2,39 +2,74 @@
  * @description 搜索引擎选择器组件
  * @date 2026-06-09
  */
-import { Check } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
-import { Tooltip } from '../ui/Tooltip';
+import { Check } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Tooltip } from '../ui/Tooltip'
 
 interface SearchEngine {
-  name: string;
-  value: string;
-  url: string;
-  icon: string;
+  name: string
+  value: string
+  url: string
+  icon: string
 }
 
 const searchEngines: SearchEngine[] = [
-  { name: '谷歌', value: 'google', url: 'https://www.google.com/search?q=', icon: '/icons/google.svg' },
-  { name: '百度', value: 'baidu', url: 'https://www.baidu.com/s?wd=', icon: '/icons/baidu.svg' },
-  { name: '必应', value: 'bing', url: 'https://www.bing.com/search?q=', icon: '/icons/bing.svg' },
-  { name: 'ChatGPT', value: 'chatgpt', url: 'ai://chatgpt', icon: '/icons/chatgpt.svg' },
-  { name: '通义千问', value: 'qwen', url: 'ai://qwen', icon: '/icons/qwen.svg' },
-  { name: '豆包', value: 'doubao', url: 'ai://doubao', icon: '/icons/doubao.svg' },
-  { name: 'AI 聚合搜索', value: 'ai-aggregator', url: 'ai://aggregator', icon: '/icons/ai-aggregator.svg' },
-];
+  {
+    name: '谷歌',
+    value: 'google',
+    url: 'https://www.google.com/search?q=',
+    icon: '/icons/google.svg',
+  },
+  {
+    name: '百度',
+    value: 'baidu',
+    url: 'https://www.baidu.com/s?wd=',
+    icon: '/icons/baidu.svg',
+  },
+  {
+    name: '必应',
+    value: 'bing',
+    url: 'https://www.bing.com/search?q=',
+    icon: '/icons/bing.svg',
+  },
+  {
+    name: 'ChatGPT',
+    value: 'chatgpt',
+    url: 'ai://chatgpt',
+    icon: '/icons/chatgpt.svg',
+  },
+  {
+    name: '通义千问',
+    value: 'qwen',
+    url: 'ai://qwen',
+    icon: '/icons/qwen.svg',
+  },
+  {
+    name: '豆包',
+    value: 'doubao',
+    url: 'ai://doubao',
+    icon: '/icons/doubao.svg',
+  },
+  {
+    name: 'AI 聚合搜索',
+    value: 'ai-aggregator',
+    url: 'ai://aggregator',
+    icon: '/icons/ai-aggregator.svg',
+  },
+]
 
 interface SearchEngineSelectProps {
-  value: string;
-  onChange: (value: string) => void;
+  value: string
+  onChange: (value: string) => void
 }
 
 /**
  * SearchEngineSelect 组件/功能描述
  */
 export function SearchEngineSelect({ value, onChange }: SearchEngineSelectProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const currentEngine = searchEngines.find(e => e.value === value) ?? searchEngines[0];
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const currentEngine = searchEngines.find((e) => e.value === value) ?? searchEngines[0]
 
   useEffect(() => {
     /**
@@ -42,18 +77,18 @@ export function SearchEngineSelect({ value, onChange }: SearchEngineSelectProps)
      */
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+        setIsOpen(false)
       }
     }
 
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('mousedown', handleClickOutside)
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen]);
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isOpen])
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -63,7 +98,11 @@ export function SearchEngineSelect({ value, onChange }: SearchEngineSelectProps)
           onClick={() => setIsOpen(!isOpen)}
           className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-input-bg transition-colors active:scale-95 shadow-sm"
         >
-          <img src={currentEngine.icon} alt={currentEngine.name} className="w-5 h-5 object-contain" />
+          <img
+            src={currentEngine.icon}
+            alt={currentEngine.name}
+            className="w-5 h-5 object-contain"
+          />
         </button>
       </Tooltip>
 
@@ -74,8 +113,8 @@ export function SearchEngineSelect({ value, onChange }: SearchEngineSelectProps)
               key={engine.value}
               type="button"
               onClick={() => {
-                onChange(engine.value);
-                setIsOpen(false);
+                onChange(engine.value)
+                setIsOpen(false)
               }}
               className="w-full flex items-center justify-between px-4 py-3 hover:bg-input-bg text-text-primary transition-colors text-left"
             >
@@ -91,8 +130,7 @@ export function SearchEngineSelect({ value, onChange }: SearchEngineSelectProps)
         </div>
       )}
     </div>
-  );
+  )
 }
 
-export { searchEngines };
-
+export { searchEngines }

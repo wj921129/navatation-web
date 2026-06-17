@@ -1,21 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'
 
 /**
  * 拟真翻页时钟 (Flip Clock)
  * 采用拟真分割卡片设计，左右结构展示小时与分钟，极具复古工业风感。
  */
 export default function FlipClock() {
-  const [time, setTime] = useState(new Date());
+  const [time, setTime] = useState(new Date())
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTime(new Date());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+      setTime(new Date())
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
 
-  const hours = time.getHours().toString().padStart(2, '0');
-  const minutes = time.getMinutes().toString().padStart(2, '0');
+  const hours = time.getHours().toString().padStart(2, '0')
+  const minutes = time.getMinutes().toString().padStart(2, '0')
 
   return (
     <div className="w-[200px] h-[100px] flex items-center justify-center gap-3 rounded-2xl widget-private-clock px-3 py-2 select-none">
@@ -51,5 +51,5 @@ export default function FlipClock() {
         </span>
       </div>
     </div>
-  );
+  )
 }

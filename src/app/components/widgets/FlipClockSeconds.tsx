@@ -1,22 +1,22 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'
 
 /**
  * 带秒钟的拟真翻页时钟 (Flip Clock with Seconds)
  * 采用拟真分割卡片设计，展示小时、分钟与秒钟。
  */
 export default function FlipClockSeconds() {
-  const [time, setTime] = useState(new Date());
+  const [time, setTime] = useState(new Date())
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTime(new Date());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+      setTime(new Date())
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
 
-  const hours = time.getHours().toString().padStart(2, '0');
-  const minutes = time.getMinutes().toString().padStart(2, '0');
-  const seconds = time.getSeconds().toString().padStart(2, '0');
+  const hours = time.getHours().toString().padStart(2, '0')
+  const minutes = time.getMinutes().toString().padStart(2, '0')
+  const seconds = time.getSeconds().toString().padStart(2, '0')
 
   return (
     <div className="w-fit h-[100px] flex items-center justify-center gap-3 rounded-2xl widget-private-clock px-3 py-2 select-none">
@@ -69,5 +69,5 @@ export default function FlipClockSeconds() {
         </span>
       </div>
     </div>
-  );
+  )
 }

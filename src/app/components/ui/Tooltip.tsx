@@ -2,17 +2,17 @@
  * @description 工具提示组件
  * @date 2026-06-09
  */
-import * as TooltipPrimitive from '@radix-ui/react-tooltip';
-import React from 'react';
+import * as TooltipPrimitive from '@radix-ui/react-tooltip'
+import type React from 'react'
 
 interface TooltipProps {
-  children: React.ReactNode;
-  content: React.ReactNode;
-  delayDuration?: number;
-  side?: 'top' | 'right' | 'bottom' | 'left';
-  align?: 'start' | 'center' | 'end';
-  sideOffset?: number;
-  className?: string;
+  children: React.ReactNode
+  content: React.ReactNode
+  delayDuration?: number
+  side?: 'top' | 'right' | 'bottom' | 'left'
+  align?: 'start' | 'center' | 'end'
+  sideOffset?: number
+  className?: string
 }
 
 /**
@@ -31,9 +31,7 @@ export function Tooltip({
   return (
     <TooltipPrimitive.Provider delayDuration={delayDuration}>
       <TooltipPrimitive.Root>
-        <TooltipPrimitive.Trigger asChild>
-          {children}
-        </TooltipPrimitive.Trigger>
+        <TooltipPrimitive.Trigger asChild>{children}</TooltipPrimitive.Trigger>
         <TooltipPrimitive.Portal>
           <TooltipPrimitive.Content
             side={side}
@@ -53,5 +51,5 @@ export function Tooltip({
         </TooltipPrimitive.Portal>
       </TooltipPrimitive.Root>
     </TooltipPrimitive.Provider>
-  );
+  )
 }

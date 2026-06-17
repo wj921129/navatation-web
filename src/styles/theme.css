@@ -58,9 +58,9 @@
 
   /* Private Widget Variables to avoid any reuse with main page */
   --private-widget-bg-clock: rgba(255, 255, 255, 0.35);
-  --private-widget-bg-card: rgba(255, 255, 255, 0.80);
+  --private-widget-bg-card: rgba(255, 255, 255, 0.8);
   --private-widget-bg-control: rgba(255, 255, 255, 0.95);
-  --private-widget-bg-opaque: rgba(255, 255, 255, 0.90);
+  --private-widget-bg-opaque: rgba(255, 255, 255, 0.9);
   --private-widget-border: rgba(0, 0, 0, 0.08);
 }
 
@@ -118,7 +118,7 @@
 
   /* Private Widget Variables to avoid any reuse with main page */
   --private-widget-bg-clock: rgba(0, 0, 0, 0.6);
-  --private-widget-bg-card: rgba(20, 20, 20, 0.80);
+  --private-widget-bg-card: rgba(20, 20, 20, 0.8);
   --private-widget-bg-control: rgba(20, 20, 20, 0.65);
   --private-widget-bg-opaque: rgba(23, 23, 23, 0.95);
   --private-widget-border: rgba(255, 255, 255, 0.08);
@@ -244,9 +244,9 @@
   }
 
   /**
-  * Default typography styles for HTML elements (h1-h4, p, label, button, input).
-  * These are in @layer base, so Tailwind utility classes (like text-sm, text-lg) automatically override them.
-  */
+   * Default typography styles for HTML elements (h1-h4, p, label, button, input).
+   * These are in @layer base, so Tailwind utility classes (like text-sm, text-lg) automatically override them.
+   */
 
   html {
     font-size: var(--font-size);
@@ -296,8 +296,13 @@
 }
 
 @keyframes flip-colon-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.15; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.15;
+  }
 }
 
 @utility interactive-glass-panel {

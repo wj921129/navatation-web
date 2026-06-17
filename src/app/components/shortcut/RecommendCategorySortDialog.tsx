@@ -3,44 +3,42 @@
  * 管理员专用：以直观的拖拽卡片方式调整推荐分类的显示顺序
  * @date 2026-06-10
  */
-import React, { useState, useEffect } from 'react';
-import { 
-  DndContext, 
-  closestCenter, 
-  PointerSensor, 
-  useSensor, 
-  useSensors, 
-  DragStartEvent, 
-  DragEndEvent 
-} from '@dnd-kit/core';
-import { 
-  SortableContext, 
-  verticalListSortingStrategy, 
-  arrayMove 
-} from '@dnd-kit/sortable';
-import { GripVertical, FolderCog, Check, X, Loader2, FolderPlus, Edit3, Trash2 } from 'lucide-react';
-import { SortableListItem } from '../ui/SortableListItem';
-import { GridDragOverlay } from '../ui/GridDragOverlay';
-import { BaseModal } from '../ui/BaseModal';
-import { navService } from '../../services/nav-service';
-import { toast } from 'sonner';
-import { IconMap } from '../ui/IconMap';
-import { AdminCategoryModal } from './AdminCategoryModal';
+
+import {
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  type DragStartEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { Check, Edit3, FolderCog, FolderPlus, GripVertical, Loader2, Trash2, X } from 'lucide-react'
+import type React from 'react'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
+import { navService } from '../../services/nav-service'
+import { BaseModal } from '../ui/BaseModal'
+import { GridDragOverlay } from '../ui/GridDragOverlay'
+import { IconMap } from '../ui/IconMap'
+import { SortableListItem } from '../ui/SortableListItem'
+import { AdminCategoryModal } from './AdminCategoryModal'
 
 interface SortCategory {
-  categoryId: string;
-  category: string;
-  icon: React.ComponentType<any>;
-  iconValue: string;
-  sortOrder: number;
-  siteCount: number;
+  categoryId: string
+  category: string
+  icon: React.ComponentType<any>
+  iconValue: string
+  sortOrder: number
+  siteCount: number
 }
 
 interface RecommendCategorySortDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  categories: any[];
-  onSaveComplete: () => void;
+  isOpen: boolean
+  onClose: () => void
+  categories: any[]
+  onSaveComplete: () => void
 }
 
 /**
@@ -53,19 +51,19 @@ export function RecommendCategorySortDialog({
   categories,
   onSaveComplete,
 }: RecommendCategorySortDialogProps) {
-  const [sortList, setSortList] = useState<SortCategory[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isDirty, setIsDirty] = useState(false);
-  const [categoryToDelete, setCategoryToDelete] = useState<SortCategory | null>(null);
-  const [deletedCategoryIds, setDeletedCategoryIds] = useState<string[]>([]);
-  const [editingCategory, setEditingCategory] = useState<any>(null);
+  const [sortList, setSortList] = useState<SortCategory[]>([])
+  const [isSaving, setIsSaving] = useState(false)
+  const [isDirty, setIsDirty] = useState(false)
+  const [categoryToDelete, setCategoryToDelete] = useState<SortCategory | null>(null)
+  const [deletedCategoryIds, setDeletedCategoryIds] = useState<string[]>([])
+  const [editingCategory, setEditingCategory] = useState<any>(null)
 
   // 弹窗打开时，初始化排序列表
   useEffect(() => {
     if (isOpen) {
       const validCats = categories
-        .filter(c => !!c.categoryId)
-        .map(c => ({
+        .filter((c) => !!c.categoryId)
+        .map((c) => ({
           categoryId: c.categoryId,
           category: c.category,
           icon: c.icon,
@@ -73,42 +71,42 @@ export function RecommendCategorySortDialog({
           sortOrder: c.sortOrder ?? 0,
           siteCount: Array.isArray(c.sites) ? c.sites.length : 0,
         }))
-        .sort((a, b) => a.sortOrder - b.sortOrder);
-      setSortList(validCats);
-      setDeletedCategoryIds([]);
-      setIsDirty(false);
+        .sort((a, b) => a.sortOrder - b.sortOrder)
+      setSortList(validCats)
+      setDeletedCategoryIds([])
+      setIsDirty(false)
     }
-  }, [isOpen, categories]);
+  }, [isOpen, categories])
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 5,
       },
-    })
-  );
+    }),
+  )
 
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null)
 
   const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id as string);
-  };
+    setActiveId(event.active.id as string)
+  }
 
   const handleDragEnd = (event: DragEndEvent) => {
-    setActiveId(null);
-    const { active, over } = event;
+    setActiveId(null)
+    const { active, over } = event
     if (over && active.id !== over.id) {
-      setSortList(prev => {
-        const oldIndex = prev.findIndex(item => item.categoryId === active.id);
-        const newIndex = prev.findIndex(item => item.categoryId === over.id);
-        return arrayMove(prev, oldIndex, newIndex);
-      });
-      setIsDirty(true);
+      setSortList((prev) => {
+        const oldIndex = prev.findIndex((item) => item.categoryId === active.id)
+        const newIndex = prev.findIndex((item) => item.categoryId === over.id)
+        return arrayMove(prev, oldIndex, newIndex)
+      })
+      setIsDirty(true)
     }
-  };
+  }
 
-  const activeItem = sortList.find(c => c.categoryId === activeId);
-  const activeIndex = activeItem ? sortList.findIndex(c => c.categoryId === activeId) : -1;
+  const activeItem = sortList.find((c) => c.categoryId === activeId)
+  const activeIndex = activeItem ? sortList.findIndex((c) => c.categoryId === activeId) : -1
 
   const renderCategoryCard = (cat: SortCategory, idx: number, isOverlay = false) => (
     <div
@@ -119,32 +117,37 @@ export function RecommendCategorySortDialog({
       }`}
     >
       <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-neutral-800 flex items-center justify-center flex-shrink-0">
-        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-          {idx + 1}
-        </span>
+        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{idx + 1}</span>
       </div>
 
       <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 border border-indigo-100 dark:border-indigo-800/30 flex items-center justify-center flex-shrink-0">
-        <cat.icon className="w-4.5 h-4.5 text-indigo-500 dark:text-indigo-400" style={{ width: '18px', height: '18px' }} />
+        <cat.icon
+          className="w-4.5 h-4.5 text-indigo-500 dark:text-indigo-400"
+          style={{ width: '18px', height: '18px' }}
+        />
       </div>
 
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium truncate">{cat.category}</p>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-          {cat.siteCount} 个网址
-        </p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{cat.siteCount} 个网址</p>
       </div>
 
       <div className="flex items-center gap-1 flex-shrink-0">
         <button
-          onClick={(e) => { e.stopPropagation(); !isOverlay && setEditingCategory({...cat}); }}
+          onClick={(e) => {
+            e.stopPropagation()
+            !isOverlay && setEditingCategory({ ...cat })
+          }}
           className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full transition-colors cursor-pointer"
           title="编辑分类"
         >
           <Edit3 className="w-4 h-4" />
         </button>
         <button
-          onClick={(e) => { e.stopPropagation(); !isOverlay && handleDeleteCategory(cat); }}
+          onClick={(e) => {
+            e.stopPropagation()
+            !isOverlay && handleDeleteCategory(cat)
+          }}
           className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors cursor-pointer"
           title="删除分类"
         >
@@ -156,28 +159,34 @@ export function RecommendCategorySortDialog({
         <GripVertical className="w-5 h-5" />
       </div>
     </div>
-  );
+  )
 
   const handleSaveCategory = (editedCat: any) => {
     if (editedCat.categoryId && !editedCat.categoryId.startsWith('temp-')) {
-      setSortList(prev => prev.map(c => c.categoryId === editedCat.categoryId ? {
-        ...c,
-        category: editedCat.category,
-        iconValue: editedCat.iconValue,
-        icon: IconMap[editedCat.iconValue] || IconMap.Folder
-      } : c));
+      setSortList((prev) =>
+        prev.map((c) =>
+          c.categoryId === editedCat.categoryId
+            ? {
+                ...c,
+                category: editedCat.category,
+                iconValue: editedCat.iconValue,
+                icon: IconMap[editedCat.iconValue] || IconMap.Folder,
+              }
+            : c,
+        ),
+      )
     } else {
-      const tempId = editedCat.categoryId || `temp-${Date.now()}`;
-      setSortList(prev => {
-        const copy = [...prev];
-        const existingIdx = copy.findIndex(c => c.categoryId === tempId);
+      const tempId = editedCat.categoryId || `temp-${Date.now()}`
+      setSortList((prev) => {
+        const copy = [...prev]
+        const existingIdx = copy.findIndex((c) => c.categoryId === tempId)
         if (existingIdx >= 0) {
           copy[existingIdx] = {
             ...copy[existingIdx],
             category: editedCat.category,
             iconValue: editedCat.iconValue,
-            icon: IconMap[editedCat.iconValue] || IconMap.Folder
-          };
+            icon: IconMap[editedCat.iconValue] || IconMap.Folder,
+          }
         } else {
           copy.push({
             categoryId: tempId,
@@ -185,23 +194,23 @@ export function RecommendCategorySortDialog({
             iconValue: editedCat.iconValue,
             icon: IconMap[editedCat.iconValue] || IconMap.Folder,
             sortOrder: prev.length,
-            siteCount: 0
-          });
+            siteCount: 0,
+          })
         }
-        return copy;
-      });
+        return copy
+      })
     }
-    setIsDirty(true);
-  };
+    setIsDirty(true)
+  }
 
   const handleSave = async () => {
-    if (isSaving) return;
-    setIsSaving(true);
+    if (isSaving) return
+    setIsSaving(true)
     try {
       for (const catId of deletedCategoryIds) {
-        await navService.deleteRecommendCategory(catId);
+        await navService.deleteRecommendCategory(catId)
       }
-      
+
       await Promise.all(
         sortList.map((cat, idx) => {
           if (cat.categoryId.startsWith('temp-')) {
@@ -209,44 +218,44 @@ export function RecommendCategorySortDialog({
               name: cat.category,
               icon: cat.iconValue,
               sortOrder: idx,
-            });
+            })
           } else {
             return navService.updateRecommendCategory(cat.categoryId, {
               name: cat.category,
               icon: cat.iconValue,
               sortOrder: idx,
-            });
+            })
           }
-        })
-      );
-      toast.success('分类排序已保存', { duration: 2000 });
-      setIsDirty(false);
-      onSaveComplete();
-      onClose();
+        }),
+      )
+      toast.success('分类排序已保存', { duration: 2000 })
+      setIsDirty(false)
+      onSaveComplete()
+      onClose()
     } catch (err) {
-      console.error('保存分类排序失败', err);
-      toast.error('保存失败，请重试');
+      console.error('保存分类排序失败', err)
+      toast.error('保存失败，请重试')
     } finally {
-      setIsSaving(false);
+      setIsSaving(false)
     }
-  };
+  }
 
   const handleDeleteCategory = (cat: SortCategory) => {
     if (cat.siteCount > 0) {
-      setCategoryToDelete(cat);
-      return;
+      setCategoryToDelete(cat)
+      return
     }
-    performDelete(cat);
-  };
+    performDelete(cat)
+  }
 
   const performDelete = (cat: SortCategory) => {
     if (!cat.categoryId.startsWith('temp-')) {
-      setDeletedCategoryIds(prev => [...prev, cat.categoryId]);
+      setDeletedCategoryIds((prev) => [...prev, cat.categoryId])
     }
-    setSortList(prev => prev.filter(c => c.categoryId !== cat.categoryId));
-    setIsDirty(true);
-    setCategoryToDelete(null);
-  };
+    setSortList((prev) => prev.filter((c) => c.categoryId !== cat.categoryId))
+    setIsDirty(true)
+    setCategoryToDelete(null)
+  }
 
   return (
     <BaseModal
@@ -266,12 +275,20 @@ export function RecommendCategorySortDialog({
           </div>
           <div>
             <h3 className="text-base font-medium">分类管理</h3>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">拖拽卡片调整推荐分类的展示顺序</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+              拖拽卡片调整推荐分类的展示顺序
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setEditingCategory({ category: '', iconValue: 'Folder', sortOrder: sortList.length })}
+            onClick={() =>
+              setEditingCategory({
+                category: '',
+                iconValue: 'Folder',
+                sortOrder: sortList.length,
+              })
+            }
             className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-indigo-50 dark:hover:bg-indigo-900/30 text-indigo-500 transition-colors cursor-pointer"
             title="新增分类"
           >
@@ -302,7 +319,7 @@ export function RecommendCategorySortDialog({
             onDragEnd={handleDragEnd}
           >
             <SortableContext
-              items={sortList.map(c => c.categoryId)}
+              items={sortList.map((c) => c.categoryId)}
               strategy={verticalListSortingStrategy}
             >
               <div className="space-y-2">
@@ -313,7 +330,7 @@ export function RecommendCategorySortDialog({
                 ))}
               </div>
             </SortableContext>
-            
+
             <GridDragOverlay>
               {activeId && activeItem ? renderCategoryCard(activeItem, activeIndex, true) : null}
             </GridDragOverlay>
@@ -369,8 +386,13 @@ export function RecommendCategorySortDialog({
           </div>
           <h3 className="text-lg font-medium mb-2">确认删除该分类？</h3>
           <p className="text-sm text-gray-500 mb-6">
-            分类 <span className="font-medium text-foreground">"{categoryToDelete?.category}"</span> 包含 <span className="text-red-500 font-medium">{categoryToDelete?.siteCount}</span> 个网址。
-            <br/><span className="text-xs text-gray-400 mt-1 block">确认后还需要点击底部「保存」才会生效。</span>
+            分类 <span className="font-medium text-foreground">"{categoryToDelete?.category}"</span>{' '}
+            包含 <span className="text-red-500 font-medium">{categoryToDelete?.siteCount}</span>{' '}
+            个网址。
+            <br />
+            <span className="text-xs text-gray-400 mt-1 block">
+              确认后还需要点击底部「保存」才会生效。
+            </span>
           </p>
           <div className="flex items-center gap-3 w-full">
             <button
@@ -396,5 +418,5 @@ export function RecommendCategorySortDialog({
         onSaveCategory={handleSaveCategory}
       />
     </BaseModal>
-  );
+  )
 }

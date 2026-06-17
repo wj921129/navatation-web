@@ -3,27 +3,31 @@
  * 功能描述: 聚合 AI 搜索底部输入控制面板
  * 创建时间: 2026-06-09
  */
-import { Send } from 'lucide-react';
+import { Send } from 'lucide-react'
 
 export interface AiSearchFooterProps {
-  inputQuery: string;
-  setInputQuery: (query: string) => void;
-  triggerAiSearch: (query: string) => void;
+  inputQuery: string
+  setInputQuery: (query: string) => void
+  triggerAiSearch: (query: string) => void
 }
 
 /**
  * 聚合 AI 搜索底部输入控制面板
  * @param props 参数
  */
-export function AiSearchFooter({ inputQuery, setInputQuery, triggerAiSearch }: AiSearchFooterProps) {
+export function AiSearchFooter({
+  inputQuery,
+  setInputQuery,
+  triggerAiSearch,
+}: AiSearchFooterProps) {
   return (
     <footer className="px-6 py-5 border-t border-white/5 bg-white/2 backdrop-blur-md flex items-center justify-center">
-      <form 
+      <form
         onSubmit={(e) => {
-          e.preventDefault();
+          e.preventDefault()
           if (inputQuery.trim()) {
-            triggerAiSearch(inputQuery);
-            setInputQuery('');
+            triggerAiSearch(inputQuery)
+            setInputQuery('')
           }
         }}
         className="max-w-4xl w-full flex items-center gap-3 relative"
@@ -46,5 +50,5 @@ export function AiSearchFooter({ inputQuery, setInputQuery, triggerAiSearch }: A
         </div>
       </form>
     </footer>
-  );
+  )
 }
