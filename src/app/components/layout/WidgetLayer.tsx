@@ -4,6 +4,7 @@ import CalendarWidget from '../widgets/CalendarWidget'
 import ClockWidget from '../widgets/ClockWidget'
 import PomodoroWidget from '../widgets/PomodoroWidget'
 import WeatherWidget from '../widgets/WeatherWidget'
+import MemoWidget from '../widgets/MemoWidget'
 
 /**
  * WidgetLayerProps 组件/功能描述
@@ -133,6 +134,27 @@ export function WidgetLayer({
             isEditMode={isEditMode}
             isDragging={activeDraggingId === widget.id}
             onStartDrag={(id, type, style, ox, oy) => {
+              activeDraggingStyleRef.current = style as any
+              setActiveDraggingId(id)
+              setDragOffset({ x: ox, y: oy })
+            }}
+            onDelete={removeWidget}
+            updateWidgetMeta={updateWidgetMeta}
+          />
+        ))}
+
+      {(isEditMode ? tempWidgets : clocksVisible ? widgets : [])
+        .filter((w) => w.type === 'memo')
+        .map((widget) => (
+          <MemoWidget
+            key={widget.id}
+            id={widget.id}
+            x={widget.x}
+            y={widget.y}
+            meta={widget.meta}
+            isEditMode={isEditMode}
+            isDragging={activeDraggingId === widget.id}
+            onStartDrag={(id, style, ox, oy) => {
               activeDraggingStyleRef.current = style as any
               setActiveDraggingId(id)
               setDragOffset({ x: ox, y: oy })

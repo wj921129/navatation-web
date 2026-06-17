@@ -164,13 +164,25 @@ export function WidgetGalleryModal({
             )}
 
             {activeCategory === 'timer' && (
-              <WidgetCard title="番茄钟" onDragStart={(e) => onDragStart(e, 'pomodoro')}>
-                <div className="w-12 h-12 flex items-center justify-center relative bg-input-bg/20 border border-widget-border rounded-xl shadow-sm">
-                  <div className="w-8 h-8 rounded-full border-2 border-blue-500/60 flex items-center justify-center">
-                    <div className="w-1 h-3 bg-blue-500/60 absolute top-2" />
+              <>
+                <WidgetCard title="番茄钟" onDragStart={(e) => onDragStart(e, 'pomodoro')}>
+                  <div className="w-12 h-12 flex items-center justify-center relative bg-input-bg/20 border border-widget-border rounded-xl shadow-sm">
+                    <div className="w-8 h-8 rounded-full border-2 border-blue-500/60 flex items-center justify-center">
+                      <div className="w-1 h-3 bg-blue-500/60 absolute top-2" />
+                    </div>
                   </div>
-                </div>
-              </WidgetCard>
+                </WidgetCard>
+
+                <WidgetCard title="便签" onDragStart={(e) => onDragStart(e, 'memo')}>
+                  <div className="w-12 h-12 flex flex-col justify-between p-2 bg-yellow-100/90 dark:bg-yellow-950/40 border border-yellow-300/30 dark:border-yellow-900/20 rounded-xl shadow-sm">
+                    <div className="w-4 h-1 bg-yellow-400/60 dark:bg-yellow-500/60 rounded-full" />
+                    <div className="flex flex-col gap-0.5 mb-1">
+                      <div className="w-full h-0.5 bg-yellow-400/30 dark:bg-yellow-500/30 rounded-full" />
+                      <div className="w-3/4 h-0.5 bg-yellow-400/30 dark:bg-yellow-500/30 rounded-full" />
+                    </div>
+                  </div>
+                </WidgetCard>
+              </>
             )}
 
             {activeCategory === 'weather' && (

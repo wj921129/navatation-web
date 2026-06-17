@@ -15,6 +15,7 @@ type WidgetStyle =
   | 'breathe'
   | 'month'
   | 'simple'
+  | 'memo'
   | null
 
 interface UseWidgetDragProps {
@@ -61,6 +62,9 @@ export function useWidgetDrag({
     } else if (style === 'simple') {
       w = 140
       h = 140
+    } else if (style === 'memo') {
+      w = 180
+      h = 180
     }
     return { w, h }
   }
@@ -77,6 +81,9 @@ export function useWidgetDrag({
     }
     if (style === 'simple') {
       return 'weather'
+    }
+    if (style === 'memo') {
+      return 'memo'
     }
     return 'clock'
   }
