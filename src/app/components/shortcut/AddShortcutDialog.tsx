@@ -14,6 +14,7 @@ import {
 import { type IconType, navService } from '../../services/nav-service'
 import { BaseModal } from '../ui/BaseModal'
 import { IconMap } from '../ui/IconMap'
+import { AdminCategoryModal } from './AdminCategoryModal'
 import { AdminDock } from './AdminDock'
 import { BatchCategoryList } from './BatchCategoryList'
 import { CustomShortcutTab } from './CustomShortcutTab'
@@ -310,7 +311,7 @@ export function AddShortcutDialog({
                   <div className="flex flex-1 h-full overflow-hidden">
                     {!isBatchMode && categories.length > 0 && (
                       <div className="w-44 border-r border-border bg-card/30 flex-shrink-0 overflow-y-auto hidden sm:block">
-                        <div className="py-4 space-y-1">
+                        <div className="px-3 py-4 space-y-1">
                           {categories.map((category, idx) => {
                             const catId = category.categoryId || idx.toString()
                             const isActive = activeCategoryId === catId || (!activeCategoryId && idx === 0)
@@ -447,6 +448,37 @@ export function AddShortcutDialog({
             return copy
           })
           setEditingSite(null)
+        }}
+      />
+
+      <AdminCategoryModal
+        editingCategory={_editingCategory}
+        setEditingCategory={setEditingCategory}
+        onSaveCategory={async (editedCat) => {
+          if (editedCat.categoryId && !editedCat.categoryId.startsWith('temp-')) {
+            try {
+              await navService.updateRecommendCategory(editedCat.categoryId, {
+                name: editedCat.category,
+                icon: editedCat.iconValue,
+              })
+              toast.success('分类已更新')
+              loadRecommended()
+            } catch (e) {
+              // error handled in api-client
+            }
+          } else {
+            try {
+              await navService.addRecommendCategory({
+                name: editedCat.category,
+                icon: editedCat.iconValue || 'Folder',
+                sortOrder: categories.length,
+              })
+              toast.success('分类已新增')
+              loadRecommended()
+            } catch (e) {
+              // error handled in api-client
+            }
+          }
         }}
       />
 

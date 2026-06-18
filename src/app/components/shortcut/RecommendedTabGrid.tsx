@@ -7,6 +7,7 @@ import {
   closestCenter,
   DndContext,
   type DragEndEvent,
+  type DragOverEvent,
   type DragStartEvent,
   PointerSensor,
   useSensor,
@@ -61,26 +62,21 @@ export function RecommendedTabGrid({
     setActiveDragId(event.active.id as string)
   }
 
-  const handleDragEndGrid = (event: DragEndEvent) => {
-    setActiveDragId(null)
+  const handleDragOverGrid = (event: DragOverEvent) => {
     const { active, over } = event
     if (!over || active.id === over.id) return
 
     setCategories((prev: any[]) => {
-      const copy = prev.map((c) => ({ ...c, sites: [...c.sites] }))
+      let sourceCatIdx = -1, sourceSiteIdx = -1
+      let destCatIdx = -1, destSiteIdx = -1
 
-      let sourceCatIdx = -1,
-        sourceSiteIdx = -1
-      let destCatIdx = -1,
-        destSiteIdx = -1
-
-      for (let i = 0; i < copy.length; i++) {
-        const sIdx = copy[i].sites.findIndex((s: any) => s.dragId === active.id)
+      for (let i = 0; i < prev.length; i++) {
+        const sIdx = prev[i].sites.findIndex((s: any) => s.dragId === active.id)
         if (sIdx !== -1) {
           sourceCatIdx = i
           sourceSiteIdx = sIdx
         }
-        const oIdx = copy[i].sites.findIndex((s: any) => s.dragId === over.id)
+        const oIdx = prev[i].sites.findIndex((s: any) => s.dragId === over.id)
         if (oIdx !== -1) {
           destCatIdx = i
           destSiteIdx = oIdx
@@ -88,15 +84,25 @@ export function RecommendedTabGrid({
       }
 
       if (sourceCatIdx !== -1 && destCatIdx !== -1) {
-        const [movedSite] = copy[sourceCatIdx].sites.splice(sourceSiteIdx, 1)
         if (sourceCatIdx !== destCatIdx) {
+          const copy = prev.map((c) => ({ ...c, sites: [...c.sites] }))
+          const [movedSite] = copy[sourceCatIdx].sites.splice(sourceSiteIdx, 1)
           movedSite.categoryId = copy[destCatIdx].categoryId
+          copy[destCatIdx].sites.splice(destSiteIdx, 0, movedSite)
+          return copy
+        } else if (sourceSiteIdx !== destSiteIdx) {
+          const copy = prev.map((c) => ({ ...c, sites: [...c.sites] }))
+          const [movedSite] = copy[sourceCatIdx].sites.splice(sourceSiteIdx, 1)
+          copy[sourceCatIdx].sites.splice(destSiteIdx, 0, movedSite)
+          return copy
         }
-        copy[destCatIdx].sites.splice(destSiteIdx, 0, movedSite)
       }
-
-      return copy
+      return prev
     })
+  }
+
+  const handleDragEndGrid = (event: DragEndEvent) => {
+    setActiveDragId(null)
   }
 
   const activeDragShortcut = activeDragId
@@ -108,6 +114,7 @@ export function RecommendedTabGrid({
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragStart={handleDragStartGrid}
+      onDragOver={handleDragOverGrid}
       onDragEnd={handleDragEndGrid}
       onDragCancel={() => setActiveDragId(null)}
     >
