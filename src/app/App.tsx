@@ -14,8 +14,8 @@ import {
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { Edit3, ListTodo, Moon, Plus, Settings, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { DEFAULT_SHORTCUTS } from '../config/app.config'
+import { useCallback, useEffect, useState } from 'react'
+
 import { BottomRightDock } from './components/dock/BottomRightDock'
 import { BrightnessPanel } from './components/dock/BrightnessPanel'
 import { TopDock } from './components/dock/TopDock'
@@ -63,14 +63,14 @@ export default function App() {
   const [isManageHomepageOpen, setIsManageHomepageOpen] = useState(false)
   const [aiSearchQuery, setAiSearchQuery] = useState('')
   const [aiSearchEngine, setAiSearchEngine] = useState('')
-  const [clocksVisible, setClocksVisible] = useState<boolean>(() => {
+  const [clocksVisible] = useState<boolean>(() => {
     return localStorage.getItem('navatation_clocks_visible') !== '0'
   })
-  const [calendarVisible, setCalendarVisible] = useState<boolean>(
+  const [calendarVisible] = useState<boolean>(
     () => localStorage.getItem('navatation_calendar_visible') !== '0',
   )
 
-  const [weatherVisible, setWeatherVisible] = useState<boolean>(
+  const [weatherVisible] = useState<boolean>(
     () => localStorage.getItem('navatation_weather_visible') !== '0',
   )
 
@@ -84,53 +84,6 @@ export default function App() {
     setAiSearchEngine(engine)
     setIsAiSearchOpen(true)
   }, [])
-
-  /**
-   * 切换时钟组件可见性
-   */
-  const handleToggleClockVisibility = useCallback(() => {
-    setClocksVisible((prev) => {
-      const next = !prev
-      localStorage.setItem('navatation_clocks_visible', next ? '1' : '0')
-      return next
-    })
-  }, [])
-
-  const handleToggleCalendarVisibility = useCallback(
-    () =>
-      setCalendarVisible((prev) => {
-        localStorage.setItem('navatation_calendar_visible', !prev ? '1' : '0')
-        return !prev
-      }),
-    [],
-  )
-
-  const handleToggleTimerVisibility = useCallback(
-    () =>
-      setTimerVisible((prev) => {
-        localStorage.setItem('navatation_timer_visible', !prev ? '1' : '0')
-        return !prev
-      }),
-    [],
-  )
-
-  const handleToggleBreatheVisibility = useCallback(
-    () =>
-      setBreatheVisible((prev) => {
-        localStorage.setItem('navatation_breathe_visible', !prev ? '1' : '0')
-        return !prev
-      }),
-    [],
-  )
-
-  const handleToggleWeatherVisibility = useCallback(
-    () =>
-      setWeatherVisible((prev) => {
-        localStorage.setItem('navatation_weather_visible', !prev ? '1' : '0')
-        return !prev
-      }),
-    [],
-  )
 
   // 1. 订阅登录状态
   const [authState, setAuthState] = useState(authStore.getState())
@@ -159,7 +112,6 @@ export default function App() {
     isLogoutConfirmOpen,
     setIsLogoutConfirmOpen,
     handleStartEdit,
-    handleEditShortcut,
   } = shortcutsData
 
   // 解构首页图标数据
@@ -201,7 +153,6 @@ export default function App() {
     settings,
     setSettings, // 解构出 setSettings 供依赖项使用，避免直接依赖整个 settingsData 对象
     isSettingsOpen,
-    setIsSettingsOpen,
     handleOpenSettings,
     handleCloseSettings,
     handlePreviewSettings,
@@ -310,7 +261,6 @@ export default function App() {
   const {
     activeDraggingId,
     setActiveDraggingId,
-    dragOffset,
     setDragOffset,
     activeDraggingStyleRef,
     menuDraggingStyle,
@@ -369,9 +319,6 @@ export default function App() {
   const handleLogout = () => {
     authStore.logout()
   }
-
-  const iconInnerSize = settings.iconSize * 0.5
-  const borderRadius = `${settings.iconRadius}%`
 
   // 首页图标使用 home shortcuts 数据
   const displayShortcuts = isEditMode ? tempHomeShortcuts : homeShortcuts
@@ -550,9 +497,6 @@ export default function App() {
             onMouseLeaveTheme={handleMouseLeaveTheme}
             onMouseEnterOtherWidget={handleMouseEnterOtherWidgetCombined}
             isHoveringBrightness={isHoveringBrightness}
-            isEditMode={isEditMode}
-            clocksVisible={clocksVisible}
-            onToggleClockVisibility={handleToggleClockVisibility}
             onOpenWidgetGallery={() => setIsWidgetGalleryOpen(true)}
             brightnessPanel={
               <BrightnessPanel

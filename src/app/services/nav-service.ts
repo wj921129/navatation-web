@@ -174,12 +174,18 @@ export const navService = {
             code: 200,
             message: 'success',
             data: JSON.parse(guestCategories),
+            timestamp: Date.now(),
           })
         } catch (e) {
           // ignore
         }
       }
-      return Promise.resolve({ code: 200, message: 'success', data: [] })
+      return Promise.resolve({
+        code: 200,
+        message: 'success',
+        data: [],
+        timestamp: Date.now(),
+      })
     }
     return api.get('/nav/categories')
   },
