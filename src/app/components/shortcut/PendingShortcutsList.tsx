@@ -22,11 +22,11 @@ export function PendingShortcutsList({
         {pendingShortcuts.length === 0 ? (
           <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-8">暂无选择</p>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {pendingShortcuts.map((shortcut, index) => (
               <div
                 key={index}
-                className="flex items-center gap-3 bg-card p-3 rounded-lg border border-border group transition-all duration-200"
+                className="flex items-center gap-3 bg-card px-3 py-2 rounded-lg border border-border group transition-all duration-200"
               >
                 <div
                   className="flex-shrink-0 bg-background flex items-center justify-center shadow-sm border border-border overflow-hidden"

@@ -318,13 +318,13 @@ export function AddShortcutDialog({
                               <button
                                 key={catId}
                                 onClick={() => scrollToCategory(catId)}
-                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-all duration-200 border-l-2 cursor-pointer ${
+                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 cursor-pointer ${
                                   isActive
-                                    ? 'border-blue-500 bg-blue-50/60 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium'
-                                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-neutral-800/50 hover:text-gray-900 dark:hover:text-gray-200'
+                                    ? 'bg-blue-500/10 text-blue-500 shadow-sm font-medium'
+                                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100/60 dark:hover:bg-neutral-800/60 hover:text-gray-900 dark:hover:text-gray-200'
                                 }`}
                               >
-                                <category.icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-blue-500' : 'opacity-70'}`} />
+                                <category.icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-blue-500' : 'opacity-70'}`} />
                                 <span className="truncate">{category.category}</span>
                               </button>
                             )

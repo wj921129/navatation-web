@@ -87,8 +87,11 @@ export function RecommendedTabGrid({
         }
       }
 
-      if (sourceCatIdx !== -1 && destCatIdx !== -1 && sourceCatIdx === destCatIdx) {
+      if (sourceCatIdx !== -1 && destCatIdx !== -1) {
         const [movedSite] = copy[sourceCatIdx].sites.splice(sourceSiteIdx, 1)
+        if (sourceCatIdx !== destCatIdx) {
+          movedSite.categoryId = copy[destCatIdx].categoryId
+        }
         copy[destCatIdx].sites.splice(destSiteIdx, 0, movedSite)
       }
 
