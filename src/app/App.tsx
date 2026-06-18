@@ -473,6 +473,9 @@ export default function App() {
             {menuDraggingStyle === 'simple' && (
               <div className="w-[140px] h-[140px] rounded-3xl border-2 border-widget-border bg-widget-bg backdrop-blur-md" />
             )}
+            {menuDraggingStyle === 'memo' && (
+              <div className="w-[180px] h-[180px] rounded-3xl border-2 border-widget-border bg-widget-bg backdrop-blur-md" />
+            )}
           </div>
         )}
 
