@@ -176,7 +176,7 @@ export const navService = {
             data: JSON.parse(guestCategories),
             timestamp: Date.now(),
           })
-        } catch (e) {
+        } catch (_e) {
           // ignore
         }
       }

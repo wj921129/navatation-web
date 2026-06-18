@@ -1,7 +1,6 @@
 import { closestCenter, DndContext } from '@dnd-kit/core'
 import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable'
 import { Plus } from 'lucide-react'
-import React from 'react'
 import { GridDragOverlay, UnifiedDragItem } from '../ui/GridDragOverlay'
 import { IconMap } from '../ui/IconMap'
 import { SortableGridItem } from '../ui/SortableGridItem'

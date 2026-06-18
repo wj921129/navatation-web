@@ -101,8 +101,8 @@ export function SettingsDialog({
         toast.error(res?.message ?? '上传壁纸失败')
       }
     } catch (err: any) {
-      toast.error(err?.message ?? '上传壁纸出错')
       console.error('上传壁纸出错:', err)
+      toast.error(err?.message ?? '上传壁纸出错')
     }
   }
 
@@ -121,8 +121,8 @@ export function SettingsDialog({
         toast.error(res?.message ?? '获取随机壁纸失败')
       }
     } catch (err: any) {
-      toast.error(err?.message ?? '获取随机壁纸出错')
       console.error('获取随机壁纸出错:', err)
+      toast.error(err?.message ?? '获取随机壁纸出错')
     }
   }
 

@@ -49,8 +49,7 @@ export function WeatherSettingsModal({
           setResults([])
         }
       }
-    } catch (err) {
-      console.error('Failed to search city:', err)
+    } catch (_err) {
     } finally {
       setIsSearching(false)
     }

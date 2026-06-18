@@ -49,7 +49,8 @@ class TodoStore {
     try {
       const raw = localStorage.getItem('navatation_todos')
       return raw ? JSON.parse(raw) : []
-    } catch {
+    } catch (err) {
+      console.warn('解析本地待办列表出错，返回空列表:', err)
       return []
     }
   }
@@ -113,8 +114,8 @@ class TodoStore {
       }
 
       this.setState({ todos: res.data, loading: false })
-    } catch (err) {
-      console.error('获取待办事项失败', err)
+    } catch (_err) {
+      console.error('加载待办列表失败:', _err)
       if (seq === this.loadSeq) this.setState({ loading: false })
     }
   }
@@ -139,8 +140,8 @@ class TodoStore {
         this.setState({ todos: updated })
         this.saveLocalTodos(updated)
       }
-    } catch (err) {
-      console.error('创建待办失败', err)
+    } catch (_err) {
+      console.error('创建待办事项失败:', _err)
     }
   }
 
@@ -163,8 +164,8 @@ class TodoStore {
         this.setState({ todos: updated })
         this.saveLocalTodos(updated)
       }
-    } catch (err) {
-      console.error('切换待办状态失败', err)
+    } catch (_err) {
+      console.error('切换待办状态失败:', _err)
     }
   }
 
@@ -179,8 +180,8 @@ class TodoStore {
         this.setState({ todos: updated })
         this.saveLocalTodos(updated)
       }
-    } catch (err) {
-      console.error('编辑待办失败', err)
+    } catch (_err) {
+      console.error('更新待办事项失败:', _err)
     }
   }
 
@@ -195,8 +196,8 @@ class TodoStore {
         this.setState({ todos: updated })
         this.saveLocalTodos(updated)
       }
-    } catch (err) {
-      console.error('删除待办失败', err)
+    } catch (_err) {
+      console.error('删除待办事项失败:', _err)
     }
   }
 
@@ -211,8 +212,8 @@ class TodoStore {
         this.setState({ todos: updated })
         this.saveLocalTodos(updated)
       }
-    } catch (err) {
-      console.error('清除已完成待办失败', err)
+    } catch (_err) {
+      console.error('清理已完成待办失败:', _err)
     }
   }
 }

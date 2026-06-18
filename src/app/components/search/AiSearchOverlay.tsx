@@ -140,7 +140,6 @@ export function AiSearchOverlay({
     Object.keys(engines).forEach((key) => {
       const fullAnswer = getKnowledgeAnswer(query, key)
       let currentIndex = 0
-      const engineSpeed = engines[key].speed
       const intervalTime = Math.max(10, Math.floor(100 / (5 - engines[key].speed / 100))) // 越快间隔越小
 
       setTimeout(() => {

@@ -33,21 +33,14 @@ import {
   Upload,
   X,
 } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useManageHomepageIcons } from '../../hooks/useManageHomepageIcons'
-import { IconType, navService } from '../../services/nav-service'
+import { navService } from '../../services/nav-service'
 import { BaseModal } from '../ui/BaseModal'
 import { GridDragOverlay, UnifiedDragItem } from '../ui/GridDragOverlay'
 import { IconMap } from '../ui/IconMap'
 import { SortableGridItem } from '../ui/SortableGridItem'
-
-const isValidDomainOrUrl = (input: string): boolean => {
-  const url = input.trim()
-  if (!url) return false
-  const domainRegex = /^(https?:\/\/)?([a-zA-Z0-9][-a-zA-Z0-9]{0,62}\.)+[a-zA-Z]{2,63}(\/.*)?$/
-  return domainRegex.test(url)
-}
 
 /**
  * ManageHomepageShortcutsDialogProps 组件/功能描述
@@ -235,7 +228,7 @@ export function ManageHomepageShortcutsDialog({
       onSaveComplete?.()
       onClose()
     } catch (err) {
-      console.error('Failed to save homepage shortcuts', err)
+      console.error('保存主页快捷方式失败:', err)
     }
   }
 

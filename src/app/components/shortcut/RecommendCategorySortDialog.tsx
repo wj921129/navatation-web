@@ -232,8 +232,7 @@ export function RecommendCategorySortDialog({
       setIsDirty(false)
       onSaveComplete()
       onClose()
-    } catch (err) {
-      console.error('保存分类排序失败', err)
+    } catch (_err) {
       toast.error('保存失败，请重试')
     } finally {
       setIsSaving(false)

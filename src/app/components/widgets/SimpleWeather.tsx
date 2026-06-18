@@ -9,7 +9,7 @@ import {
   RefreshCw,
   Sun,
 } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { LocationData } from './WeatherSettingsModal'
 
 interface WeatherData {
@@ -57,9 +57,7 @@ export default function SimpleWeather({ meta }: SimpleWeatherProps) {
               return
             }
           }
-        } catch (e) {
-          console.error('IP 定位失败', e)
-        }
+        } catch (_e) {}
 
         // 兜底：北京
         if (isMounted) {
@@ -81,7 +79,6 @@ export default function SimpleWeather({ meta }: SimpleWeatherProps) {
             }
           },
           (error) => {
-            console.warn('Geolocation failed or denied, fallback to IP:', error)
             fetchByIpOrFallback()
           },
           { timeout: 5000 },
@@ -145,8 +142,7 @@ export default function SimpleWeather({ meta }: SimpleWeatherProps) {
       if (currentIndex >= results.length) {
         setCurrentIndex(0)
       }
-    } catch (e) {
-      console.error('Failed to fetch weather', e)
+    } catch (_e) {
     } finally {
       setLoading(false)
     }

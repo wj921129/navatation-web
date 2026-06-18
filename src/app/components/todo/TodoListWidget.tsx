@@ -1,6 +1,5 @@
-import { CheckCircle2, Circle, ListTodo } from 'lucide-react'
+import { Circle, ListTodo } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { TodoItem } from '../../services/todo-service'
 import { authStore } from '../../stores/auth-store'
 import { todoStore } from '../../stores/todo-store'
 
@@ -35,7 +34,7 @@ export function TodoListWidget({ onOpenTodoPanel }: TodoListWidgetProps) {
       try {
         const parsed = JSON.parse(savedPos)
         setPosition(parsed)
-      } catch (e) {}
+      } catch (_e) {}
     }
 
     return () => {

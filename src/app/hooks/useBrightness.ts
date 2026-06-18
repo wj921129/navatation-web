@@ -74,8 +74,7 @@ export function useBrightness(theme: string, setTheme: (theme: string) => void, 
 
     try {
       await settingsService.patchSettings({ theme: nextTheme })
-    } catch (err) {
-      console.error('Toggle theme error:', err)
+    } catch (_err) {
       toast.error('保存主题设置失败')
     }
   }, [

@@ -63,16 +63,9 @@ export default function App() {
   const [isManageHomepageOpen, setIsManageHomepageOpen] = useState(false)
   const [aiSearchQuery, setAiSearchQuery] = useState('')
   const [aiSearchEngine, setAiSearchEngine] = useState('')
-  const [clocksVisible] = useState<boolean>(() => {
-    return localStorage.getItem('navatation_clocks_visible') !== '0'
-  })
-  const [calendarVisible] = useState<boolean>(
-    () => localStorage.getItem('navatation_calendar_visible') !== '0',
-  )
-
-  const [weatherVisible] = useState<boolean>(
-    () => localStorage.getItem('navatation_weather_visible') !== '0',
-  )
+  const clocksVisible = localStorage.getItem('navatation_clocks_visible') !== '0'
+  const calendarVisible = localStorage.getItem('navatation_calendar_visible') !== '0'
+  const weatherVisible = localStorage.getItem('navatation_weather_visible') !== '0'
 
   const [isWidgetGalleryOpen, setIsWidgetGalleryOpen] = useState(false)
 

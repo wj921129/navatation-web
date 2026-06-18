@@ -1,10 +1,10 @@
-import React, { type MutableRefObject } from 'react'
+import { type MutableRefObject } from 'react'
 import BreatheWidget from '../widgets/BreatheWidget'
 import CalendarWidget from '../widgets/CalendarWidget'
 import ClockWidget from '../widgets/ClockWidget'
+import MemoWidget from '../widgets/MemoWidget'
 import PomodoroWidget from '../widgets/PomodoroWidget'
 import WeatherWidget from '../widgets/WeatherWidget'
-import MemoWidget from '../widgets/MemoWidget'
 
 /**
  * WidgetLayerProps 组件/功能描述

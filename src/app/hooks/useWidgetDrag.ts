@@ -43,7 +43,7 @@ export function useWidgetDrag({
   const menuDragStartPosRef = useRef({ x: 0, y: 0 })
   const menuDragHasMovedRef = useRef(false)
   const menuDraggingStyleRef = useRef<WidgetStyle>(null)
-  
+
   const rafRef = useRef<number | null>(null)
 
   const getWidgetDimensions = (style: WidgetStyle) => {

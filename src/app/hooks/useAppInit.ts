@@ -170,8 +170,7 @@ export function useAppInit(
           setHomeShortcuts(loaded)
           setTempHomeShortcuts(loaded)
         }
-      } catch (err) {
-        console.error('Failed to load guest config:', err)
+      } catch (_err) {
         toast.error('拉取游客配置失败')
       }
     }

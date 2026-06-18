@@ -80,8 +80,7 @@ export function useSettings(
         setSearchEngine(data.searchEngine)
         localStorage.setItem('navatation_search_engine', data.searchEngine)
       }
-    } catch (err) {
-      console.error('Failed to fetch settings', err)
+    } catch (_err) {
       toast.error('拉取个性化设置失败')
     }
   }, [authState.isLoggedIn, setSearchEngine])
@@ -167,8 +166,7 @@ export function useSettings(
             searchEngine: searchEngine,
             theme: draftTheme,
           })
-        } catch (err) {
-          console.error('Save settings error:', err)
+        } catch (_err) {
           toast.error('保存个性化设置失败')
         }
       }
@@ -198,8 +196,7 @@ export function useSettings(
       if (authState.isLoggedIn) {
         await settingsService.patchSettings({ backgroundImage: newBg })
       }
-    } catch (err) {
-      console.error('Failed to trigger random wallpaper', err)
+    } catch (_err) {
       toast.error('随机更换壁纸失败')
     }
   }, [authState.isLoggedIn])

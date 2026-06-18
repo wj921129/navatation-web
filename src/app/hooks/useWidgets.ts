@@ -38,9 +38,7 @@ export function useWidgets(isEditMode: boolean, authState: AuthState) {
     if (savedWidgets) {
       try {
         return JSON.parse(savedWidgets)
-      } catch (e) {
-        console.error('Failed to parse saved widgets, resetting to empty', e)
-      }
+      } catch (_e) {}
     }
 
     // 历史数据兼容：自动迁移旧版 navatation_clocks
@@ -60,9 +58,7 @@ export function useWidgets(isEditMode: boolean, authState: AuthState) {
           localStorage.setItem('navatation_widgets', JSON.stringify(migrated))
           return migrated
         }
-      } catch (e) {
-        console.error('Failed to migrate historic clocks to widgets', e)
-      }
+      } catch (_e) {}
     }
 
     return []
@@ -139,10 +135,7 @@ export function useWidgets(isEditMode: boolean, authState: AuthState) {
       }))
       setWidgets(loaded)
       localStorage.setItem('navatation_widgets', JSON.stringify(loaded))
-    } catch (err) {
-      // 捕获网络请求等异步错误，防异常逃逸
-      console.error('[useWidgets] 同步云端组件配置出错:', err)
-    }
+    } catch (_err) {}
   }, [authState.isLoggedIn])
 
   // 监听登录态变化，处理拉取与迁移
@@ -191,9 +184,7 @@ export function useWidgets(isEditMode: boolean, authState: AuthState) {
           }
         })
         await widgetService.saveWidgets(uploadPayload)
-      } catch (err) {
-        console.error('[useWidgets] 保存云端组件配置出错:', err)
-      }
+      } catch (_err) {}
     },
     [authState.isLoggedIn],
   )

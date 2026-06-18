@@ -128,7 +128,7 @@ async function request<T = any>(path: string, options: RequestInit = {}): Promis
         } else {
           throw new Error('Refresh failed')
         }
-      } catch (err) {
+      } catch (_err) {
         rejectRefreshed()
         if (getAccessToken() === token) {
           clearTokens()

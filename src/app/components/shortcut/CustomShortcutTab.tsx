@@ -36,8 +36,6 @@ export function CustomShortcutTab({
   handleAddCustomToPending,
   iconRadius,
 }: CustomShortcutTabProps) {
-  const borderRadius = `${iconRadius}%`
-
   const showImagePreview = iconFromUpload || (customIconUrl && customIconUrl !== 'Link')
 
   return (

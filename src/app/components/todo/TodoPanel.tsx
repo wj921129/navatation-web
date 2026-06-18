@@ -92,9 +92,7 @@ export function TodoPanel({ isOpen, onClose }: TodoPanelProps) {
     e.stopPropagation()
     try {
       await navigator.clipboard.writeText(content)
-    } catch (err) {
-      console.error('复制失败', err)
-    }
+    } catch (_err) {}
   }
 
   // 订阅登录状态与待办数据变化

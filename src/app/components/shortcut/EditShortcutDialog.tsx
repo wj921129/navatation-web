@@ -48,7 +48,8 @@ const getDebounceDelay = (input: string): number => {
     const fullUrl = url.startsWith('http') ? url : `https://${url}`
     const parsed = new URL(fullUrl)
     host = parsed.host
-  } catch {
+  } catch (err) {
+    console.warn('URL 解析错误，使用默认延迟:', err)
     return 500
   }
 
@@ -152,7 +153,8 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
     try {
       const parsed = new URL(fullUrl)
       host = parsed.host
-    } catch {
+    } catch (err) {
+      console.warn('解析 URL 主机名失败:', err)
       setFaviconStatus('idle')
       setDetectedIcons([])
       return
@@ -198,8 +200,7 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
         }
       })
       .catch((e) => {
-        // 忽略后台抓取失败，不影响主流程
-        console.error('获取图标失败', e)
+        console.error('抓取图标失败:', e)
       })
   }
 
@@ -266,6 +267,7 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
         setFaviconStatus('error')
       }
     } catch (e) {
+      console.error('上传自定义图标失败:', e)
       const errorMessage = e instanceof Error ? e.message : String(e)
       setUploadError(errorMessage)
       setFaviconStatus('error')

@@ -1,8 +1,3 @@
-/**
- * @description 前端UI组件：AppDialogs.tsx
- * @date 2026-06-10
- */
-import React from 'react'
 import { LoginDialog } from '../auth/LoginDialog'
 import { LogoutConfirmDialog } from '../auth/LogoutConfirmDialog'
 import { AiSearchOverlay } from '../search/AiSearchOverlay'

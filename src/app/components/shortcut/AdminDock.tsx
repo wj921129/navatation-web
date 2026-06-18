@@ -1,5 +1,4 @@
 import { Check, FolderCog, Grid, List, RotateCw } from 'lucide-react'
-import React from 'react'
 
 /**
  * 管理员侧边栏操作组件，提供切换模式、保存、新增分类和批量刷新图标功能

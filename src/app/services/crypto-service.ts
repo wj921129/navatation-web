@@ -74,10 +74,7 @@ async function encryptWithPublicKey(plaintext: string, publicKeyPem: string): Pr
         binary += String.fromCharCode(bytes[i])
       }
       return btoa(binary)
-    } catch (err) {
-      // 容错：如果原生环境加密失败，则自动滑入纯 JS 降级通路
-      console.warn('原生 Web Crypto 加密失败，降级为 node-forge 纯 JS 加密:', err)
-    }
+    } catch (_err) {}
   }
 
   // 2. 降级方案：在非安全上下文（纯 HTTP 局域网访问）中使用 node-forge 进行 RSA-OAEP-256 加密
@@ -90,8 +87,7 @@ async function encryptWithPublicKey(plaintext: string, publicKeyPem: string): Pr
       },
     })
     return forge.util.encode64(encrypted)
-  } catch (err) {
-    console.error('node-forge 降级加密失败:', err)
+  } catch (_err) {
     throw new Error('加密计算失败，无法保证安全传输。')
   }
 }

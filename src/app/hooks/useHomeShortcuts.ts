@@ -30,8 +30,8 @@ export function useHomeShortcuts(authState: { isLoggedIn: boolean; user: any }) 
           setHomeShortcuts(loaded)
           setTempHomeShortcuts(loaded)
         }
-      } catch (err) {
-        console.error('Failed to fetch guest home shortcuts', err)
+      } catch (_err) {
+        console.error('获取主页快捷方式失败:', _err)
       }
       return
     }
@@ -51,8 +51,8 @@ export function useHomeShortcuts(authState: { isLoggedIn: boolean; user: any }) 
         setHomeShortcuts(loaded)
         setTempHomeShortcuts(loaded)
       }
-    } catch (err) {
-      console.error('Failed to fetch home shortcuts', err)
+    } catch (_err) {
+      console.error('从服务拉取快捷方式失败:', _err)
     }
   }, [authState.isLoggedIn])
 
@@ -132,8 +132,8 @@ export function useHomeShortcuts(authState: { isLoggedIn: boolean; user: any }) 
 
       // 6. 静默重新拉取以获取最新数据库 ID
       await fetchHomeShortcuts()
-    } catch (err) {
-      console.error('Failed to save home shortcuts', err)
+    } catch (_err) {
+      console.error('编辑/更新主页快捷方式失败:', _err)
       setHomeShortcuts(snapshotBeforeEdit)
     }
   }, [tempHomeShortcuts, homeShortcuts, authState.isLoggedIn, fetchHomeShortcuts])

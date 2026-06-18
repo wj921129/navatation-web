@@ -155,9 +155,7 @@ export function useShortcuts(authState: any) {
       }))
       setShortcuts(loaded)
       setTempShortcuts(loaded)
-    } catch (err) {
-      console.error('Failed to fetch shortcuts', err)
-    }
+    } catch (_err) {}
   }, [authState.isLoggedIn])
 
   // 拖拽排序 - 移动快捷方式在临时列表中的位置
@@ -332,8 +330,7 @@ export function useShortcuts(authState: any) {
 
       // 9. 全局静默重新加载以同步 React 界面状态及真实的数据库 ID
       await fetchShortcuts()
-    } catch (err) {
-      console.error('Failed to save shortcut edits to backend', err)
+    } catch (_err) {
       // 发生异常时回滚乐观更新
       setShortcuts(snapshotBeforeEdit)
       // 可以加上 toast 提示

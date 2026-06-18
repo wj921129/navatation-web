@@ -151,7 +151,7 @@ export function useManageHomepageIcons(
         const imgDdg = new Image()
         imgDdg.onload = () => updateIcon(ddgCdn)
         imgDdg.src = ddgCdn
-      } catch (e) {}
+      } catch (_e) {}
     })
 
     setTimeout(() => {
@@ -204,8 +204,7 @@ export function useManageHomepageIcons(
           }
         })
       }
-    } catch (err) {
-      console.error('Batch refresh all icons error:', err)
+    } catch (_err) {
     } finally {
       tasks.forEach(({ idx }) => {
         setRowLoadingStatus((prev) => ({ ...prev, [`${idx}`]: false }))
@@ -239,8 +238,7 @@ export function useManageHomepageIcons(
           [rowKey]: [res.data.iconUrl],
         }))
       }
-    } catch (err) {
-      console.error('Row upload icon error:', err)
+    } catch (_err) {
     } finally {
       setRowLoadingStatus((prev) => ({ ...prev, [rowKey]: false }))
       activeUploadRow.current = null

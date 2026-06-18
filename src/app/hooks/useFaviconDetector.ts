@@ -195,7 +195,7 @@ export function useFaviconDetector(
         const imgDdg = new Image()
         imgDdg.onload = () => updateIcon(ddgCdn)
         imgDdg.src = ddgCdn
-      } catch (e) {}
+      } catch (_e) {}
     })
 
     setTimeout(() => {
@@ -250,8 +250,7 @@ export function useFaviconDetector(
           }
         })
       }
-    } catch (err) {
-      console.error('Batch refresh category icons error:', err)
+    } catch (_err) {
     } finally {
       validSites.forEach((site) => {
         const siteIdx = category.sites.indexOf(site)
@@ -318,7 +317,7 @@ export function useFaviconDetector(
         const imgDdg = new Image()
         imgDdg.onload = () => updateIcon(ddgCdn)
         imgDdg.src = ddgCdn
-      } catch (e) {}
+      } catch (_e) {}
     })
 
     setTimeout(() => {
@@ -371,8 +370,7 @@ export function useFaviconDetector(
           }
         })
       }
-    } catch (err) {
-      console.error('Batch refresh all icons error:', err)
+    } catch (_err) {
     } finally {
       tasks.forEach(({ catIdx, siteIdx }) => {
         const rowKey = `${catIdx}-${siteIdx}`

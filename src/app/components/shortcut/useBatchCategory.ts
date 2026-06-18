@@ -98,8 +98,7 @@ export function useBatchCategory(categories: CategoryGroup[], loadRecommended: (
           [rowKey]: [res.data.iconUrl],
         }))
       }
-    } catch (err) {
-      console.error('Row upload icon error:', err)
+    } catch (_err) {
     } finally {
       setRowLoadingStatus((prev: any) => ({ ...prev, [rowKey]: false }))
       activeUploadRow.current = null
@@ -187,9 +186,7 @@ export function useBatchCategory(categories: CategoryGroup[], loadRecommended: (
       )
       loadRecommended()
       toast.success('已保存', { duration: 2000 })
-    } catch (err) {
-      console.error('Batch save all sites error:', err)
-    }
+    } catch (_err) {}
   }
 
   const handleSaveCategorySites = async (categoryGroup: CategoryGroup) => {
@@ -229,9 +226,7 @@ export function useBatchCategory(categories: CategoryGroup[], loadRecommended: (
         loadRecommended()
         toast.success('已保存', { duration: 2000 })
       }
-    } catch (err) {
-      console.error('Batch save sites error:', err)
-    }
+    } catch (_err) {}
   }
 
   return {

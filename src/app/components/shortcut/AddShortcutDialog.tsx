@@ -4,7 +4,7 @@
  */
 
 import { Check, Link, Settings, X } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import {
   type CategoryGroup,
@@ -21,7 +21,6 @@ import { EditShortcutDialog } from './EditShortcutDialog'
 import { PendingShortcutsList } from './PendingShortcutsList'
 import { RecommendCategorySortDialog } from './RecommendCategorySortDialog'
 import { RecommendedTabGrid } from './RecommendedTabGrid'
-import { RecommendSiteItem } from './RecommendSiteItem'
 import { useBatchCategory } from './useBatchCategory'
 import { useCustomShortcut } from './useCustomShortcut'
 
@@ -63,7 +62,7 @@ export function AddShortcutDialog({
   const customShortcutControls = useCustomShortcut(handleAddRecommendedToPending)
 
   // 管理员编辑状态
-  const [editingCategory, setEditingCategory] = useState<any>(null)
+  const [_editingCategory, setEditingCategory] = useState<any>(null)
   const [editingSite, setEditingSite] = useState<any>(null)
   const [isSortDialogOpen, setIsSortDialogOpen] = useState(false)
 
@@ -107,7 +106,6 @@ export function AddShortcutDialog({
         }
       })
       .catch((err) => {
-        console.error('Failed to load recommended sites:', err)
         setCategories(
           recommendedCategories.map((cat) => ({
             ...cat,

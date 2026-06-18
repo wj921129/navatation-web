@@ -38,12 +38,6 @@ interface BaseModalProps {
   /** 弹窗容器层级 */
   zIndex?: number
 }
-
-const overlayVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1 },
-}
-
 // 后期扩展动效：只需在此对象中添加新的 variant 配置即可
 const modalVariants: Record<AnimationType, any> = {
   scale: {

@@ -1,5 +1,4 @@
 import { Check, X } from 'lucide-react'
-import React from 'react'
 import { BaseModal } from '../ui/BaseModal'
 import { IconMap } from '../ui/IconMap'
 

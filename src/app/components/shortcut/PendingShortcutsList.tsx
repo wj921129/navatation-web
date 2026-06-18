@@ -1,5 +1,4 @@
 import { Trash2 } from 'lucide-react'
-import React from 'react'
 
 /**
  * 待添加捷径列表组件，展示当前选中的拟添加网站
