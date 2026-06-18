@@ -64,34 +64,91 @@
 }
 
 /* 2. 气泡整体样式定制：自适应宽度、纯净毛玻璃与微阴影，杜绝任何彩色发光与彩色背景 */
-[data-sonner-toaster] [data-sonner-toast],
-[data-sonner-toaster] [data-sonner-toast][data-type="success"],
-[data-sonner-toaster] [data-sonner-toast][data-type="error"],
-[data-sonner-toaster] [data-sonner-toast][data-type="warning"],
-[data-sonner-toaster] [data-sonner-toast][data-type="info"] {
+/* 2. 气泡整体通用布局、尺寸与动画属性定制 */
+[data-sonner-toaster] [data-sonner-toast] {
   width: fit-content !important;
   min-width: 120px !important;
   max-width: 90vw !important;
   margin: 6px auto !important;
   padding: 10px 20px !important;
-  border-radius: 10px !important; /* 精致圆角 */
+  border-radius: 14px !important; /* 更柔和、优雅的大圆角，符合全局 UI 风格 */
   font-size: 13.5px !important;
   font-weight: 500 !important;
   letter-spacing: 0.015em !important;
-
-  /* 与系统主题变量自动打通：极简半透毛玻璃态 */
-  background: var(--glass-bg) !important;
-  border: 1px solid var(--widget-border) !important;
-  color: var(--text-primary) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
-
+  backdrop-filter: blur(16px) !important; /* 加强高斯模糊，让磨砂感更优雅 */
+  -webkit-backdrop-filter: blur(16px) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   gap: 8px !important;
   transition: all 0.2s ease !important;
+
+  /* 默认/Info 提示的极简半透毛玻璃态 */
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--widget-border) !important;
+  color: var(--text-primary) !important;
+}
+
+/* 2.1 成功 (Success) 气泡样式：优雅嫩绿浅色背景 */
+[data-sonner-toaster] [data-sonner-toast][data-type="success"] {
+  background: rgba(240, 253, 244, 0.85) !important;
+  border: 1px solid rgba(187, 247, 208, 0.45) !important;
+  color: #166534 !important; /* Tailwind green-800 */
+}
+/* 成功图标颜色适配 */
+[data-sonner-toaster] [data-sonner-toast][data-type="success"] [data-icon] svg {
+  color: #22c55e !important;
+}
+
+/* 2.2 错误 (Error) 气泡样式：优雅淡红浅色背景 */
+[data-sonner-toaster] [data-sonner-toast][data-type="error"] {
+  background: rgba(254, 242, 242, 0.85) !important;
+  border: 1px solid rgba(254, 226, 226, 0.45) !important;
+  color: #991b1b !important; /* Tailwind red-800 */
+}
+/* 错误图标颜色适配 */
+[data-sonner-toaster] [data-sonner-toast][data-type="error"] [data-icon] svg {
+  color: #ef4444 !important;
+}
+
+/* 2.3 警告 (Warning) 气泡样式：优雅浅桔浅色背景 */
+[data-sonner-toaster] [data-sonner-toast][data-type="warning"] {
+  background: rgba(255, 251, 235, 0.85) !important;
+  border: 1px solid rgba(253, 230, 138, 0.45) !important;
+  color: #9a3412 !important; /* Tailwind orange-800 */
+}
+/* 警告图标颜色适配 */
+[data-sonner-toaster] [data-sonner-toast][data-type="warning"] [data-icon] svg {
+  color: #f97316 !important;
+}
+
+/* 2.4 暗黑模式 (Dark Mode) 下的自适应色调 */
+.dark [data-sonner-toaster] [data-sonner-toast][data-type="success"] {
+  background: rgba(20, 53, 33, 0.75) !important;
+  border: 1px solid rgba(34, 197, 94, 0.2) !important;
+  color: #4ade80 !important; /* Tailwind green-400 */
+}
+.dark [data-sonner-toaster] [data-sonner-toast][data-type="success"] [data-icon] svg {
+  color: #4ade80 !important;
+}
+
+.dark [data-sonner-toaster] [data-sonner-toast][data-type="error"] {
+  background: rgba(69, 26, 26, 0.75) !important;
+  border: 1px solid rgba(239, 68, 68, 0.2) !important;
+  color: #f87171 !important; /* Tailwind red-400 */
+}
+.dark [data-sonner-toaster] [data-sonner-toast][data-type="error"] [data-icon] svg {
+  color: #f87171 !important;
+}
+
+.dark [data-sonner-toaster] [data-sonner-toast][data-type="warning"] {
+  background: rgba(69, 43, 20, 0.75) !important;
+  border: 1px solid rgba(249, 115, 22, 0.2) !important;
+  color: #fb923c !important; /* Tailwind orange-400 */
+}
+.dark [data-sonner-toaster] [data-sonner-toast][data-type="warning"] [data-icon] svg {
+  color: #fb923c !important;
 }
 
 /* 3. 暗色模式下微调阴影效果，保持与页面阴影一致 */
