@@ -4,7 +4,7 @@
  */
 
 import { Check, Link, Settings, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import {
   type CategoryGroup,
@@ -54,6 +54,46 @@ export function AddShortcutDialog({
   const [isGridAdmin, setIsGridAdmin] = useState(false)
   const [pendingShortcuts, setPendingShortcuts] = useState<RecommendedSite[]>([])
   const [categories, setCategories] = useState<CategoryGroup[]>([])
+
+  // ScrollSpy states
+  const [activeCategoryId, setActiveCategoryId] = useState<string>('')
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const isScrollingRef = useRef(false)
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    if (isScrollingRef.current || !categories.length) return
+    const containerTop = e.currentTarget.scrollTop
+    let currentActiveId = categories[0]?.categoryId || '0'
+    for (let i = 0; i < categories.length; i++) {
+      const catId = categories[i].categoryId || i.toString()
+      const element = document.getElementById(`category-section-${catId}`)
+      if (element) {
+        if (containerTop >= element.offsetTop - 150) {
+          currentActiveId = catId
+        }
+      }
+    }
+    if (activeCategoryId !== currentActiveId) {
+      setActiveCategoryId(currentActiveId)
+    }
+  }
+
+  const scrollToCategory = (id: string) => {
+    const element = document.getElementById(`category-section-${id}`)
+    if (element && scrollContainerRef.current) {
+      isScrollingRef.current = true
+      setActiveCategoryId(id)
+      scrollContainerRef.current.scrollTo({
+        top: Math.max(0, element.offsetTop - 24),
+        behavior: 'smooth'
+      })
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current)
+      scrollTimeoutRef.current = setTimeout(() => {
+        isScrollingRef.current = false
+      }, 800)
+    }
+  }
 
   const handleAddRecommendedToPending = (site: RecommendedSite) => {
     setPendingShortcuts([...pendingShortcuts, site])
@@ -129,6 +169,8 @@ export function AddShortcutDialog({
       setIsGridAdmin(false)
       setIsBatchMode(false)
       setBatchEditData([])
+      setActiveCategoryId('')
+      if (scrollContainerRef.current) scrollContainerRef.current.scrollTop = 0
       loadRecommended()
     }
   }, [isOpen])
@@ -260,51 +302,85 @@ export function AddShortcutDialog({
           </div>
 
           <div className="flex-1 overflow-hidden">
-            <div className="grid grid-cols-3 h-full">
+            <div className="grid grid-cols-4 h-full">
               <div
-                className={`${isBatchMode ? 'col-span-3' : 'col-span-2'} border-r border-border overflow-y-scroll`}
+                className={`${isBatchMode ? 'col-span-4' : 'col-span-3'} border-r border-border flex flex-col h-full overflow-hidden`}
               >
                 {activeTab === 'recommended' ? (
-                  <div className="p-6 space-y-8 relative">
-                    {isBatchMode ? (
-                      <div
-                        key="list-mode"
-                        className="space-y-8 relative animate-in fade-in slide-in-from-right-4 duration-300"
-                      >
-                        <input
-                          type="file"
-                          ref={batchCategoryControls.rowFileInputRef}
-                          onChange={batchCategoryControls.handleRowIconUpload}
-                          className="hidden"
-                          accept="image/*"
-                        />
-                        <BatchCategoryList {...batchCategoryControls} />
-                      </div>
-                    ) : (
-                      <div
-                        key="grid-mode"
-                        className="h-full animate-in fade-in slide-in-from-left-4 duration-300"
-                      >
-                        <RecommendedTabGrid
-                          categories={categories}
-                          setCategories={setCategories}
-                          userRole={isGridAdmin ? 'ADMIN' : 'USER'}
-                          iconSize={iconSize}
-                          iconRadius={iconRadius}
-                          iconSpacingX={iconSpacingX}
-                          iconSpacingY={iconSpacingY}
-                          iconTextGap={iconTextGap}
-                          textSize={textSize}
-                          setEditingCategory={setEditingCategory}
-                          setEditingSite={setEditingSite}
-                          loadRecommended={loadRecommended}
-                          handleAddRecommendedToPending={handleAddRecommendedToPending}
-                        />
+                  <div className="flex flex-1 h-full overflow-hidden">
+                    {!isBatchMode && categories.length > 0 && (
+                      <div className="w-44 border-r border-border bg-card/30 flex-shrink-0 overflow-y-auto hidden sm:block">
+                        <div className="py-4 space-y-1">
+                          {categories.map((category, idx) => {
+                            const catId = category.categoryId || idx.toString()
+                            const isActive = activeCategoryId === catId || (!activeCategoryId && idx === 0)
+                            return (
+                              <button
+                                key={catId}
+                                onClick={() => scrollToCategory(catId)}
+                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-all duration-200 border-l-2 cursor-pointer ${
+                                  isActive
+                                    ? 'border-blue-500 bg-blue-50/60 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium'
+                                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-neutral-800/50 hover:text-gray-900 dark:hover:text-gray-200'
+                                }`}
+                              >
+                                <category.icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-blue-500' : 'opacity-70'}`} />
+                                <span className="truncate">{category.category}</span>
+                              </button>
+                            )
+                          })}
+                        </div>
                       </div>
                     )}
+                    <div 
+                      className="flex-1 overflow-y-auto relative scroll-smooth"
+                      ref={scrollContainerRef}
+                      onScroll={handleScroll}
+                    >
+                      <div className="p-6 space-y-8 relative">
+                        {isBatchMode ? (
+                          <div
+                            key="list-mode"
+                            className="space-y-8 relative animate-in fade-in slide-in-from-right-4 duration-300"
+                          >
+                            <input
+                              type="file"
+                              ref={batchCategoryControls.rowFileInputRef}
+                              onChange={batchCategoryControls.handleRowIconUpload}
+                              className="hidden"
+                              accept="image/*"
+                            />
+                            <BatchCategoryList {...batchCategoryControls} />
+                          </div>
+                        ) : (
+                          <div
+                            key="grid-mode"
+                            className="h-full animate-in fade-in slide-in-from-left-4 duration-300"
+                          >
+                            <RecommendedTabGrid
+                              categories={categories}
+                              setCategories={setCategories}
+                              userRole={isGridAdmin ? 'ADMIN' : 'USER'}
+                              iconSize={iconSize}
+                              iconRadius={iconRadius}
+                              iconSpacingX={iconSpacingX}
+                              iconSpacingY={iconSpacingY}
+                              iconTextGap={iconTextGap}
+                              textSize={textSize}
+                              setEditingCategory={setEditingCategory}
+                              setEditingSite={setEditingSite}
+                              loadRecommended={loadRecommended}
+                              handleAddRecommendedToPending={handleAddRecommendedToPending}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 ) : (
-                  <CustomShortcutTab {...customShortcutControls} iconRadius={iconRadius} />
+                  <div className="flex-1 overflow-y-auto h-full p-6">
+                    <CustomShortcutTab {...customShortcutControls} iconRadius={iconRadius} />
+                  </div>
                 )}
               </div>
 
