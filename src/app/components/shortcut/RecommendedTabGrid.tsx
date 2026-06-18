@@ -168,19 +168,22 @@ export function RecommendedTabGrid({
               >
                 {category.sites.map((site: any) => (
                   <SortableGridItem key={site.dragId!} id={site.dragId!}>
-                    <RecommendSiteItem
-                      site={site}
-                      catIdx={catIdx}
-                      iconSize={iconSize}
-                      borderRadius={borderRadius}
-                      iconTextGap={iconTextGap}
-                      textSize={textSize}
-                      userRole={userRole}
-                      category={category}
-                      setEditingSite={setEditingSite}
-                      setCategories={setCategories}
-                      handleAddRecommendedToPending={handleAddRecommendedToPending}
-                    />
+                    {({ dragHandleProps }: any) => (
+                      <RecommendSiteItem
+                        site={site}
+                        catIdx={catIdx}
+                        iconSize={iconSize}
+                        borderRadius={borderRadius}
+                        iconTextGap={iconTextGap}
+                        textSize={textSize}
+                        userRole={userRole}
+                        category={category}
+                        setEditingSite={setEditingSite}
+                        setCategories={setCategories}
+                        handleAddRecommendedToPending={handleAddRecommendedToPending}
+                        dragHandleProps={dragHandleProps}
+                      />
+                    )}
                   </SortableGridItem>
                 ))}
               </SortableContext>

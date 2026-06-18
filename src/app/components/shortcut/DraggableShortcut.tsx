@@ -16,6 +16,7 @@ interface DraggableShortcutProps {
   textSize: number
   onEdit: () => void
   onDelete: () => void
+  dragHandleProps?: any
 }
 
 /**
@@ -33,6 +34,7 @@ export function DraggableShortcut({
   textSize,
   onEdit,
   onDelete,
+  dragHandleProps,
 }: Omit<DraggableShortcutProps, 'index' | 'moveShortcut'>) {
   return (
     <div
@@ -59,7 +61,8 @@ export function DraggableShortcut({
         style={{ gap: `${iconTextGap}px` }}
       >
         <div
-          className="bg-icon-bg border border-widget-border flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden shrink-0"
+          {...dragHandleProps}
+          className="bg-icon-bg border border-widget-border flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden shrink-0 cursor-grab active:cursor-grabbing"
           style={{
             width: `${iconSize}px`,
             height: `${iconSize}px`,

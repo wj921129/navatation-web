@@ -18,6 +18,7 @@ interface DraggableRecommendSiteProps {
   setEditingSite: (site: any) => void
   setCategories: React.Dispatch<React.SetStateAction<any[]>>
   handleAddRecommendedToPending: (site: any) => void
+  dragHandleProps?: any
 }
 
 export function RecommendSiteItem({
@@ -32,6 +33,7 @@ export function RecommendSiteItem({
   setEditingSite,
   setCategories,
   handleAddRecommendedToPending,
+  dragHandleProps,
 }: DraggableRecommendSiteProps) {
   return (
     <div className="relative group/item flex-shrink-0" style={{ width: `${iconSize + 32}px` }}>
@@ -43,7 +45,8 @@ export function RecommendSiteItem({
         style={{ gap: `${iconTextGap}px` }}
       >
         <div
-          className="bg-card flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all duration-200 border border-border overflow-hidden"
+          {...dragHandleProps}
+          className="bg-card flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all duration-200 border border-border overflow-hidden cursor-grab active:cursor-grabbing"
           style={{
             width: `${iconSize}px`,
             height: `${iconSize}px`,
@@ -60,12 +63,15 @@ export function RecommendSiteItem({
                 <img
                   src={site.iconValue}
                   alt={site.name}
+                  draggable={false}
+                  className="pointer-events-none"
                   style={{ width: '50%', height: '50%', objectFit: 'contain' }}
                 />
               )
             }
             return (
               <site.icon
+                className="pointer-events-none"
                 style={{
                   color: site.color,
                   width: `${iconSize * 0.5}px`,

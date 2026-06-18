@@ -553,14 +553,17 @@ export function ManageHomepageShortcutsDialog({
                   >
                     {editData.map((site, idx) => (
                       <SortableGridItem key={site.dragId} id={site.dragId}>
-                        <GridItemInner
-                          site={site}
-                          idx={idx}
-                          handleDeleteRow={handleDeleteRow}
-                          iconSize={iconSize}
-                          borderRadiusCss={borderRadiusCss}
-                          textSize={textSize}
-                        />
+                        {({ dragHandleProps }: any) => (
+                          <GridItemInner
+                            site={site}
+                            idx={idx}
+                            handleDeleteRow={handleDeleteRow}
+                            iconSize={iconSize}
+                            borderRadiusCss={borderRadiusCss}
+                            textSize={textSize}
+                            dragHandleProps={dragHandleProps}
+                          />
+                        )}
                       </SortableGridItem>
                     ))}
                   </div>
@@ -593,6 +596,7 @@ interface GridItemInnerProps {
   iconSize: number
   borderRadiusCss: string
   textSize: number
+  dragHandleProps?: any
 }
 
 function GridItemInner({
@@ -602,6 +606,7 @@ function GridItemInner({
   iconSize,
   borderRadiusCss,
   textSize,
+  dragHandleProps,
 }: GridItemInnerProps) {
   return (
     <div
@@ -609,7 +614,8 @@ function GridItemInner({
       style={{ width: `${iconSize + 32}px` }}
     >
       <div
-        className="bg-card border border-border flex items-center justify-center shadow-md overflow-hidden pointer-events-none"
+        {...dragHandleProps}
+        className="bg-card border border-border flex items-center justify-center shadow-md overflow-hidden cursor-grab active:cursor-grabbing"
         style={{
           width: `${iconSize}px`,
           height: `${iconSize}px`,
@@ -627,6 +633,8 @@ function GridItemInner({
                 key={site.iconValue}
                 src={site.iconValue}
                 alt={site.name}
+                draggable={false}
+                className="pointer-events-none"
                 style={{ width: '50%', height: '50%', objectFit: 'contain' }}
                 onLoad={(e) => {
                   ;(e.target as any).style.display = ''
@@ -640,6 +648,7 @@ function GridItemInner({
           const IconComponent = IconMap[site.iconValue || 'Link'] || Link
           return (
             <IconComponent
+              className="pointer-events-none"
               style={{
                 color: site.color || '#333',
                 width: `${iconSize * 0.5}px`,

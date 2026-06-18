@@ -70,16 +70,19 @@ export function ShortcutGrid({
                 key={shortcut.dragId || `shortcut-edit-${globalIndex}`}
                 id={shortcut.dragId || `shortcut-edit-${globalIndex}`}
               >
-                <DraggableShortcut
-                  shortcut={shortcut}
-                  iconInnerSize={iconInnerSize}
-                  iconSize={settings.iconSize}
-                  iconRadius={settings.iconRadius}
-                  iconTextGap={settings.iconTextGap}
-                  textSize={settings.textSize}
-                  onEdit={() => handleEditShortcut(globalIndex)}
-                  onDelete={() => handleDeleteShortcut(globalIndex)}
-                />
+                {({ dragHandleProps }: any) => (
+                  <DraggableShortcut
+                    shortcut={shortcut}
+                    iconInnerSize={iconInnerSize}
+                    iconSize={settings.iconSize}
+                    iconRadius={settings.iconRadius}
+                    iconTextGap={settings.iconTextGap}
+                    textSize={settings.textSize}
+                    onEdit={() => handleEditShortcut(globalIndex)}
+                    onDelete={() => handleDeleteShortcut(globalIndex)}
+                    dragHandleProps={dragHandleProps}
+                  />
+                )}
               </SortableGridItem>
             ))}
           </SortableContext>
