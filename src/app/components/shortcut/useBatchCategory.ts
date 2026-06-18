@@ -113,8 +113,8 @@ export function useBatchCategory(categories: CategoryGroup[], loadRecommended: (
         name: '',
         url: '',
         icon: Link,
-        iconType: 'FAVICON' as IconType,
-        iconValue: '',
+        iconType: 'BUILTIN' as IconType,
+        iconValue: 'Link',
         color: '#4285F4',
         dragId: Math.random().toString(36).substring(7),
       }

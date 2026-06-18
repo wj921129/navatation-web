@@ -311,7 +311,7 @@ export function AddShortcutDialog({
                   <div className="flex flex-1 h-full overflow-hidden">
                     {!isBatchMode && categories.length > 0 && (
                       <div className="w-44 border-r border-border bg-card/30 flex-shrink-0 overflow-y-auto hidden sm:block">
-                        <div className="px-3 py-4 space-y-1">
+                        <div className="px-3 py-4 space-y-2">
                           {categories.map((category, idx) => {
                             const catId = category.categoryId || idx.toString()
                             const isActive = activeCategoryId === catId || (!activeCategoryId && idx === 0)
@@ -319,7 +319,7 @@ export function AddShortcutDialog({
                               <button
                                 key={catId}
                                 onClick={() => scrollToCategory(catId)}
-                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 cursor-pointer ${
+                                className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-all duration-200 cursor-pointer ${
                                   isActive
                                     ? 'bg-blue-500/10 text-blue-500 shadow-sm font-medium'
                                     : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100/60 dark:hover:bg-neutral-800/60 hover:text-gray-900 dark:hover:text-gray-200'
@@ -404,7 +404,7 @@ export function AddShortcutDialog({
           id: editingSite?.siteId,
           name: editingSite?.name || '',
           url: editingSite?.url || '',
-          iconType: editingSite?.iconType || 'FAVICON',
+          iconType: editingSite?.iconType || 'BUILTIN',
           iconValue: editingSite?.iconValue || '',
         }}
         onSave={(shortcut) => {

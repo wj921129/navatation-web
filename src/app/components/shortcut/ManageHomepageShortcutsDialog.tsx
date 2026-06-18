@@ -116,8 +116,8 @@ export function ManageHomepageShortcutsDialog({
       {
         name: '',
         url: '',
-        iconType: 'FAVICON',
-        iconValue: '',
+        iconType: 'BUILTIN',
+        iconValue: 'Link',
         color: '#ffffff',
         dragId: Math.random().toString(36).substring(7),
       },

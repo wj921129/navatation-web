@@ -117,8 +117,15 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
   useEffect(() => {
     setName(shortcut.name)
     setUrl(shortcut.url)
-    setIconType(shortcut.iconType || 'BUILTIN')
-    setIconValue(shortcut.iconValue || 'Link')
+    const rawIconType = shortcut.iconType || 'BUILTIN'
+    const rawIconValue = shortcut.iconValue || 'Link'
+    if (rawIconValue === 'Link') {
+      setIconType('BUILTIN')
+      setIconValue('Link')
+    } else {
+      setIconType(rawIconType)
+      setIconValue(rawIconValue)
+    }
     setFaviconStatus('idle')
     setUploadError(null)
     setDetectedIcons([])
@@ -290,7 +297,8 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
   }
 
   const showImagePreview =
-    iconType === 'CUSTOM_URL' || iconType === 'FAVICON' || iconType === 'CUSTOM_UPLOAD'
+    (iconType === 'CUSTOM_URL' || iconType === 'FAVICON' || iconType === 'CUSTOM_UPLOAD') &&
+    iconValue !== 'Link'
 
   return (
     <BaseModal
@@ -466,7 +474,7 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
             </div>
           )}
           {/* 当没有列表但存在自定义图标（例如刚打开弹窗回显） */}
-          {detectedIcons.length === 0 && showImagePreview && iconValue && (
+          {detectedIcons.length === 0 && showImagePreview && iconValue && iconValue !== 'Link' && (
             <div className="mt-3 flex items-center gap-3">
               <div className="w-12 h-12 flex-shrink-0 bg-card border border-border rounded-xl flex items-center justify-center overflow-hidden">
                 <img
