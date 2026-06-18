@@ -4,6 +4,7 @@
  */
 import { Key, LogOut, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { authStore } from '../../stores/auth-store'
 import { BaseModal } from '../ui/BaseModal'
 import { Tooltip } from '../ui/Tooltip'
@@ -65,15 +66,8 @@ export function LogoutConfirmDialog({
     setLoading(true)
     try {
       await authStore.changePassword(oldPassword, newPassword)
-      setSuccess('密码修改成功！')
-      setOldPassword('')
-      setNewPassword('')
-      setConfirmPassword('')
-      // 成功后延迟切回主面板
-      setTimeout(() => {
-        setView('confirm')
-        setSuccess('')
-      }, 1500)
+      toast.success('密码修改成功')
+      onClose()
     } catch (err: any) {
       setError(err?.message ?? '原密码错误或修改失败')
     } finally {
