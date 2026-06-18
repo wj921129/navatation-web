@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @description 搜索引擎选择器组件
  * @date 2026-06-09
  */
@@ -96,7 +96,7 @@ export function SearchEngineSelect({ value, onChange }: SearchEngineSelectProps)
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-input-bg transition-colors active:scale-95 shadow-sm"
+          className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-input-bg theme-transition active:scale-95 shadow-sm"
         >
           <img
             src={currentEngine.icon}
@@ -116,7 +116,7 @@ export function SearchEngineSelect({ value, onChange }: SearchEngineSelectProps)
                 onChange(engine.value)
                 setIsOpen(false)
               }}
-              className="w-full flex items-center justify-between px-4 py-3 hover:bg-input-bg text-text-primary transition-colors text-left"
+              className="w-full flex items-center justify-between px-4 py-3 hover:bg-input-bg text-text-primary theme-transition text-left"
             >
               <div className="flex items-center gap-3">
                 <img src={engine.icon} alt={engine.name} className="w-5 h-5 object-contain" />

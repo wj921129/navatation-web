@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @description 搜索框组件
  * @date 2026-06-09
  */
@@ -67,14 +67,14 @@ export function SearchBox({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="搜索或输入网址..."
-            className="w-full px-16 rounded-full bg-widget-bg backdrop-blur-xl border border-widget-border text-text-primary placeholder-text-placeholder text-lg outline-none focus:bg-widget-bg/90 focus:border-blue-500/50 transition-all shadow-md"
+            className="w-full px-16 rounded-full bg-widget-bg backdrop-blur-xl border border-widget-border text-text-primary placeholder-text-placeholder text-lg outline-none focus:bg-widget-bg/90 focus:border-blue-500/50 theme-transition shadow-md"
             style={{ height: `${settings.searchBoxHeight}px` }}
           />
 
           <Tooltip content="立即搜索" side="top">
             <button
               type="submit"
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full text-text-secondary hover:text-text-primary hover:bg-input-bg transition-all active:scale-95"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full text-text-secondary hover:text-text-primary hover:bg-input-bg theme-transition active:scale-95"
             >
               <Search className="w-5 h-5 text-current" />
             </button>
