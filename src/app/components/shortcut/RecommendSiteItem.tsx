@@ -38,15 +38,16 @@ export function RecommendSiteItem({
   return (
     <div className="relative group/item flex-shrink-0" style={{ width: `${iconSize + 32}px` }}>
       <div
-        onClick={() => {
-          handleAddRecommendedToPending(site)
-        }}
-        className="flex flex-col items-center group cursor-pointer w-full"
+        className="flex flex-col items-center w-full"
         style={{ gap: `${iconTextGap}px` }}
       >
         <div
           {...dragHandleProps}
-          className="bg-card flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all duration-200 border border-border overflow-hidden cursor-grab active:cursor-grabbing"
+          onClick={(e) => {
+            e.stopPropagation()
+            handleAddRecommendedToPending(site)
+          }}
+          className="bg-card flex items-center justify-center shadow-md hover:shadow-lg hover:scale-110 transition-all duration-200 border border-border overflow-hidden cursor-pointer cursor-grab active:cursor-grabbing"
           style={{
             width: `${iconSize}px`,
             height: `${iconSize}px`,
@@ -83,7 +84,7 @@ export function RecommendSiteItem({
           })()}
         </div>
         <span
-          className="text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors truncate w-full text-center px-1 font-light tracking-wide"
+          className="text-gray-500 dark:text-gray-400 truncate w-full text-center px-1 font-light tracking-wide"
           style={{ fontSize: `${textSize}px` }}
         >
           {site.name}

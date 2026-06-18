@@ -56,13 +56,16 @@ export function DraggableShortcut({
       </button>
 
       <div
-        onClick={onEdit}
         className="flex flex-col items-center w-full"
         style={{ gap: `${iconTextGap}px` }}
       >
         <div
           {...dragHandleProps}
-          className="bg-icon-bg border border-widget-border flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden shrink-0 cursor-grab active:cursor-grabbing"
+          onClick={(e) => {
+            e.stopPropagation()
+            onEdit()
+          }}
+          className="bg-icon-bg border border-widget-border flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 overflow-hidden shrink-0 cursor-grab active:cursor-grabbing"
           style={{
             width: `${iconSize}px`,
             height: `${iconSize}px`,

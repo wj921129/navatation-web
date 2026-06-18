@@ -106,20 +106,24 @@ export function ShortcutGrid({
             <div
               key={shortcut.dragId || `shortcut-${globalIndex}`}
               className="flex flex-col items-center group relative"
-              style={{ width: `${settings.iconSize + 32}px` }}
+              style={{
+                width: `${settings.iconSize + 32}px`,
+                gap: `${settings.iconTextGap}px`,
+              }}
             >
               <a
                 href={shortcut.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-col items-center w-full"
-                style={{ gap: `${settings.iconTextGap}px` }}
+                className="flex items-center justify-center shrink-0 transition-transform duration-200 hover:scale-110"
+                style={{
+                  width: `${settings.iconSize}px`,
+                  height: `${settings.iconSize}px`,
+                }}
               >
                 <div
-                  className="bg-icon-bg border border-widget-border flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 overflow-hidden shrink-0"
+                  className="bg-icon-bg border border-widget-border flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden w-full h-full"
                   style={{
-                    width: `${settings.iconSize}px`,
-                    height: `${settings.iconSize}px`,
                     borderRadius: borderRadius,
                   }}
                 >
@@ -158,13 +162,13 @@ export function ShortcutGrid({
                     )
                   })()}
                 </div>
-                <span
-                  className="text-white font-light tracking-wide drop-shadow-lg text-center w-full truncate px-1"
-                  style={{ fontSize: `${settings.textSize}px` }}
-                >
-                  {shortcut.name}
-                </span>
               </a>
+              <span
+                className="text-white font-light tracking-wide drop-shadow-lg text-center w-full truncate px-1"
+                style={{ fontSize: `${settings.textSize}px` }}
+              >
+                {shortcut.name}
+              </span>
             </div>
           ))}
         </>
