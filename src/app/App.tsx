@@ -25,6 +25,7 @@ import { WidgetLayer } from './components/layout/WidgetLayer'
 import { SearchBox } from './components/search/SearchBox'
 import { ShortcutGrid } from './components/shortcut/ShortcutGrid'
 import { TodoListWidget } from './components/todo/TodoListWidget'
+import { ThemeTransition } from './components/ui/ThemeTransition'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -410,7 +411,7 @@ export default function App() {
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger className="size-full relative flex flex-col items-center justify-start overflow-hidden">
+      <ContextMenuTrigger className="size-full relative flex flex-col items-center justify-start overflow-hidden theme-transition">
         {/* Background Image */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-500"
@@ -512,7 +513,7 @@ export default function App() {
         </div>
 
         {/* Content Container */}
-        <div
+        <ThemeTransition
           className="relative z-10 w-full px-8"
           style={{ paddingTop: `${settings.searchBoxMarginTop}px` }}
         >
@@ -538,7 +539,7 @@ export default function App() {
             handleDeleteShortcut={handleDeleteHomeShortcut}
             setIsAddShortcutOpen={setIsAddShortcutOpen}
           />
-        </div>
+        </ThemeTransition>
 
         {/* Bottom Right Controls */}
         <BottomRightDock
