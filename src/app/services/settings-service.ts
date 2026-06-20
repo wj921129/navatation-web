@@ -44,6 +44,11 @@ export const settingsService = {
     return api.patch('/settings', partial)
   },
 
+  /** 切换搜索引擎 */
+  switchSearchEngine(engine: string): Promise<ApiResponse<null>> {
+    return api.patch(`/settings/search-engine?engine=${engine}`)
+  },
+
   /** 上传本地壁纸图片到服务器，返回可公开访问的壁纸 URL */
   uploadWallpaper(file: File): Promise<ApiResponse<WallpaperUploadResult>> {
     const formData = new FormData()

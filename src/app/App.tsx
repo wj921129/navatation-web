@@ -303,7 +303,7 @@ export default function App() {
     localStorage.setItem('navatation_search_engine', engine)
     if (authState.isLoggedIn) {
       const { settingsService } = require('./services/settings-service')
-      settingsService.patchSettings({ searchEngine: engine }).catch(console.error)
+      settingsService.switchSearchEngine(engine).catch(console.error)
     }
   }
 
