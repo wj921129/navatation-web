@@ -46,6 +46,7 @@ import { useSettings } from './hooks/useSettings'
 import { useShortcuts } from './hooks/useShortcuts'
 import { useWidgetDrag } from './hooks/useWidgetDrag'
 import { useWidgets } from './hooks/useWidgets'
+import { settingsService } from './services/settings-service'
 import { authStore } from './stores/auth-store'
 
 /**
@@ -302,7 +303,6 @@ export default function App() {
     setSearchEngine(engine)
     localStorage.setItem('navatation_search_engine', engine)
     if (authState.isLoggedIn) {
-      const { settingsService } = require('./services/settings-service')
       settingsService.switchSearchEngine(engine).catch(console.error)
     }
   }
