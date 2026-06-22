@@ -55,10 +55,7 @@ export function DraggableShortcut({
         <XIcon className="w-3 h-3 text-white" strokeWidth={3} />
       </button>
 
-      <div
-        className="flex flex-col items-center w-full"
-        style={{ gap: `${iconTextGap}px` }}
-      >
+      <div className="flex flex-col items-center w-full" style={{ gap: `${iconTextGap}px` }}>
         <div
           {...dragHandleProps}
           onClick={(e) => {

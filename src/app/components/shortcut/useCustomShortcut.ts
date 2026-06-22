@@ -158,6 +158,7 @@ export function useCustomShortcut(onAddToPending: (site: RecommendedSite) => voi
         url,
         iconType: iconType as any,
         iconValue,
+        dragId: Math.random().toString(36).substring(7),
       }
 
       onAddToPending(newShortcut)

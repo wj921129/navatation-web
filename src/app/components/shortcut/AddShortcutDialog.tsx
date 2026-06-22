@@ -87,7 +87,7 @@ export function AddShortcutDialog({
       setActiveCategoryId(id)
       scrollContainerRef.current.scrollTo({
         top: Math.max(0, element.offsetTop - 24),
-        behavior: 'smooth'
+        behavior: 'smooth',
       })
       if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current)
       scrollTimeoutRef.current = setTimeout(() => {
@@ -314,7 +314,8 @@ export function AddShortcutDialog({
                         <div className="px-3 py-4 space-y-2">
                           {categories.map((category, idx) => {
                             const catId = category.categoryId || idx.toString()
-                            const isActive = activeCategoryId === catId || (!activeCategoryId && idx === 0)
+                            const isActive =
+                              activeCategoryId === catId || (!activeCategoryId && idx === 0)
                             return (
                               <button
                                 key={catId}
@@ -325,7 +326,9 @@ export function AddShortcutDialog({
                                     : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100/60 dark:hover:bg-neutral-800/60 hover:text-gray-900 dark:hover:text-gray-200'
                                 }`}
                               >
-                                <category.icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-blue-500' : 'opacity-70'}`} />
+                                <category.icon
+                                  className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-blue-500' : 'opacity-70'}`}
+                                />
                                 <span className="truncate">{category.category}</span>
                               </button>
                             )
@@ -333,7 +336,7 @@ export function AddShortcutDialog({
                         </div>
                       </div>
                     )}
-                    <div 
+                    <div
                       className="flex-1 overflow-y-auto relative scroll-smooth"
                       ref={scrollContainerRef}
                       onScroll={handleScroll}
@@ -388,6 +391,7 @@ export function AddShortcutDialog({
               {!isBatchMode && (
                 <PendingShortcutsList
                   pendingShortcuts={pendingShortcuts}
+                  setPendingShortcuts={setPendingShortcuts}
                   iconRadius={iconRadius}
                   handleRemoveFromPending={handleRemoveFromPending}
                 />

@@ -17,10 +17,7 @@ export const ThemeTransition: React.FC<ThemeTransitionProps> = ({
   ...props
 }) => {
   return (
-    <Component
-      className={`theme-transition ${className}`}
-      {...props}
-    >
+    <Component className={`theme-transition ${className}`} {...props}>
       {children}
     </Component>
   )

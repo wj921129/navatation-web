@@ -44,10 +44,7 @@ export function SortableGridItem({
       {...(isRenderFn ? {} : dragHandleProps)}
       className={`${className} ${isDragging ? 'z-50' : 'z-0'} ${isRenderFn ? '' : 'cursor-pointer'}`}
     >
-      {isRenderFn
-        ? (children as Function)({ dragHandleProps })
-        : children
-      }
+      {isRenderFn ? (children as Function)({ dragHandleProps }) : children}
     </div>
   )
 }

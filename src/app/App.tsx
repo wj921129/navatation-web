@@ -25,7 +25,6 @@ import { WidgetLayer } from './components/layout/WidgetLayer'
 import { SearchBox } from './components/search/SearchBox'
 import { ShortcutGrid } from './components/shortcut/ShortcutGrid'
 import { TodoListWidget } from './components/todo/TodoListWidget'
-import { ThemeTransition } from './components/ui/ThemeTransition'
 import {
   ContextMenu,
   ContextMenuContent,
@@ -33,6 +32,7 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from './components/ui/context-menu'
+import { ThemeTransition } from './components/ui/ThemeTransition'
 import AnalogClock from './components/widgets/AnalogClock'
 import DigitalClock from './components/widgets/DigitalClock'
 import FlipClock from './components/widgets/FlipClock'

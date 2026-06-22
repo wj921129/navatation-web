@@ -37,10 +37,7 @@ export function RecommendSiteItem({
 }: DraggableRecommendSiteProps) {
   return (
     <div className="relative group/item flex-shrink-0" style={{ width: `${iconSize + 32}px` }}>
-      <div
-        className="flex flex-col items-center w-full"
-        style={{ gap: `${iconTextGap}px` }}
-      >
+      <div className="flex flex-col items-center w-full" style={{ gap: `${iconTextGap}px` }}>
         <div
           {...dragHandleProps}
           onClick={(e) => {

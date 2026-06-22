@@ -67,8 +67,10 @@ export function RecommendedTabGrid({
     if (!over || active.id === over.id) return
 
     setCategories((prev: any[]) => {
-      let sourceCatIdx = -1, sourceSiteIdx = -1
-      let destCatIdx = -1, destSiteIdx = -1
+      let sourceCatIdx = -1,
+        sourceSiteIdx = -1
+      let destCatIdx = -1,
+        destSiteIdx = -1
 
       for (let i = 0; i < prev.length; i++) {
         const sIdx = prev[i].sites.findIndex((s: any) => s.dragId === active.id)
