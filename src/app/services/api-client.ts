@@ -1,6 +1,21 @@
 /** 后端 API 根路径，优先读取环境变量，回退到本地开发地址 */
 const API_BASE = import.meta.env.VITE_API_BASE || '/api/v1'
 
+/** 后端服务地址（用于拼接 /uploads 等静态资源路径），开发环境为空走相对路径 */
+const BACKEND_ORIGIN = import.meta.env.VITE_BACKEND_ORIGIN || ''
+
+/**
+ * 解析后端返回的静态资源路径为完整 URL
+ * /uploads/ 开头的相对路径拼接后端地址，外部 URL 原样返回
+ */
+function resolveAssetUrl(path: string): string {
+  if (!path) return path
+  if (path.startsWith('/uploads/') && BACKEND_ORIGIN) {
+    return BACKEND_ORIGIN + path
+  }
+  return path
+}
+
 import { toast } from 'sonner'
 
 interface ApiResponse<T = any> {
@@ -218,4 +233,4 @@ export const api = {
 }
 
 export type { ApiResponse }
-export { API_BASE, clearTokens, getAccessToken, setTokens }
+export { API_BASE, BACKEND_ORIGIN, clearTokens, getAccessToken, resolveAssetUrl, setTokens }

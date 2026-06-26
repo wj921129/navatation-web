@@ -2,6 +2,7 @@
  * @description 自定义快捷方式选项卡组件
  * @date 2026-06-09
  */
+import { resolveAssetUrl } from '@/app/services/api-client'
 import { Check, Link, Loader2, RotateCw, Upload, X } from 'lucide-react'
 import type React from 'react'
 
@@ -199,7 +200,7 @@ export function CustomShortcutTab({
                           : 'border-border hover:border-gray-400 dark:hover:border-gray-500'
                       }`}
                     >
-                      <img src={iconUrl} alt="Icon Option" className="w-6 h-6 object-contain" />
+                      <img src={resolveAssetUrl(iconUrl)} alt="Icon Option" className="w-6 h-6 object-contain" />
                     </button>
                   ))}
                   {showImagePreview && customIconUrl && (
@@ -225,7 +226,7 @@ export function CustomShortcutTab({
               <div className="mt-3 flex items-center gap-3">
                 <div className="w-12 h-12 flex-shrink-0 bg-card border border-border rounded-xl flex items-center justify-center overflow-hidden">
                   <img
-                    src={customIconUrl}
+                    src={resolveAssetUrl(customIconUrl)}
                     alt="Preview"
                     style={{
                       width: '50%',

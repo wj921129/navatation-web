@@ -1,3 +1,4 @@
+import { resolveAssetUrl } from '@/app/services/api-client'
 import { closestCenter, DndContext } from '@dnd-kit/core'
 import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable'
 import { Plus } from 'lucide-react'
@@ -135,7 +136,7 @@ export function ShortcutGrid({
                     ) {
                       return (
                         <img
-                          src={shortcut.iconValue}
+                          src={resolveAssetUrl(shortcut.iconValue)}
                           alt={shortcut.name}
                           style={{
                             width: '50%',

@@ -1,3 +1,4 @@
+import { resolveAssetUrl } from '@/app/services/api-client'
 import {
   closestCenter,
   DndContext,
@@ -77,7 +78,7 @@ function SortableShortcutItem({
         shortcut.iconType === 'CUSTOM_URL' ||
         shortcut.iconType === 'CUSTOM_UPLOAD' ? (
           <img
-            src={shortcut.iconValue}
+            src={resolveAssetUrl(shortcut.iconValue)}
             alt={shortcut.name}
             style={{
               width: '50%',

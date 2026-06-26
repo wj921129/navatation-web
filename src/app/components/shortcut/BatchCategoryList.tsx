@@ -1,3 +1,4 @@
+import { resolveAssetUrl } from '@/app/services/api-client'
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd'
 import {
   Check,
@@ -216,7 +217,7 @@ export function BatchCategoryList({
                                                     return (
                                                       <img
                                                         key={site.iconValue}
-                                                        src={site.iconValue}
+                                                        src={resolveAssetUrl(site.iconValue)}
                                                         alt={site.name}
                                                         className="w-[24px] h-[24px] object-contain"
                                                         onLoad={(e) => {

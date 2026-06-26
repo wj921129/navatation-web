@@ -1,3 +1,4 @@
+import { resolveAssetUrl } from '@/app/services/api-client'
 import { DragOverlay, type DropAnimation } from '@dnd-kit/core'
 import type { ReactNode } from 'react'
 
@@ -65,7 +66,7 @@ export function UnifiedDragItem({
           ) {
             return (
               <img
-                src={shortcut.iconValue}
+                src={resolveAssetUrl(shortcut.iconValue)}
                 alt={shortcut.name}
                 style={{ width: '50%', height: '50%', objectFit: 'contain' }}
               />

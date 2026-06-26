@@ -2,6 +2,7 @@
  * @description 编辑快捷方式对话框
  * @date 2026-06-09
  */
+import { resolveAssetUrl } from '@/app/services/api-client'
 import { Check, Link, Loader2, RotateCw, Upload, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { navService } from '../../services/nav-service'
@@ -450,7 +451,7 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
                         : 'border-border hover:border-gray-400 dark:hover:border-gray-500'
                     }`}
                   >
-                    <img src={iconUrl} alt="Icon Option" className="w-6 h-6 object-contain" />
+                    <img src={resolveAssetUrl(iconUrl)} alt="Icon Option" className="w-6 h-6 object-contain" />
                   </button>
                 ))}
                 {showImagePreview && iconValue && (
@@ -478,7 +479,7 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
             <div className="mt-3 flex items-center gap-3">
               <div className="w-12 h-12 flex-shrink-0 bg-card border border-border rounded-xl flex items-center justify-center overflow-hidden">
                 <img
-                  src={iconValue}
+                  src={resolveAssetUrl(iconValue)}
                   alt="Preview"
                   style={{ width: '50%', height: '50%', objectFit: 'contain' }}
                 />

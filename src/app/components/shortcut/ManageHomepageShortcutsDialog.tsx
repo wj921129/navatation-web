@@ -3,6 +3,7 @@
  * @date 2026-06-10
  */
 
+import { resolveAssetUrl } from '@/app/services/api-client'
 import {
   closestCenter,
   DndContext,
@@ -394,7 +395,7 @@ export function ManageHomepageShortcutsDialog({
                                           return (
                                             <img
                                               key={site.iconValue}
-                                              src={site.iconValue}
+                                              src={resolveAssetUrl(site.iconValue)}
                                               alt={site.name}
                                               className="w-[24px] h-[24px] object-contain"
                                               onLoad={(e) => {
@@ -631,7 +632,7 @@ function GridItemInner({
             return (
               <img
                 key={site.iconValue}
-                src={site.iconValue}
+                src={resolveAssetUrl(site.iconValue)}
                 alt={site.name}
                 draggable={false}
                 className="pointer-events-none"

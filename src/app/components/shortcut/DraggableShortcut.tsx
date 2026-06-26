@@ -2,6 +2,7 @@
  * @description 可拖拽快捷方式组件
  * @date 2026-06-09
  */
+import { resolveAssetUrl } from '@/app/services/api-client'
 import { X as XIcon } from 'lucide-react'
 import { IconMap } from '../ui/IconMap'
 
@@ -77,7 +78,7 @@ export function DraggableShortcut({
             ) {
               return (
                 <img
-                  src={shortcut.iconValue}
+                  src={resolveAssetUrl(shortcut.iconValue)}
                   alt={shortcut.name}
                   style={{ width: '50%', height: '50%', objectFit: 'contain' }}
                 />

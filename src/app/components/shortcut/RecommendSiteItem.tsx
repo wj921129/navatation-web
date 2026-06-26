@@ -1,3 +1,4 @@
+import { resolveAssetUrl } from '@/app/services/api-client'
 import { Edit3, Trash2 } from 'lucide-react'
 import type React from 'react'
 import { toast } from 'sonner'
@@ -59,7 +60,7 @@ export function RecommendSiteItem({
             ) {
               return (
                 <img
-                  src={site.iconValue}
+                  src={resolveAssetUrl(site.iconValue)}
                   alt={site.name}
                   draggable={false}
                   className="pointer-events-none"
