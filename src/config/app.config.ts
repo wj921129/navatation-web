@@ -2,8 +2,7 @@
 /**
  * DEFAULT_WALLPAPER 组件/功能描述
  */
-export const DEFAULT_WALLPAPER =
-  'https://images.unsplash.com/photo-1598439473183-42c9301db5dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=2400'
+export const DEFAULT_WALLPAPER = '/uploads/sys_data/bg_img/wallpaper_16.jpg'
 
 /**
  * DEFAULT_SETTINGS 组件/功能描述
