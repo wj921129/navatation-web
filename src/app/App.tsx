@@ -48,6 +48,7 @@ import { useWidgetDrag } from './hooks/useWidgetDrag'
 import { useWidgets } from './hooks/useWidgets'
 import { settingsService } from './services/settings-service'
 import { authStore } from './stores/auth-store'
+import { resolveAssetUrl } from './services/api-client'
 
 /**
  * 文件名：App.tsx
@@ -416,7 +417,7 @@ export default function App() {
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-500"
           style={{
-            backgroundImage: `url(${backgroundImage})`,
+            backgroundImage: `url(${resolveAssetUrl(backgroundImage)})`,
             filter: theme === 'dark' ? `brightness(${bgBrightness}%)` : 'none',
           }}
         />
