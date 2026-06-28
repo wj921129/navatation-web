@@ -80,7 +80,9 @@
     "babel-plugin-react-compiler": "^1.0.0",
     "tailwindcss": "4.1.12",
     "typescript": "^5.3.3",
-    "vite": "6.3.5"
+    "vite": "6.3.5",
+    "vite-plugin-compression": "^0.5.1",
+    "vite-plugin-svg-icons": "^2.0.1"
   },
   "peerDependencies": {
     "react": "18.3.1",
