@@ -1,4 +1,5 @@
 import { StackShortcut } from '../../constants/recommendedSitesData'
+import { createPortal } from 'react-dom'
 
 export function StackExpandModal({
   isOpen,
@@ -9,15 +10,15 @@ export function StackExpandModal({
   onClose: () => void
   stack: StackShortcut | null
 }) {
-  if (!isOpen || !stack) return null
+  if (!isOpen || !stack || typeof document === 'undefined') return null
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xl animate-in fade-in duration-300"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-xl animate-in fade-in duration-300 pointer-events-auto"
       onClick={onClose}
     >
       <div
-        className="w-[80vw] h-[80vh] bg-transparent flex flex-col"
+        className="w-[80vw] h-[80vh] bg-transparent flex flex-col pointer-events-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="text-center mb-8">
@@ -46,6 +47,7 @@ export function StackExpandModal({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

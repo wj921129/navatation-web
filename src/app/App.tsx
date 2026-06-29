@@ -51,6 +51,7 @@ import { resolveAssetUrl } from './services/api-client'
 import { settingsService } from './services/settings-service'
 import { authStore } from './stores/auth-store'
 import type { StackShortcut } from './constants/recommendedSitesData'
+import { currentMergeTargetId } from './utils/dndMergeStrategy'
 
 /**
  * 文件名：App.tsx
@@ -353,12 +354,10 @@ export default function App() {
       
       const isAdminMode = authState.user?.role === 'ADMIN'
 
-      if (!isAdminMode && isEditMode && over) {
-        const overIdStr = String(over.id)
-        const isMerge = overIdStr.endsWith('__merge')
-        const realOverId = isMerge ? overIdStr.replace('__merge', '') : overIdStr
+      if (!isAdminMode && isEditMode && currentMergeTargetId) {
+        const realOverId = currentMergeTargetId
 
-        if (isMerge && active.id !== realOverId) {
+        if (active.id !== realOverId) {
           const activeIndex = displayShortcuts.findIndex(
             (item, idx) => (item.dragId || `shortcut-edit-${idx}`) === active.id,
           )

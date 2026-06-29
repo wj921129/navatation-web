@@ -13,7 +13,7 @@ import { DraggableShortcut } from './DraggableShortcut'
 import { IconEntryModal } from './IconEntryModal'
 import { StackExpandModal } from './StackExpandModal'
 import { ShortcutStackItem } from './ShortcutStackItem'
-import { mergeCollisionDetection } from '../../utils/dndMergeStrategy'
+import { mergeCollisionDetection, currentMergeTargetId } from '../../utils/dndMergeStrategy'
 
 /**
  * ShortcutGridProps 组件/功能描述
@@ -53,6 +53,7 @@ export function ShortcutGrid({
   const [isIconEntryOpen, setIsIconEntryOpen] = useState(false)
   const [isStackExpandOpen, setIsStackExpandOpen] = useState(false)
   const [activeStack, setActiveStack] = useState<StackShortcut | null>(null)
+  const [activeMergeTargetId, setActiveMergeTargetId] = useState<string | null>(null)
 
   const iconInnerSize = settings.iconSize * 0.5
   const borderRadius = `${settings.iconRadius}%`
@@ -73,8 +74,19 @@ export function ShortcutGrid({
             sensors={sensors}
             collisionDetection={mergeCollisionDetection}
             onDragStart={handleDragStartGrid}
-            onDragEnd={handleDragEndGrid}
-            onDragCancel={handleDragCancelGrid}
+            onDragMove={() => {
+              if (activeMergeTargetId !== currentMergeTargetId) {
+                setActiveMergeTargetId(currentMergeTargetId)
+              }
+            }}
+            onDragEnd={(event) => {
+              setActiveMergeTargetId(null)
+              handleDragEndGrid(event)
+            }}
+            onDragCancel={() => {
+              setActiveMergeTargetId(null)
+              handleDragCancelGrid()
+            }}
           >
             <SortableContext
               items={displayShortcuts.map((s, idx) => s.dragId || `shortcut-edit-${idx}`)}
@@ -84,6 +96,7 @@ export function ShortcutGrid({
                 <SortableGridItem
                   key={shortcut.dragId || `shortcut-edit-${globalIndex}`}
                   id={shortcut.dragId || `shortcut-edit-${globalIndex}`}
+                  isMergeTarget={activeMergeTargetId === (shortcut.dragId || `shortcut-edit-${globalIndex}`)}
                 >
                   {({ dragHandleProps }: any) => (
                     <DraggableShortcut
