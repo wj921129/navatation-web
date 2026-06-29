@@ -1,6 +1,6 @@
 import {
   CollisionDetection,
-  pointerIntersection,
+  pointerWithin,
   closestCenter,
   ClientRect,
 } from '@dnd-kit/core'
@@ -12,8 +12,8 @@ import {
  * - 否则，回退到 closestCenter 进行正常的拖拽排序。
  */
 export const mergeCollisionDetection: CollisionDetection = (args) => {
-  // 先通过 pointerIntersection 获取当前鼠标位于哪个容器内部
-  const pointerCollisions = pointerIntersection(args)
+  // 先通过 pointerWithin 获取当前鼠标位于哪个容器内部
+  const pointerCollisions = pointerWithin(args)
   
   if (pointerCollisions.length > 0) {
     const collision = pointerCollisions[0]
