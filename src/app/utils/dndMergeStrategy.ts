@@ -1,15 +1,14 @@
 import {
   CollisionDetection,
   pointerWithin,
-  closestCenter,
   ClientRect,
 } from '@dnd-kit/core'
 
 /**
  * 自定义碰撞检测策略
- * - 如果鼠标悬停在某个目标的中心 50% 区域内，判定为“合并 (Merge)”目标，返回附加后缀的 ID，
- *   这样 SortableContext 就不会将其视作排序目标，从而避免目标发生避让（跑开）。
- * - 否则，回退到 closestCenter 进行正常的拖拽排序。
+ * - 始终使用 pointerWithin 获取碰撞目标，避免 closestCenter 的位置计算引发的抖动
+ * - 如果鼠标悬停在某个目标的中心 60% 区域内，判定为“合并 (Merge)”目标，返回附加后缀的 ID
+ * - 否则返回原始 ID，由 SortableContext 处理正常的拖拽排序
  */
 export const mergeCollisionDetection: CollisionDetection = (args) => {
   // 先通过 pointerWithin 获取当前鼠标位于哪个容器内部
@@ -26,7 +25,6 @@ export const mergeCollisionDetection: CollisionDetection = (args) => {
       if (container && container.rect.current) {
         const rect = container.rect.current as ClientRect
         
-        // 我们只在鼠标实际存在的坐标下（args.pointerCoordinates）进行计算
         if (args.pointerCoordinates) {
           const { x, y } = args.pointerCoordinates
           const rectX = rect.left
@@ -34,7 +32,7 @@ export const mergeCollisionDetection: CollisionDetection = (args) => {
           const width = rect.width
           const height = rect.height
           
-          // 定义中心区域的比例，比如 60%
+          // 中心区域的比例 60%
           const innerRatio = 0.6
           const marginX = (width * (1 - innerRatio)) / 2
           const marginY = (height * (1 - innerRatio)) / 2
@@ -44,16 +42,17 @@ export const mergeCollisionDetection: CollisionDetection = (args) => {
           const innerTop = rectY + marginY
           const innerBottom = rectY + height - marginY
           
-          // 如果指针进入了中心区域
+          // 如果指针进入了中心区域，返回 merge 后缀
           if (x >= innerLeft && x <= innerRight && y >= innerTop && y <= innerBottom) {
-            // 返回带有特殊后缀的 ID，这样 SortableContext 就不会触发重排
             return [{ id: `${overId}__merge` }]
           }
         }
       }
+      
+      // 不在中心区域，返回原始的 collision，交由 SortableContext 排序
+      return [collision]
     }
   }
 
-  // 否则，正常进行重排碰撞检测
-  return closestCenter(args)
+  return []
 }

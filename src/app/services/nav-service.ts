@@ -271,6 +271,10 @@ export const navService = {
   deleteHomeShortcut(shortcutId: string): Promise<ApiResponse<null>> {
     return api.delete(`/nav/home-shortcuts/${shortcutId}`)
   },
+  /** 批量保存首页图标 */
+  batchSaveHomeShortcuts(shortcuts: any[]): Promise<ApiResponse<null>> {
+    return api.put('/nav/home-shortcuts/batch', { shortcuts })
+  },
 
   // 推荐
   /** 获取系统预置的推荐网站分类及站点列表 */
