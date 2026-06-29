@@ -76,7 +76,7 @@ export function DraggableShortcut({
               return (
                 <Layers
                   style={{
-                    color: shortcut.color || '#333',
+                    color: 'color' in shortcut ? shortcut.color : '#333',
                     width: `${iconInnerSize}px`,
                     height: `${iconInnerSize}px`,
                   }}

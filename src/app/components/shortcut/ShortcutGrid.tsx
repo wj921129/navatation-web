@@ -3,6 +3,7 @@ import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable'
 import { Layers, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { resolveAssetUrl } from '@/app/services/api-client'
+import { StackShortcut } from '../../constants/recommendedSitesData'
 import { GridDragOverlay, UnifiedDragItem } from '../ui/GridDragOverlay'
 import { IconMap } from '../ui/IconMap'
 import { SortableGridItem } from '../ui/SortableGridItem'
@@ -46,7 +47,7 @@ export function ShortcutGrid({
 }: ShortcutGridProps) {
   const [isIconEntryOpen, setIsIconEntryOpen] = useState(false)
   const [isStackExpandOpen, setIsStackExpandOpen] = useState(false)
-  const [activeStack, setActiveStack] = useState<any>(null)
+  const [activeStack, setActiveStack] = useState<StackShortcut | null>(null)
 
   const iconInnerSize = settings.iconSize * 0.5
   const borderRadius = `${settings.iconRadius}%`
@@ -142,7 +143,7 @@ export function ShortcutGrid({
                       >
                         <Layers
                           style={{
-                            color: shortcut.color || '#333',
+                            color: 'color' in shortcut ? shortcut.color : '#333',
                             width: `${iconInnerSize}px`,
                             height: `${iconInnerSize}px`,
                           }}
@@ -258,8 +259,7 @@ export function ShortcutGrid({
         }}
         onSelectStack={() => {
           setIsIconEntryOpen(false)
-          // To be implemented in a future task (e.g. Task 5)
-          console.log('Select Stack clicked')
+          // TODO: Implement in Task 5
         }}
       />
 

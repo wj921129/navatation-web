@@ -64,7 +64,7 @@ export function UnifiedDragItem({
             return (
               <Layers
                 style={{
-                  color: shortcut.color || shortcut.iconColor || '#333',
+                  color: 'color' in shortcut ? shortcut.color : ('iconColor' in shortcut ? shortcut.iconColor : '#333'),
                   width: `${innerSize}px`,
                   height: `${innerSize}px`,
                 }}
