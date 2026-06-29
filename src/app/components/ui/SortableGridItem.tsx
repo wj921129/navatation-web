@@ -1,5 +1,5 @@
 import { useSortable } from '@dnd-kit/sortable'
-import { useDndContext } from '@dnd-kit/core'
+import { useDndContext, useDroppable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import type { ReactNode } from 'react'
 
@@ -28,6 +28,10 @@ export function SortableGridItem({
     },
   })
 
+  const { setNodeRef: setMergeNodeRef } = useDroppable({
+    id: `${id}__merge`,
+  })
+
   const { over } = useDndContext()
   const isMergeTarget = over?.id === `${id}__merge`
 
@@ -48,8 +52,9 @@ export function SortableGridItem({
       ref={setNodeRef}
       style={combinedStyle}
       {...(isRenderFn ? {} : dragHandleProps)}
-      className={`${className} ${isDragging ? 'z-50' : 'z-0'} ${isRenderFn ? '' : 'cursor-pointer'} ${mergeClasses}`}
+      className={`${className} ${isDragging ? 'z-50' : 'z-0'} ${isRenderFn ? '' : 'cursor-pointer'} ${mergeClasses} relative`}
     >
+      <div ref={setMergeNodeRef} className="absolute inset-0 pointer-events-none" />
       {isRenderFn ? (children as Function)({ dragHandleProps }) : children}
     </div>
   )
