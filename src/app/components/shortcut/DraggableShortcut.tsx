@@ -2,8 +2,9 @@
  * @description 可拖拽快捷方式组件
  * @date 2026-06-09
  */
+
+import { Layers, X as XIcon } from 'lucide-react'
 import { resolveAssetUrl } from '@/app/services/api-client'
-import { X as XIcon } from 'lucide-react'
 import { IconMap } from '../ui/IconMap'
 
 interface DraggableShortcutProps {
@@ -71,6 +72,18 @@ export function DraggableShortcut({
           }}
         >
           {(() => {
+            if (shortcut.type === 'stack') {
+              return (
+                <Layers
+                  style={{
+                    color: shortcut.color || '#333',
+                    width: `${iconInnerSize}px`,
+                    height: `${iconInnerSize}px`,
+                  }}
+                  strokeWidth={2}
+                />
+              )
+            }
             if (
               shortcut.iconType === 'CUSTOM_URL' ||
               shortcut.iconType === 'FAVICON' ||
