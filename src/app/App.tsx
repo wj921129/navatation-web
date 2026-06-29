@@ -49,6 +49,7 @@ import { useWidgets } from './hooks/useWidgets'
 import { resolveAssetUrl } from './services/api-client'
 import { settingsService } from './services/settings-service'
 import { authStore } from './stores/auth-store'
+import type { StackShortcut } from './constants/recommendedSitesData'
 
 /**
  * 文件名：App.tsx
@@ -300,6 +301,13 @@ export default function App() {
     [setTempHomeShortcuts],
   )
 
+  const handleAddHomeStack = useCallback(
+    (newStack: StackShortcut) => {
+      setTempHomeShortcuts((prev) => [...prev, newStack])
+    },
+    [setTempHomeShortcuts],
+  )
+
   const handleSearchEngineChange = (engine: string) => {
     setSearchEngine(engine)
     localStorage.setItem('navatation_search_engine', engine)
@@ -539,6 +547,7 @@ export default function App() {
             handleEditShortcut={handleEditHomeShortcut}
             handleDeleteShortcut={handleDeleteHomeShortcut}
             setIsAddShortcutOpen={setIsAddShortcutOpen}
+            handleAddStack={handleAddHomeStack}
           />
         </ThemeTransition>
 

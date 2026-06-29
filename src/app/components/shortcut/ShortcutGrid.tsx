@@ -4,6 +4,7 @@ import { Layers, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { resolveAssetUrl } from '@/app/services/api-client'
 import { StackShortcut } from '../../constants/recommendedSitesData'
+import { v4 as uuidv4 } from 'uuid'
 import { GridDragOverlay, UnifiedDragItem } from '../ui/GridDragOverlay'
 import { IconMap } from '../ui/IconMap'
 import { SortableGridItem } from '../ui/SortableGridItem'
@@ -27,6 +28,7 @@ export interface ShortcutGridProps {
   handleEditShortcut: (index: number) => void
   handleDeleteShortcut: (index: number) => void
   setIsAddShortcutOpen: (v: boolean) => void
+  handleAddStack: (stack: StackShortcut) => void
 }
 
 /**
@@ -44,6 +46,7 @@ export function ShortcutGrid({
   handleEditShortcut,
   handleDeleteShortcut,
   setIsAddShortcutOpen,
+  handleAddStack,
 }: ShortcutGridProps) {
   const [isIconEntryOpen, setIsIconEntryOpen] = useState(false)
   const [isStackExpandOpen, setIsStackExpandOpen] = useState(false)
@@ -259,7 +262,13 @@ export function ShortcutGrid({
         }}
         onSelectStack={() => {
           setIsIconEntryOpen(false)
-          // TODO: Implement in Task 5
+          const newStack: StackShortcut = {
+            type: 'stack',
+            dragId: uuidv4(),
+            name: '未命名文件夹',
+            children: [],
+          }
+          handleAddStack(newStack)
         }}
       />
 
