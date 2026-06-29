@@ -12,6 +12,7 @@ import { Tooltip } from '../ui/Tooltip'
 import { DraggableShortcut } from './DraggableShortcut'
 import { IconEntryModal } from './IconEntryModal'
 import { StackExpandModal } from './StackExpandModal'
+import { ShortcutStackItem } from './ShortcutStackItem'
 
 /**
  * ShortcutGridProps 组件/功能描述
@@ -127,32 +128,16 @@ export function ShortcutGrid({
                   }}
                 >
                   {isStack ? (
-                    <div
-                      onClick={() => {
-                        setActiveStack(shortcut)
-                        setIsStackExpandOpen(true)
-                      }}
-                      className="flex items-center justify-center shrink-0 transition-transform duration-200 hover:scale-110 cursor-pointer"
-                      style={{
-                        width: `${settings.iconSize}px`,
-                        height: `${settings.iconSize}px`,
-                      }}
-                    >
-                      <div
-                        className="bg-icon-bg border border-widget-border flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden w-full h-full"
-                        style={{
-                          borderRadius: borderRadius,
+                    <div className="flex items-center justify-center shrink-0 transition-transform duration-200 hover:scale-110">
+                      <ShortcutStackItem
+                        shortcut={shortcut}
+                        iconSize={settings.iconSize}
+                        borderRadius={borderRadius}
+                        onClick={() => {
+                          setActiveStack(shortcut)
+                          setIsStackExpandOpen(true)
                         }}
-                      >
-                        <Layers
-                          style={{
-                            color: 'color' in shortcut ? shortcut.color : '#333',
-                            width: `${iconInnerSize}px`,
-                            height: `${iconInnerSize}px`,
-                          }}
-                          strokeWidth={2}
-                        />
-                      </div>
+                      />
                     </div>
                   ) : (
                     <a
