@@ -353,69 +353,68 @@ export default function App() {
       
       const isAdminMode = authState.user?.role === 'ADMIN'
 
-      if (!isAdminMode && isEditMode && over && active.id !== over.id) {
-        const activeRect = active.rect.current.translated
-        const overRect = over.rect
-        
-        if (activeRect && overRect) {
-          const overlapX = Math.max(0, Math.min(activeRect.right, overRect.right) - Math.max(activeRect.left, overRect.left))
-          const overlapY = Math.max(0, Math.min(activeRect.bottom, overRect.bottom) - Math.max(activeRect.top, overRect.top))
-          const overlapArea = overlapX * overlapY
-          const overArea = overRect.width * overRect.height
+      if (!isAdminMode && isEditMode && over) {
+        const overIdStr = String(over.id)
+        const isMerge = overIdStr.endsWith('__merge')
+        const realOverId = isMerge ? overIdStr.replace('__merge', '') : overIdStr
+
+        if (isMerge && active.id !== realOverId) {
+          const activeIndex = displayShortcuts.findIndex(
+            (item, idx) => (item.dragId || `shortcut-edit-${idx}`) === active.id,
+          )
+          const overIndex = displayShortcuts.findIndex(
+            (item, idx) => (item.dragId || `shortcut-edit-${idx}`) === realOverId,
+          )
           
-          if (overlapArea / overArea > 0.5) {
-            const activeIndex = displayShortcuts.findIndex(
-              (item, idx) => (item.dragId || `shortcut-edit-${idx}`) === active.id,
-            )
-            const overIndex = displayShortcuts.findIndex(
-              (item, idx) => (item.dragId || `shortcut-edit-${idx}`) === over.id,
-            )
+          if (activeIndex !== -1 && overIndex !== -1) {
+            const activeItem = displayShortcuts[activeIndex]
+            const overItem = displayShortcuts[overIndex]
             
-            if (activeIndex !== -1 && overIndex !== -1) {
-              const activeItem = displayShortcuts[activeIndex]
-              const overItem = displayShortcuts[overIndex]
-              
-              const newShortcuts = displayShortcuts.filter((_, idx) => idx !== activeIndex)
-              const updatedOverIndex = overIndex > activeIndex ? overIndex - 1 : overIndex
-              
-              if (overItem.type === 'stack') {
-                const updatedStack = {
-                  ...overItem,
-                  children: [...(overItem.children || []), activeItem]
-                }
-                newShortcuts[updatedOverIndex] = updatedStack
-                setTempHomeShortcuts(newShortcuts)
-                return
-              } else {
-                const newStack = {
-                  type: 'stack',
-                  dragId: uuidv4(),
-                  name: '未命名文件夹',
-                  children: [overItem, activeItem]
-                }
-                newShortcuts[updatedOverIndex] = newStack
-                setTempHomeShortcuts(newShortcuts)
-                return
+            const newShortcuts = displayShortcuts.filter((_, idx) => idx !== activeIndex)
+            const updatedOverIndex = overIndex > activeIndex ? overIndex - 1 : overIndex
+            
+            if (overItem.type === 'stack') {
+              const updatedStack = {
+                ...overItem,
+                children: [...(overItem.children || []), activeItem]
               }
+              newShortcuts[updatedOverIndex] = updatedStack
+              setTempHomeShortcuts(newShortcuts)
+              return
+            } else {
+              const newStack = {
+                type: 'stack',
+                dragId: uuidv4(),
+                name: '未命名文件夹',
+                children: [overItem, activeItem]
+              }
+              newShortcuts[updatedOverIndex] = newStack
+              setTempHomeShortcuts(newShortcuts)
+              return
             }
           }
         }
       }
 
-      if (over && active.id !== over.id) {
-        const oldIndex = displayShortcuts.findIndex(
-          (item, idx) => (item.dragId || `shortcut-edit-${idx}`) === active.id,
-        )
-        const newIndex = displayShortcuts.findIndex(
-          (item, idx) => (item.dragId || `shortcut-edit-${idx}`) === over.id,
-        )
+      if (over) {
+        const overIdStr = String(over.id)
+        const realOverId = overIdStr.endsWith('__merge') ? overIdStr.replace('__merge', '') : overIdStr
 
-        if (oldIndex !== -1 && newIndex !== -1) {
-          const newItems = arrayMove(displayShortcuts, oldIndex, newIndex)
-          if (isEditMode) {
-            setTempHomeShortcuts(newItems)
-          } else {
-            setHomeShortcuts(newItems)
+        if (active.id !== realOverId) {
+          const oldIndex = displayShortcuts.findIndex(
+            (item, idx) => (item.dragId || `shortcut-edit-${idx}`) === active.id,
+          )
+          const newIndex = displayShortcuts.findIndex(
+            (item, idx) => (item.dragId || `shortcut-edit-${idx}`) === realOverId,
+          )
+
+          if (oldIndex !== -1 && newIndex !== -1) {
+            const newItems = arrayMove(displayShortcuts, oldIndex, newIndex)
+            if (isEditMode) {
+              setTempHomeShortcuts(newItems)
+            } else {
+              setHomeShortcuts(newItems)
+            }
           }
         }
       }

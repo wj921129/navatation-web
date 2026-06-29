@@ -1,4 +1,4 @@
-import { closestCenter, DndContext } from '@dnd-kit/core'
+import { DndContext } from '@dnd-kit/core'
 import { rectSortingStrategy, SortableContext } from '@dnd-kit/sortable'
 import { Layers, Plus } from 'lucide-react'
 import { useState } from 'react'
@@ -13,6 +13,7 @@ import { DraggableShortcut } from './DraggableShortcut'
 import { IconEntryModal } from './IconEntryModal'
 import { StackExpandModal } from './StackExpandModal'
 import { ShortcutStackItem } from './ShortcutStackItem'
+import { mergeCollisionDetection } from '../../utils/dndMergeStrategy'
 
 /**
  * ShortcutGridProps 组件/功能描述
@@ -70,7 +71,7 @@ export function ShortcutGrid({
         {isEditMode ? (
           <DndContext
             sensors={sensors}
-            collisionDetection={closestCenter}
+            collisionDetection={mergeCollisionDetection}
             onDragStart={handleDragStartGrid}
             onDragEnd={handleDragEndGrid}
             onDragCancel={handleDragCancelGrid}
