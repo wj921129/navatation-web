@@ -15,6 +15,7 @@ import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { Edit3, ListTodo, Moon, Plus, Settings, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useCallback, useEffect, useState } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 
 import { BottomRightDock } from './components/dock/BottomRightDock'
 import { BrightnessPanel } from './components/dock/BrightnessPanel'
@@ -349,6 +350,58 @@ export default function App() {
     (event: DragEndEvent) => {
       setActiveDragId(null)
       const { active, over } = event
+      
+      const isAdminMode = authState.user?.role === 'ADMIN'
+
+      if (!isAdminMode && isEditMode && over && active.id !== over.id) {
+        const activeRect = active.rect.current.translated
+        const overRect = over.rect
+        
+        if (activeRect && overRect) {
+          const overlapX = Math.max(0, Math.min(activeRect.right, overRect.right) - Math.max(activeRect.left, overRect.left))
+          const overlapY = Math.max(0, Math.min(activeRect.bottom, overRect.bottom) - Math.max(activeRect.top, overRect.top))
+          const overlapArea = overlapX * overlapY
+          const overArea = overRect.width * overRect.height
+          
+          if (overlapArea / overArea > 0.5) {
+            const activeIndex = displayShortcuts.findIndex(
+              (item, idx) => (item.dragId || `shortcut-edit-${idx}`) === active.id,
+            )
+            const overIndex = displayShortcuts.findIndex(
+              (item, idx) => (item.dragId || `shortcut-edit-${idx}`) === over.id,
+            )
+            
+            if (activeIndex !== -1 && overIndex !== -1) {
+              const activeItem = displayShortcuts[activeIndex]
+              const overItem = displayShortcuts[overIndex]
+              
+              const newShortcuts = displayShortcuts.filter((_, idx) => idx !== activeIndex)
+              const updatedOverIndex = overIndex > activeIndex ? overIndex - 1 : overIndex
+              
+              if (overItem.type === 'stack') {
+                const updatedStack = {
+                  ...overItem,
+                  children: [...(overItem.children || []), activeItem]
+                }
+                newShortcuts[updatedOverIndex] = updatedStack
+                setTempHomeShortcuts(newShortcuts)
+                return
+              } else {
+                const newStack = {
+                  type: 'stack',
+                  dragId: uuidv4(),
+                  name: '未命名文件夹',
+                  children: [overItem, activeItem]
+                }
+                newShortcuts[updatedOverIndex] = newStack
+                setTempHomeShortcuts(newShortcuts)
+                return
+              }
+            }
+          }
+        }
+      }
+
       if (over && active.id !== over.id) {
         const oldIndex = displayShortcuts.findIndex(
           (item, idx) => (item.dragId || `shortcut-edit-${idx}`) === active.id,
@@ -367,7 +420,7 @@ export default function App() {
         }
       }
     },
-    [isEditMode, displayShortcuts, setTempHomeShortcuts, setHomeShortcuts],
+    [isEditMode, displayShortcuts, setTempHomeShortcuts, setHomeShortcuts, authState.user?.role],
   )
 
   /**
