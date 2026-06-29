@@ -1,4 +1,3 @@
-import { resolveAssetUrl } from '@/app/services/api-client'
 import {
   closestCenter,
   DndContext,
@@ -17,6 +16,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical, Trash2 } from 'lucide-react'
+import { resolveAssetUrl } from '@/app/services/api-client'
 
 /**
  * 待添加捷径列表组件，展示当前选中的拟添加网站

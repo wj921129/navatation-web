@@ -12,26 +12,26 @@ import {
 } from 'lucide-react'
 
 export interface BaseShortcut {
-  dragId: string;
-  name: string;
-  type?: 'single' | 'stack';
+  dragId: string
+  name: string
+  type?: 'single' | 'stack'
 }
 
 export interface SingleShortcut extends BaseShortcut {
-  type: 'single' | undefined;
-  url: string;
-  iconType: 'FAVICON' | 'CUSTOM_UPLOAD' | 'BUILTIN' | 'CUSTOM_URL';
-  iconValue?: string;
-  color?: string;
-  icon?: LucideIcon; // 为了保持向后兼容性
+  type: 'single' | undefined
+  url: string
+  iconType: 'FAVICON' | 'CUSTOM_UPLOAD' | 'BUILTIN' | 'CUSTOM_URL'
+  iconValue?: string
+  color?: string
+  icon?: LucideIcon // 为了保持向后兼容性
 }
 
 export interface StackShortcut extends BaseShortcut {
-  type: 'stack';
-  children: SingleShortcut[];
+  type: 'stack'
+  children: SingleShortcut[]
 }
 
-export type DesktopItem = SingleShortcut | StackShortcut;
+export type DesktopItem = SingleShortcut | StackShortcut
 
 /**
  * RecommendedSite 组件/功能描述

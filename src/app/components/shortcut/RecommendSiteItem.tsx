@@ -1,7 +1,7 @@
-import { resolveAssetUrl } from '@/app/services/api-client'
 import { Edit3, Trash2 } from 'lucide-react'
 import type React from 'react'
 import { toast } from 'sonner'
+import { resolveAssetUrl } from '@/app/services/api-client'
 
 /**
  * 推荐网站图标项组件，支持拖拽和管理员编辑

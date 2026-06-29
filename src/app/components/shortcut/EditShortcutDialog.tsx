@@ -2,9 +2,10 @@
  * @description 编辑快捷方式对话框
  * @date 2026-06-09
  */
-import { resolveAssetUrl } from '@/app/services/api-client'
+
 import { Check, Link, Loader2, RotateCw, Upload, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { resolveAssetUrl } from '@/app/services/api-client'
 import { navService } from '../../services/nav-service'
 import { BaseModal } from '../ui/BaseModal'
 
@@ -451,7 +452,11 @@ export function EditShortcutDialog({ isOpen, onClose, onSave, shortcut }: EditSh
                         : 'border-border hover:border-gray-400 dark:hover:border-gray-500'
                     }`}
                   >
-                    <img src={resolveAssetUrl(iconUrl)} alt="Icon Option" className="w-6 h-6 object-contain" />
+                    <img
+                      src={resolveAssetUrl(iconUrl)}
+                      alt="Icon Option"
+                      className="w-6 h-6 object-contain"
+                    />
                   </button>
                 ))}
                 {showImagePreview && iconValue && (

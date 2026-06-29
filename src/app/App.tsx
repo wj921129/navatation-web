@@ -46,9 +46,9 @@ import { useSettings } from './hooks/useSettings'
 import { useShortcuts } from './hooks/useShortcuts'
 import { useWidgetDrag } from './hooks/useWidgetDrag'
 import { useWidgets } from './hooks/useWidgets'
+import { resolveAssetUrl } from './services/api-client'
 import { settingsService } from './services/settings-service'
 import { authStore } from './stores/auth-store'
-import { resolveAssetUrl } from './services/api-client'
 
 /**
  * 文件名：App.tsx
