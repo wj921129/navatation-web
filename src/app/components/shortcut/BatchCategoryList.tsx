@@ -1,4 +1,3 @@
-import { resolveAssetUrl } from '@/app/services/api-client'
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd'
 import {
   Check,
@@ -11,6 +10,7 @@ import {
   Upload,
 } from 'lucide-react'
 import type React from 'react'
+import { resolveAssetUrl } from '@/app/services/api-client'
 import { useProgressiveRender } from '../../hooks/useProgressiveRender'
 import { IconMap } from '../ui/IconMap'
 

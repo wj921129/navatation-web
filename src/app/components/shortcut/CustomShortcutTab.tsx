@@ -2,9 +2,10 @@
  * @description 自定义快捷方式选项卡组件
  * @date 2026-06-09
  */
-import { resolveAssetUrl } from '@/app/services/api-client'
+
 import { Check, Link, Loader2, RotateCw, Upload, X } from 'lucide-react'
 import type React from 'react'
+import { resolveAssetUrl } from '@/app/services/api-client'
 
 interface CustomShortcutTabProps {
   customName: string
@@ -200,7 +201,11 @@ export function CustomShortcutTab({
                           : 'border-border hover:border-gray-400 dark:hover:border-gray-500'
                       }`}
                     >
-                      <img src={resolveAssetUrl(iconUrl)} alt="Icon Option" className="w-6 h-6 object-contain" />
+                      <img
+                        src={resolveAssetUrl(iconUrl)}
+                        alt="Icon Option"
+                        className="w-6 h-6 object-contain"
+                      />
                     </button>
                   ))}
                   {showImagePreview && customIconUrl && (

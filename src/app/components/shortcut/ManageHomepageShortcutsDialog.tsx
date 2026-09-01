@@ -3,7 +3,6 @@
  * @date 2026-06-10
  */
 
-import { resolveAssetUrl } from '@/app/services/api-client'
 import {
   closestCenter,
   DndContext,
@@ -36,6 +35,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { resolveAssetUrl } from '@/app/services/api-client'
 import { useManageHomepageIcons } from '../../hooks/useManageHomepageIcons'
 import { navService } from '../../services/nav-service'
 import { BaseModal } from '../ui/BaseModal'

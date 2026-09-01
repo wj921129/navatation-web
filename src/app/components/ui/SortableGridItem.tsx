@@ -7,6 +7,7 @@ interface SortableGridItemProps {
   children: ReactNode | ((props: { dragHandleProps: any }) => ReactNode)
   className?: string
   style?: React.CSSProperties
+  isMergeTarget?: boolean
 }
 
 /**
@@ -18,6 +19,7 @@ export function SortableGridItem({
   children,
   className = '',
   style = {},
+  isMergeTarget = false,
 }: SortableGridItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
@@ -37,12 +39,14 @@ export function SortableGridItem({
   const dragHandleProps = { ...attributes, ...listeners }
   const isRenderFn = typeof children === 'function'
 
+  const mergeClasses = isMergeTarget ? 'ring-4 ring-blue-500 rounded-2xl scale-105 transition-all duration-200 z-40' : ''
+
   return (
     <div
       ref={setNodeRef}
       style={combinedStyle}
       {...(isRenderFn ? {} : dragHandleProps)}
-      className={`${className} ${isDragging ? 'z-50' : 'z-0'} ${isRenderFn ? '' : 'cursor-pointer'}`}
+      className={`${className} ${isDragging ? 'z-50' : 'z-0'} ${isRenderFn ? '' : 'cursor-pointer'} ${mergeClasses}`}
     >
       {isRenderFn ? (children as Function)({ dragHandleProps }) : children}
     </div>

@@ -15,6 +15,7 @@ import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { Edit3, ListTodo, Moon, Plus, Settings, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useCallback, useEffect, useState } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 
 import { BottomRightDock } from './components/dock/BottomRightDock'
 import { BrightnessPanel } from './components/dock/BrightnessPanel'
@@ -46,9 +47,11 @@ import { useSettings } from './hooks/useSettings'
 import { useShortcuts } from './hooks/useShortcuts'
 import { useWidgetDrag } from './hooks/useWidgetDrag'
 import { useWidgets } from './hooks/useWidgets'
+import { resolveAssetUrl } from './services/api-client'
 import { settingsService } from './services/settings-service'
 import { authStore } from './stores/auth-store'
-import { resolveAssetUrl } from './services/api-client'
+import type { StackShortcut } from './constants/recommendedSitesData'
+import { currentMergeTargetId } from './utils/dndMergeStrategy'
 
 /**
  * 文件名：App.tsx
@@ -300,6 +303,13 @@ export default function App() {
     [setTempHomeShortcuts],
   )
 
+  const handleAddHomeStack = useCallback(
+    (newStack: StackShortcut) => {
+      setTempHomeShortcuts((prev) => [...prev, newStack])
+    },
+    [setTempHomeShortcuts],
+  )
+
   const handleSearchEngineChange = (engine: string) => {
     setSearchEngine(engine)
     localStorage.setItem('navatation_search_engine', engine)
@@ -341,25 +351,74 @@ export default function App() {
     (event: DragEndEvent) => {
       setActiveDragId(null)
       const { active, over } = event
-      if (over && active.id !== over.id) {
-        const oldIndex = displayShortcuts.findIndex(
-          (item, idx) => (item.dragId || `shortcut-edit-${idx}`) === active.id,
-        )
-        const newIndex = displayShortcuts.findIndex(
-          (item, idx) => (item.dragId || `shortcut-edit-${idx}`) === over.id,
-        )
+      
+      const isAdminMode = authState.user?.role === 'ADMIN'
 
-        if (oldIndex !== -1 && newIndex !== -1) {
-          const newItems = arrayMove(displayShortcuts, oldIndex, newIndex)
-          if (isEditMode) {
-            setTempHomeShortcuts(newItems)
-          } else {
-            setHomeShortcuts(newItems)
+      if (!isAdminMode && isEditMode && currentMergeTargetId) {
+        const realOverId = currentMergeTargetId
+
+        if (active.id !== realOverId) {
+          const activeIndex = displayShortcuts.findIndex(
+            (item, idx) => (item.dragId || `shortcut-edit-${idx}`) === active.id,
+          )
+          const overIndex = displayShortcuts.findIndex(
+            (item, idx) => (item.dragId || `shortcut-edit-${idx}`) === realOverId,
+          )
+          
+          if (activeIndex !== -1 && overIndex !== -1) {
+            const activeItem = displayShortcuts[activeIndex]
+            const overItem = displayShortcuts[overIndex]
+            
+            const newShortcuts = displayShortcuts.filter((_, idx) => idx !== activeIndex)
+            const updatedOverIndex = overIndex > activeIndex ? overIndex - 1 : overIndex
+            
+            if (overItem.type === 'stack') {
+              const updatedStack = {
+                ...overItem,
+                children: [...(overItem.children || []), activeItem]
+              }
+              newShortcuts[updatedOverIndex] = updatedStack
+              setTempHomeShortcuts(newShortcuts)
+              return
+            } else {
+              const newStack = {
+                type: 'stack',
+                dragId: uuidv4(),
+                name: '未命名文件夹',
+                children: [overItem, activeItem]
+              }
+              newShortcuts[updatedOverIndex] = newStack
+              setTempHomeShortcuts(newShortcuts)
+              return
+            }
+          }
+        }
+      }
+
+      if (over) {
+        const overIdStr = String(over.id)
+        const realOverId = overIdStr.endsWith('__merge') ? overIdStr.replace('__merge', '') : overIdStr
+
+        if (active.id !== realOverId) {
+          const oldIndex = displayShortcuts.findIndex(
+            (item, idx) => (item.dragId || `shortcut-edit-${idx}`) === active.id,
+          )
+          const newIndex = displayShortcuts.findIndex(
+            (item, idx) => (item.dragId || `shortcut-edit-${idx}`) === realOverId,
+          )
+
+          if (oldIndex !== -1 && newIndex !== -1) {
+            const newItems = arrayMove(displayShortcuts, oldIndex, newIndex)
+            if (isEditMode) {
+              setTempHomeShortcuts(newItems)
+            } else {
+              setHomeShortcuts(newItems)
+            }
           }
         }
       }
     },
-    [isEditMode, displayShortcuts, setTempHomeShortcuts, setHomeShortcuts],
+    [isEditMode, displayShortcuts, setTempHomeShortcuts, setHomeShortcuts, authState.user?.role],
   )
 
   /**
@@ -539,6 +598,7 @@ export default function App() {
             handleEditShortcut={handleEditHomeShortcut}
             handleDeleteShortcut={handleDeleteHomeShortcut}
             setIsAddShortcutOpen={setIsAddShortcutOpen}
+            handleAddStack={handleAddHomeStack}
           />
         </ThemeTransition>
 

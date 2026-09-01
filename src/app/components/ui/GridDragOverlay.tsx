@@ -1,6 +1,7 @@
-import { resolveAssetUrl } from '@/app/services/api-client'
 import { DragOverlay, type DropAnimation } from '@dnd-kit/core'
+import { Layers } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { resolveAssetUrl } from '@/app/services/api-client'
 
 const dropAnimationConfig: DropAnimation = {
   duration: 300,
@@ -59,6 +60,18 @@ export function UnifiedDragItem({
         }}
       >
         {(() => {
+          if (shortcut.type === 'stack') {
+            return (
+              <Layers
+                style={{
+                  color: 'color' in shortcut ? shortcut.color : ('iconColor' in shortcut ? shortcut.iconColor : '#333'),
+                  width: `${innerSize}px`,
+                  height: `${innerSize}px`,
+                }}
+                strokeWidth={2}
+              />
+            )
+          }
           if (
             shortcut.iconType === 'CUSTOM_URL' ||
             shortcut.iconType === 'FAVICON' ||

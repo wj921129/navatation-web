@@ -3,15 +3,16 @@ const API_BASE = import.meta.env.VITE_API_BASE || '/api/v1'
 
 /** 后端服务地址（用于拼接 /uploads 等静态资源路径），开发环境为空走相对路径 */
 const BACKEND_ORIGIN = import.meta.env.VITE_BACKEND_ORIGIN || ''
+const STATIC_RESOURCE_ORIGIN = import.meta.env.VITE_STATIC_RESOURCE_ORIGIN || BACKEND_ORIGIN
 
 /**
  * 解析后端返回的静态资源路径为完整 URL
- * /uploads/ 开头的相对路径拼接后端地址，外部 URL 原样返回
+ * /uploads/ 开头的相对路径拼接静态资源地址，外部 URL 原样返回
  */
 function resolveAssetUrl(path: string): string {
   if (!path) return path
-  if (path.startsWith('/uploads/') && BACKEND_ORIGIN) {
-    return BACKEND_ORIGIN + path
+  if (path.startsWith('/uploads/') && STATIC_RESOURCE_ORIGIN) {
+    return STATIC_RESOURCE_ORIGIN + path
   }
   return path
 }
